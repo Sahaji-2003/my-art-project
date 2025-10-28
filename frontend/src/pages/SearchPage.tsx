@@ -4,7 +4,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { artworkAPI, type Artwork, type SearchFilters } from '../services/artwork';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import '../styles/App.css';
 
 
@@ -135,264 +134,208 @@ const SearchPage: React.FC = () => {
   };
 
   return (
-    <div className="container-fluid py-4">
-      {/* Header Section */}
-      <div className="row mb-4">
-        <div className="col-12">
-          <div className="text-center">
-            <h1 className="display-4 text-primary mb-3">Explore Artwork</h1>
-            <p className="lead text-muted">Discover a curated collection of art from talented artists worldwide</p>
-          </div>
+    <div className="search-page">
+      <div className="search-container">
+        {/* Header Section */}
+        <div className="search-header">
+          <h1>Explore Artwork</h1>
+          <p>Discover a curated collection of art from talented artists worldwide</p>
         </div>
-      </div>
 
-      {/* Main Search Bar */}
-      <div className="row mb-4">
-        <div className="col-12">
-          <form onSubmit={handleSearch}>
-            <div className="input-group input-group-lg">
-              <span className="input-group-text bg-light">
-                <i className="bi bi-search"></i>
-              </span>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Search artworks, artists, styles..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <button type="submit" className="btn btn-primary">
-                Search
+        {/* Main Search Bar */}
+        <form className="main-search-form" onSubmit={handleSearch}>
+          <div className="search-input-container">
+            <span className="search-icon">🔍</span>
+            <input
+              type="text"
+              placeholder="Search artworks, artists, styles..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="main-search-input"
+            />
+            <button type="submit" className="search-button">
+              Search
+            </button>
+          </div>
+        </form>
+
+        {/* Popular Mediums Filter */}
+        <div className="filters-section">
+          <h3>Popular Mediums:</h3>
+          <div className="medium-filters">
+            {popularMediums.map((medium) => (
+              <button
+                key={medium}
+                className={`medium-filter ${filters.medium === medium ? 'active' : ''}`}
+                onClick={() => handleMediumFilter(medium)}
+              >
+                {medium}
               </button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      {/* Popular Mediums Filter */}
-      <div className="row mb-4">
-        <div className="col-12">
-          <div className="card">
-            <div className="card-body">
-              <h5 className="card-title">Popular Mediums</h5>
-              <div className="d-flex flex-wrap gap-2">
-                {popularMediums.map((medium) => (
-                  <button
-                    key={medium}
-                    className={`btn btn-outline-primary btn-sm ${filters.medium === medium ? 'active' : ''}`}
-                    onClick={() => handleMediumFilter(medium)}
-                  >
-                    {medium}
-                  </button>
-                ))}
-              </div>
-            </div>
+            ))}
           </div>
         </div>
-      </div>
 
-      {/* Advanced Filters */}
-      <div className="row mb-4">
-        <div className="col-12">
-          <div className="card">
-            <div className="card-body">
-              <h5 className="card-title">Advanced Filters</h5>
-              <div className="row g-3">
-                <div className="col-md-3">
-                  <label htmlFor="style-filter" className="form-label">Style</label>
-                  <select
-                    id="style-filter"
-                    className="form-select"
-                    value={filters.style}
-                    onChange={(e) => handleFilterChange('style', e.target.value)}
-                  >
-                    <option value="">All Styles</option>
-                    <option value="Realistic">Realistic</option>
-                    <option value="Abstract">Abstract</option>
-                    <option value="Impressionist">Impressionist</option>
-                    <option value="Contemporary">Contemporary</option>
-                    <option value="Minimalist">Minimalist</option>
-                    <option value="Surreal">Surreal</option>
-                  </select>
-                </div>
-
-                <div className="col-md-3">
-                  <label htmlFor="price-min" className="form-label">Min Price</label>
-                  <input
-                    type="number"
-                    id="price-min"
-                    className="form-control"
-                    placeholder="Min"
-                    value={filters.price_min || ''}
-                    onChange={(e) => handleFilterChange('price_min', e.target.value ? parseInt(e.target.value) : undefined)}
-                  />
-                </div>
-
-                <div className="col-md-3">
-                  <label htmlFor="price-max" className="form-label">Max Price</label>
-                  <input
-                    type="number"
-                    id="price-max"
-                    className="form-control"
-                    placeholder="Max"
-                    value={filters.price_max || ''}
-                    onChange={(e) => handleFilterChange('price_max', e.target.value ? parseInt(e.target.value) : undefined)}
-                  />
-                </div>
-
-                <div className="col-md-3 d-flex align-items-end">
-                  <button className="btn btn-outline-secondary w-100" onClick={clearFilters}>
-                    <i className="bi bi-x-circle me-1"></i>
-                    Clear Filters
-                  </button>
-                </div>
-              </div>
-            </div>
+        {/* Advanced Filters */}
+        <div className="advanced-filters">
+          <div className="filter-group">
+            <label htmlFor="style-filter">Style:</label>
+            <select
+              id="style-filter"
+              value={filters.style}
+              onChange={(e) => handleFilterChange('style', e.target.value)}
+            >
+              <option value="">All Styles</option>
+              <option value="Realistic">Realistic</option>
+              <option value="Abstract">Abstract</option>
+              <option value="Impressionist">Impressionist</option>
+              <option value="Contemporary">Contemporary</option>
+              <option value="Minimalist">Minimalist</option>
+              <option value="Surreal">Surreal</option>
+            </select>
           </div>
-        </div>
-      </div>
 
-      {/* Results Count */}
-      {!loading && artworks.length > 0 && (
-        <div className="row mb-3">
-          <div className="col-12">
-            <div className="alert alert-info">
-              <i className="bi bi-info-circle me-2"></i>
+          <div className="filter-group">
+            <label htmlFor="price-min">Min Price:</label>
+            <input
+              type="number"
+              id="price-min"
+              placeholder="Min"
+              value={filters.price_min}
+              onChange={(e) => handleFilterChange('price_min', e.target.value ? parseInt(e.target.value) : undefined)}
+            />
+          </div>
+
+          <div className="filter-group">
+            <label htmlFor="price-max">Max Price:</label>
+            <input
+              type="number"
+              id="price-max"
+              placeholder="Max"
+              value={filters.price_max}
+              onChange={(e) => handleFilterChange('price_max', e.target.value ? parseInt(e.target.value) : undefined)}
+            />
+          </div>
+
+          <button className="clear-filters" onClick={clearFilters}>
+            Clear Filters
+          </button>
+        </div>
+
+        {/* Results Count */}
+        {!loading && artworks.length > 0 && (
+          <div className="results-info">
+            <p>
               Showing {artworks.length} of {pagination.totalItems} artworks
-            </div>
+            </p>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Error Message */}
-      {error && (
-        <div className="row mb-3">
-          <div className="col-12">
-            <div className="alert alert-danger d-flex align-items-center">
-              <i className="bi bi-exclamation-triangle me-2"></i>
-              {error}
-            </div>
+        {/* Error Message */}
+        {error && (
+          <div className="error-message">
+            <span>⚠️</span>
+            {error}
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Loading State */}
-      {loading && (
-        <div className="row">
-          <div className="col-12 text-center py-5">
-            <div className="spinner-border text-primary" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
-            <p className="mt-2 text-muted">Loading artworks...</p>
+        {/* Loading State */}
+        {loading && (
+          <div className="loading-container">
+            <div className="spinner"></div>
+            <p>Loading artworks...</p>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Artworks Grid */}
-      {!loading && artworks.length > 0 && (
-        <div className="row g-4">
-          {artworks.filter(artwork => artwork && artwork._id).map((artwork) => (
-            <div key={artwork._id} className="col-lg-3 col-md-4 col-sm-6">
+        {/* Artworks Grid */}
+        {!loading && artworks.length > 0 && (
+          <div className="artworks-grid">
+            {artworks.filter(artwork => artwork && artwork._id).map((artwork) => (
               <div 
-                className="card h-100 shadow-sm"
+                key={artwork._id} 
+                className="artwork-card"
                 onClick={() => navigate(`/purchase/${artwork._id}`)}
                 style={{ cursor: 'pointer' }}
               >
-                <div className="position-relative">
+                <div className="artwork-image-container">
                   <img
                     src={artwork.images?.[0]?.url || 'https://via.placeholder.com/400x300/CCCCCC/FFFFFF?text=No+Image'}
                     alt={artwork.title || 'Artwork'}
-                    className="card-img-top"
-                    style={{height: '250px', objectFit: 'cover'}}
+                    className="artwork-image"
                   />
-                  <div className="position-absolute top-0 end-0 m-2">
+                  <div className="artwork-overlay">
                     <button 
-                      className="btn btn-light btn-sm"
+                      className="like-button"
                       onClick={(e) => {
                         e.stopPropagation();
                         // Handle like functionality here
                       }}
                     >
-                      <i className="bi bi-heart"></i>
-                      <span className="ms-1">{artwork.likes?.length || 0}</span>
+                      <span>❤️</span>
+                      {artwork.likes?.length || 0}
                     </button>
                   </div>
                 </div>
                 
-                <div className="card-body d-flex flex-column">
-                  <h5 className="card-title">{artwork.title || 'Untitled'}</h5>
-                  <p className="card-text text-muted small">by {artwork.artist?.name || 'Unknown Artist'}</p>
-                  <div className="mt-auto">
-                    <div className="d-flex justify-content-between align-items-center">
-                      <span className="h5 text-primary mb-0">${artwork.price?.toLocaleString() || '0'}</span>
-                      <span className="badge bg-secondary">
-                        {artwork.medium || 'Other'}
-                      </span>
-                    </div>
+                <div className="artwork-info">
+                  <h3 className="artwork-title">{artwork.title || 'Untitled'}</h3>
+                  <p className="artist-name">by {artwork.artist?.name || 'Unknown Artist'}</p>
+                  <div className="artwork-meta">
+                    <span className="artwork-price">${artwork.price?.toLocaleString() || '0'}</span>
+                    <span className={`medium-tag medium-${artwork.medium?.toLowerCase() || 'other'}`}>
+                      {artwork.medium || 'Other'}
+                    </span>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
 
-      {/* No Results */}
-      {!loading && artworks.length === 0 && !error && (
-        <div className="row">
-          <div className="col-12 text-center py-5">
-            <div className="fs-1 mb-3">🎨</div>
-            <h3 className="h4 text-muted">No artworks found</h3>
-            <p className="text-muted mb-3">No artworks are available at the moment. Please check back later or try different search criteria.</p>
-            <button className="btn btn-primary" onClick={clearFilters}>
-              <i className="bi bi-arrow-clockwise me-1"></i>
+        {/* No Results */}
+        {!loading && artworks.length === 0 && !error && (
+          <div className="no-results">
+            <div className="no-results-icon">🎨</div>
+            <h3>No artworks found</h3>
+            <p>No artworks are available at the moment. Please check back later or try different search criteria.</p>
+            <button className="browse-all-button" onClick={clearFilters}>
               Clear Filters
             </button>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Pagination */}
-      {!loading && pagination.totalPages > 1 && (
-        <div className="row mt-4">
-          <div className="col-12">
-            <nav aria-label="Search pagination">
-              <ul className="pagination justify-content-center">
-                <li className={`page-item ${pagination.currentPage === 1 ? 'disabled' : ''}`}>
-                  <button
-                    className="page-link"
-                    onClick={() => handlePageChange(pagination.currentPage - 1)}
-                    disabled={pagination.currentPage === 1}
-                  >
-                    Previous
-                  </button>
-                </li>
-                
-                {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((page) => (
-                  <li key={page} className={`page-item ${pagination.currentPage === page ? 'active' : ''}`}>
-                    <button
-                      className="page-link"
-                      onClick={() => handlePageChange(page)}
-                    >
-                      {page}
-                    </button>
-                  </li>
-                ))}
-                
-                <li className={`page-item ${pagination.currentPage === pagination.totalPages ? 'disabled' : ''}`}>
-                  <button
-                    className="page-link"
-                    onClick={() => handlePageChange(pagination.currentPage + 1)}
-                    disabled={pagination.currentPage === pagination.totalPages}
-                  >
-                    Next
-                  </button>
-                </li>
-              </ul>
-            </nav>
+        {/* Pagination */}
+        {!loading && pagination.totalPages > 1 && (
+          <div className="pagination">
+            <button
+              className="pagination-button"
+              onClick={() => handlePageChange(pagination.currentPage - 1)}
+              disabled={pagination.currentPage === 1}
+            >
+              Previous
+            </button>
+            
+            <div className="pagination-numbers">
+              {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((page) => (
+                <button
+                  key={page}
+                  className={`pagination-number ${pagination.currentPage === page ? 'active' : ''}`}
+                  onClick={() => handlePageChange(page)}
+                >
+                  {page}
+                </button>
+              ))}
+            </div>
+            
+            <button
+              className="pagination-button"
+              onClick={() => handlePageChange(pagination.currentPage + 1)}
+              disabled={pagination.currentPage === pagination.totalPages}
+            >
+              Next
+            </button>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

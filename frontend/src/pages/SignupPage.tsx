@@ -4,7 +4,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { loginAPI, formValidation } from '../services/login';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import '../styles/App.css';
 
 const SignupPage: React.FC = () => {
@@ -70,138 +69,115 @@ const SignupPage: React.FC = () => {
   };
 
   return (
-    <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light">
-      <div className="container">
-        <div className="row justify-content-center">
-          <div className="col-md-6 col-lg-5">
-            <div className="card shadow">
-              <div className="card-body p-5">
-                <div className="text-center mb-4">
-                  <div className="mb-3">
-                    <div className="fs-1">🎨</div>
-                  </div>
-                  <h2 className="fw-bold text-primary">Create Your Arthub Account</h2>
-                  <p className="text-muted">Join our community of artists and art lovers</p>
-                </div>
+    <div className="signup-page">
+      <div className="signup-container">
+        <div className="signup-header">
+          <h1>Create Your Arthub Account</h1>
+          <p>Join our community of artists and art lovers</p>
+        </div>
 
-                {errors.general && (
-                  <div className="alert alert-danger d-flex align-items-center" role="alert">
-                    <i className="bi bi-exclamation-triangle me-2"></i>
-                    {errors.general}
-                  </div>
-                )}
-
-                <form onSubmit={handleSubmit}>
-                  <div className="mb-3">
-                    <label htmlFor="name" className="form-label">Full Name</label>
-                    <input
-                      type="text"
-                      className={`form-control ${errors.name ? 'is-invalid' : ''}`}
-                      id="name"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      disabled={loading}
-                      autoComplete="name"
-                    />
-                    {errors.name && (
-                      <div className="invalid-feedback">{errors.name}</div>
-                    )}
-                  </div>
-
-                  <div className="mb-3">
-                    <label htmlFor="email" className="form-label">Email</label>
-                    <input
-                      type="email"
-                      className={`form-control ${errors.email ? 'is-invalid' : ''}`}
-                      id="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      disabled={loading}
-                      autoComplete="email"
-                    />
-                    {errors.email && (
-                      <div className="invalid-feedback">{errors.email}</div>
-                    )}
-                  </div>
-
-                  <div className="mb-4">
-                    <label htmlFor="password" className="form-label">Password</label>
-                    <input
-                      type="password"
-                      className={`form-control ${errors.password ? 'is-invalid' : ''}`}
-                      id="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      disabled={loading}
-                      autoComplete="new-password"
-                    />
-                    {errors.password && (
-                      <div className="invalid-feedback">{errors.password}</div>
-                    )}
-                  </div>
-
-                  <button 
-                    type="submit" 
-                    className="btn btn-primary w-100 mb-3"
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      <>
-                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                        Signing up...
-                      </>
-                    ) : (
-                      'Sign Up'
-                    )}
-                  </button>
-                </form>
-
-                <div className="text-center mb-3">
-                  <hr className="my-3" />
-                  <span className="text-muted small">OR</span>
-                  <hr className="my-3" />
-                </div>
-
-                <div className="d-flex justify-content-center gap-3 mb-3">
-                  <button 
-                    className="btn btn-outline-secondary btn-sm"
-                    onClick={() => handleSocialSignup('Google')}
-                    type="button"
-                    title="Sign up with Google"
-                  >
-                    <i className="bi bi-google me-1"></i>
-                    Google
-                  </button>
-                  <button 
-                    className="btn btn-outline-primary btn-sm"
-                    onClick={() => handleSocialSignup('Facebook')}
-                    type="button"
-                    title="Sign up with Facebook"
-                  >
-                    <i className="bi bi-facebook me-1"></i>
-                    Facebook
-                  </button>
-                  <button 
-                    className="btn btn-outline-dark btn-sm"
-                    onClick={() => handleSocialSignup('GitHub')}
-                    type="button"
-                    title="Sign up with GitHub"
-                  >
-                    <i className="bi bi-github me-1"></i>
-                    GitHub
-                  </button>
-                </div>
-
-                <div className="text-center">
-                  <span className="text-muted">Already have an account? </span>
-                  <Link to="/login" className="text-primary text-decoration-none fw-medium">Log In</Link>
-                </div>
-              </div>
-            </div>
+        {errors.general && (
+          <div className="error-message">
+            <span>⚠️</span>
+            {errors.general}
           </div>
+        )}
+
+        <form className="signup-form" onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="name">Full Name</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              disabled={loading}
+              autoComplete="name"
+            />
+            {errors.name && (
+              <div className="field-error">{errors.name}</div>
+            )}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              disabled={loading}
+              autoComplete="email"
+            />
+            {errors.email && (
+              <div className="field-error">{errors.email}</div>
+            )}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              disabled={loading}
+              autoComplete="new-password"
+            />
+            {errors.password && (
+              <div className="field-error">{errors.password}</div>
+            )}
+          </div>
+          <button 
+            type="submit" 
+            className="btn-signup"
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <span className="spinner"></span>
+                Signing up...
+              </>
+            ) : (
+              'Sign Up'
+            )}
+          </button>
+        </form>
+
+        <div className="divider">
+          <span>OR</span>
+        </div>
+
+        <div className="social-signup">
+          <button 
+            className="social-btn"
+            onClick={() => handleSocialSignup('Google')}
+            type="button"
+          >
+            <div className="social-icon google-icon">⚙</div>
+          </button>
+          <button 
+            className="social-btn"
+            onClick={() => handleSocialSignup('Facebook')}
+            type="button"
+          >
+            <div className="social-icon facebook-icon">f</div>
+          </button>
+          <button 
+            className="social-btn"
+            onClick={() => handleSocialSignup('GitHub')}
+            type="button"
+          >
+            <div className="social-icon github-icon">🐙</div>
+          </button>
+        </div>
+
+        <div className="signup-footer">
+          Already have an account?{' '}
+          <Link to="/login" className="login-link">Log In</Link>
         </div>
       </div>
     </div>
