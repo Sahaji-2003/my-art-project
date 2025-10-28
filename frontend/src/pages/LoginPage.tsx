@@ -3,132 +3,146 @@
 // ============================================
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { authAPI, setAuthToken, setUser } from '../services/api.service';
+import { loginAPI, formValidation } from '../services/login';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import '../styles/App.css';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: 'name@example.com',
+    password: '********',
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
-    setError('');
-  };
-
-  const validateForm = (): boolean => {
-    if (!formData.email || !formData.password) {
-      setError('Please fill in all fields');
-      return false;
+    
+    // Clear specific field error when user starts typing
+    if (errors[name as keyof typeof errors]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: undefined
+      }));
     }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      setError('Please enter a valid email address');
-      return false;
-    }
-
-    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateForm()) return;
+    // Validate form
+    const validation = formValidation.validateLoginForm(formData.email, formData.password);
+    
+    if (!validation.isValid) {
+      setErrors(validation.errors);
+      return;
+    }
 
     setLoading(true);
-    setError('');
+    setErrors({});
 
     try {
-      const response = await authAPI.login(formData);
+      const response = await loginAPI.login(formData);
       
-      // Save token and user data
-      setAuthToken(response.data.token);
-      setUser(response.data.user);
+      // Save authentication data
+      loginAPI.saveAuthData(response.data.token, response.data.user);
 
-      // Navigate to dashboard or home
+      // Navigate to dashboard
       navigate('/dashboard');
     } catch (err: any) {
-      setError(
-        err.response?.data?.error || 
-        'Invalid credentials. Please check your email and password.'
-      );
+      setErrors({
+        general: err.message || 'Invalid credentials. Please check your email and password.'
+      });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-container fade-in">
-        <div className="auth-header">
-          <div className="auth-logo">🎨</div>
-          <h1>Welcome Back</h1>
-          <p>Log in to your Arthub account</p>
-        </div>
+    <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light">
+      <div className="container">
+        <div className="row justify-content-center">
+          <div className="col-md-6 col-lg-4">
+            <div className="card shadow">
+              <div className="card-body p-5">
+                <div className="text-center mb-4">
+                  <div className="mb-3">
+                    <div className="fs-1">🎨</div>
+                  </div>
+                  <h2 className="fw-bold text-primary">Login to Arthub</h2>
+                  <p className="text-muted">Enter your credentials to access your account</p>
+                </div>
 
-        {error && (
-          <div className="error-message">
-            <span>⚠️</span>
-            {error}
+                {errors.general && (
+                  <div className="alert alert-danger d-flex align-items-center" role="alert">
+                    <i className="bi bi-exclamation-triangle me-2"></i>
+                    {errors.general}
+                  </div>
+                )}
+
+                <form onSubmit={handleSubmit}>
+                  <div className="mb-3">
+                    <label htmlFor="email" className="form-label">Email</label>
+                    <input
+                      type="email"
+                      className={`form-control ${errors.email ? 'is-invalid' : ''}`}
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      disabled={loading}
+                      autoComplete="email"
+                    />
+                    {errors.email && (
+                      <div className="invalid-feedback">{errors.email}</div>
+                    )}
+                  </div>
+
+                  <div className="mb-4">
+                    <label htmlFor="password" className="form-label">Password</label>
+                    <input
+                      type="password"
+                      className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+                      id="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      disabled={loading}
+                      autoComplete="current-password"
+                    />
+                    {errors.password && (
+                      <div className="invalid-feedback">{errors.password}</div>
+                    )}
+                  </div>
+
+                  <button 
+                    type="submit" 
+                    className="btn btn-primary w-100 mb-3"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        Logging in...
+                      </>
+                    ) : (
+                      'Login'
+                    )}
+                  </button>
+                </form>
+
+                <div className="text-center">
+                  <span className="text-muted">Don't have an account? </span>
+                  <Link to="/signup" className="text-primary text-decoration-none fw-medium">Sign Up</Link>
+                </div>
+              </div>
+            </div>
           </div>
-        )}
-
-        <form className="auth-form" onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="email">Email Address</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              placeholder="john@example.com"
-              value={formData.email}
-              onChange={handleChange}
-              disabled={loading}
-              autoComplete="email"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              placeholder="Enter your password"
-              value={formData.password}
-              onChange={handleChange}
-              disabled={loading}
-              autoComplete="current-password"
-            />
-          </div>
-
-          <button 
-            type="submit" 
-            className="btn btn-primary btn-full"
-            disabled={loading}
-          >
-            {loading ? (
-              <>
-                <span className="spinner"></span>
-                Logging in...
-              </>
-            ) : (
-              'Log In'
-            )}
-          </button>
-        </form>
-
-        <div className="auth-footer">
-          Don't have an account?{' '}
-          <Link to="/signup">Sign up for free</Link>
         </div>
       </div>
     </div>
