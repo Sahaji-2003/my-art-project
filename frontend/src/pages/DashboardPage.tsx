@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-
 import { useNavigate } from 'react-router-dom';
-
 import { artistAPI, artworkAPI, getUser } from '../services/api.service';
-
+import 'bootstrap/dist/css/bootstrap.min.css';
 import '../styles/App.css';
 
 
@@ -153,307 +151,214 @@ const DashboardPage: React.FC = () => {
  
 
  return (
-
-   <>
-
-     <div className="dashboard-page">
-
-       <div className="dashboard-container">
-
-         {/* Hero Section */}
-
-         <section className="dashboard-hero">
-
-           <div className="hero-content-dashboard">
-
-             <h1>Discover, Create, Connect: Your Art Journey Starts Here.</h1>
-
-             <p>
-
-               Arthub connects talented artists with eager buyers. Manage your art, 
-
-               track sales, and engage with a vibrant community. Your dashboard provides 
-
-               a quick overview of everything you need.
-
-             </p>
-
-             <button className="btn btn-primary" onClick={() => navigate('/upload')}>
-
-               Start Creating Now
-
-             </button>
-
-           </div>
-
-           <div className="hero-image-dashboard">
-
-             <div className="hero-illustration">
-
-               <div className="illustration-workspace">
-
-                 <div className="workspace-desk"></div>
-
-                 <div className="workspace-items">
-
-                   <div className="item-canvas canvas-1"></div>
-
-                   <div className="item-canvas canvas-2"></div>
-
-                   <div className="item-canvas canvas-3"></div>
-
-                   <div className="item-plant"></div>
-
-                   <div className="item-chair"></div>
-
-                 </div>
-
-               </div>
-
-             </div>
-
-           </div>
-
-         </section>
-
-
- 
-
-         {/* Platform Overview */}
-
-         <section className="platform-overview">
-
-           <h2>Your Platform Overview</h2>
-
-           <div className="stats-grid">
-
-             <div className="stat-card">
-
-               <div className="stat-icon">🎨</div>
-
-               <div className="stat-content">
-
-                 <h3>Total Artworks</h3>
-
-                 <div className="stat-value">{loading ? '...' : stats.totalArtworks.toLocaleString()}+</div>
-
-                 <p className="stat-change">Up 12% from last month</p>
-
-               </div>
-
-             </div>
-
-             
-
-             <div className="stat-card">
-
-               <div className="stat-icon">💰</div>
-
-               <div className="stat-content">
-
-                 <h3>Total Sales</h3>
-
-                 <div className="stat-value">${loading ? '...' : stats.totalRevenue.toLocaleString()}</div>
-
-                 <p className="stat-change">Up 8% from last month</p>
-
-               </div>
-
-             </div>
-
-             
-
-             <div className="stat-card">
-
-               <div className="stat-icon">👨‍🎨</div>
-
-               <div className="stat-content">
-
-                 <h3>Active Artists</h3>
-
-                 <div className="stat-value">{stats.activeArtists}</div>
-
-                 <p className="stat-change">5 new artists this week</p>
-
-               </div>
-
-             </div>
-
-             
-
-             <div className="stat-card">
-
-               <div className="stat-icon">😊</div>
-
-               <div className="stat-content">
-
-                 <h3>Happy Buyers</h3>
-
-                 <div className="stat-value">{stats.happyBuyers}</div>
-
-                 <p className="stat-change">Satisfied customers</p>
-
-               </div>
-
-             </div>
-
-           </div>
-
-         </section>
-
-
- 
-
-         {/* Quick Access Features */}
-
-         <section className="quick-access">
-
-           <h2>Quick Access to Features</h2>
-
-           <div className="features-grid-dashboard">
-
-             <div className="feature-card-dashboard" onClick={() => navigate('/upload')}>
-
-               <div className="feature-icon-dashboard">☁️</div>
-
-               <h3>Upload New Artwork</h3>
-
-               <p>Showcase your latest creations to a global audience.</p>
-
-             </div>
-
-             
-
-             <div className="feature-card-dashboard" onClick={() => navigate('/artist-profile')}>
-
-               <div className="feature-icon-dashboard">👤</div>
-
-               <h3>Manage Your Profile</h3>
-
-               <p>Update your artist bio, portfolio, and contact details.</p>
-
-             </div>
-
-             
-
-             <div className="feature-card-dashboard" onClick={() => navigate('/inventory')}>
-
-               <div className="feature-icon-dashboard">📋</div>
-
-               <h3>Inventory & Sales</h3>
-
-               <p>Track your listings, sales, and artwork availability.</p>
-
-             </div>
-
-             
-
-             <div className="feature-card-dashboard" onClick={() => navigate('/community')}>
-
-               <div className="feature-icon-dashboard">👥</div>
-
-               <h3>Explore Community</h3>
-
-               <p>Connect with fellow artists, share insights, and collaborate.</p>
-
-             </div>
-
-             
-
-             <div className="feature-card-dashboard" onClick={() => navigate('/search')}>
-
-               <div className="feature-icon-dashboard">🔍</div>
-
-               <h3>Discover New Art</h3>
-
-               <p>Browse a curated selection of unique artworks from various artists.</p>
-
-             </div>
-
-             
-
-             <div className="feature-card-dashboard" onClick={() => navigate('/favorites')}>
-
-               <div className="feature-icon-dashboard">❤️</div>
-
-               <h3>Your Favorites</h3>
-
-               <p>Quickly access artworks you've saved or wish to purchase later.</p>
-
-             </div>
-
-           </div>
-
-         </section>
-
-
- 
-
-         {/* Recent Activity */}
-
-         <section className="recent-activity">
-
-           <h2>Recent Activity</h2>
-
-           <div className="activity-list">
-
-             {activities.map((activity, index) => (
-
-               <div key={index} className="activity-item">
-
-                 <div className="activity-icon">{activity.icon}</div>
-
-                 <div className="activity-content">
-
-                   <p className="activity-text">{activity.text}</p>
-
-                   <p className="activity-time">{activity.time}</p>
-
-                 </div>
-
-               </div>
-
-             ))}
-
-           </div>
-
-         </section>
-
-
- 
-
-         {/* CTA Section */}
-
-         <section className="dashboard-cta">
-
-           <div className="cta-content-dashboard">
-
-             <h2>Ready to Explore More Unique Artworks?</h2>
-
-             <p>
-
-               Dive into our extensive collection from artists around the globe. 
-
-               Find your next masterpiece today.
-
-             </p>
-
-             <button className="btn btn-light" onClick={() => navigate('/search')}>
-
-               Browse Artworks
-
-             </button>
-
-           </div>
-
-         </section>
-
+   <div className="container-fluid py-4">
+     {/* Hero Section */}
+     <section className="row mb-5">
+       <div className="col-lg-8">
+         <div className="text-center text-lg-start">
+           <h1 className="display-4 text-primary mb-3">Discover, Create, Connect: Your Art Journey Starts Here.</h1>
+           <p className="lead text-muted mb-4">
+             Arthub connects talented artists with eager buyers. Manage your art, 
+             track sales, and engage with a vibrant community. Your dashboard provides 
+             a quick overview of everything you need.
+           </p>
+           <button className="btn btn-primary btn-lg" onClick={() => navigate('/upload')}>
+             <i className="bi bi-upload me-2"></i>
+             Start Creating Now
+           </button>
+         </div>
        </div>
+       <div className="col-lg-4">
+         <div className="text-center">
+           <div className="fs-1 mb-3">🎨</div>
+           <div className="d-flex justify-content-center gap-3 mb-3">
+             <div className="fs-2">🖌️</div>
+             <div className="fs-2">📸</div>
+             <div className="fs-2">✏️</div>
+           </div>
+           <div className="d-flex justify-content-center gap-3">
+             <div className="fs-3">🖼️</div>
+             <div className="fs-3">🎭</div>
+           </div>
+         </div>
+       </div>
+     </section>
 
-     </div>
 
-   </>
+ 
 
+     {/* Platform Overview */}
+     <section className="row mb-5">
+       <div className="col-12">
+         <h2 className="h3 text-primary mb-4">Your Platform Overview</h2>
+         <div className="row g-4">
+           <div className="col-md-6 col-lg-3">
+             <div className="card text-center h-100">
+               <div className="card-body">
+                 <div className="fs-1 mb-3">🎨</div>
+                 <h5 className="card-title">Total Artworks</h5>
+                 <div className="h4 text-primary mb-2">{loading ? '...' : stats.totalArtworks.toLocaleString()}+</div>
+                 <p className="text-muted small mb-0">Up 12% from last month</p>
+               </div>
+             </div>
+           </div>
+
+           <div className="col-md-6 col-lg-3">
+             <div className="card text-center h-100">
+               <div className="card-body">
+                 <div className="fs-1 mb-3">💰</div>
+                 <h5 className="card-title">Total Sales</h5>
+                 <div className="h4 text-success mb-2">${loading ? '...' : stats.totalRevenue.toLocaleString()}</div>
+                 <p className="text-muted small mb-0">Up 8% from last month</p>
+               </div>
+             </div>
+           </div>
+
+           <div className="col-md-6 col-lg-3">
+             <div className="card text-center h-100">
+               <div className="card-body">
+                 <div className="fs-1 mb-3">👨‍🎨</div>
+                 <h5 className="card-title">Active Artists</h5>
+                 <div className="h4 text-info mb-2">{stats.activeArtists}</div>
+                 <p className="text-muted small mb-0">5 new artists this week</p>
+               </div>
+             </div>
+           </div>
+
+           <div className="col-md-6 col-lg-3">
+             <div className="card text-center h-100">
+               <div className="card-body">
+                 <div className="fs-1 mb-3">😊</div>
+                 <h5 className="card-title">Happy Buyers</h5>
+                 <div className="h4 text-warning mb-2">{stats.happyBuyers}</div>
+                 <p className="text-muted small mb-0">Satisfied customers</p>
+               </div>
+             </div>
+           </div>
+         </div>
+       </div>
+     </section>
+
+
+ 
+
+     {/* Quick Access Features */}
+     <section className="row mb-5">
+       <div className="col-12">
+         <h2 className="h3 text-primary mb-4">Quick Access to Features</h2>
+         <div className="row g-4">
+           <div className="col-md-6 col-lg-4">
+             <div className="card h-100 text-center" style={{cursor: 'pointer'}} onClick={() => navigate('/upload')}>
+               <div className="card-body">
+                 <div className="fs-1 mb-3">☁️</div>
+                 <h5 className="card-title">Upload New Artwork</h5>
+                 <p className="card-text text-muted">Showcase your latest creations to a global audience.</p>
+               </div>
+             </div>
+           </div>
+
+           <div className="col-md-6 col-lg-4">
+             <div className="card h-100 text-center" style={{cursor: 'pointer'}} onClick={() => navigate('/artist-profile')}>
+               <div className="card-body">
+                 <div className="fs-1 mb-3">👤</div>
+                 <h5 className="card-title">Manage Your Profile</h5>
+                 <p className="card-text text-muted">Update your artist bio, portfolio, and contact details.</p>
+               </div>
+             </div>
+           </div>
+
+           <div className="col-md-6 col-lg-4">
+             <div className="card h-100 text-center" style={{cursor: 'pointer'}} onClick={() => navigate('/inventory')}>
+               <div className="card-body">
+                 <div className="fs-1 mb-3">📋</div>
+                 <h5 className="card-title">Inventory & Sales</h5>
+                 <p className="card-text text-muted">Track your listings, sales, and artwork availability.</p>
+               </div>
+             </div>
+           </div>
+
+           <div className="col-md-6 col-lg-4">
+             <div className="card h-100 text-center" style={{cursor: 'pointer'}} onClick={() => navigate('/community')}>
+               <div className="card-body">
+                 <div className="fs-1 mb-3">👥</div>
+                 <h5 className="card-title">Explore Community</h5>
+                 <p className="card-text text-muted">Connect with fellow artists, share insights, and collaborate.</p>
+               </div>
+             </div>
+           </div>
+
+           <div className="col-md-6 col-lg-4">
+             <div className="card h-100 text-center" style={{cursor: 'pointer'}} onClick={() => navigate('/search')}>
+               <div className="card-body">
+                 <div className="fs-1 mb-3">🔍</div>
+                 <h5 className="card-title">Discover New Art</h5>
+                 <p className="card-text text-muted">Browse a curated selection of unique artworks from various artists.</p>
+               </div>
+             </div>
+           </div>
+
+           <div className="col-md-6 col-lg-4">
+             <div className="card h-100 text-center" style={{cursor: 'pointer'}} onClick={() => navigate('/favorites')}>
+               <div className="card-body">
+                 <div className="fs-1 mb-3">❤️</div>
+                 <h5 className="card-title">Your Favorites</h5>
+                 <p className="card-text text-muted">Quickly access artworks you've saved or wish to purchase later.</p>
+               </div>
+             </div>
+           </div>
+         </div>
+       </div>
+     </section>
+
+
+ 
+
+     {/* Recent Activity */}
+     <section className="row mb-5">
+       <div className="col-12">
+         <h2 className="h3 text-primary mb-4">Recent Activity</h2>
+         <div className="card">
+           <div className="card-body">
+             <div className="list-group list-group-flush">
+               {activities.map((activity, index) => (
+                 <div key={index} className="list-group-item d-flex align-items-start">
+                   <div className="flex-shrink-0 me-3">
+                     <div className="fs-4">{activity.icon}</div>
+                   </div>
+                   <div className="flex-grow-1">
+                     <p className="mb-1">{activity.text}</p>
+                     <small className="text-muted">{activity.time}</small>
+                   </div>
+                 </div>
+               ))}
+             </div>
+           </div>
+         </div>
+       </div>
+     </section>
+
+
+ 
+
+     {/* CTA Section */}
+     <section className="row">
+       <div className="col-12">
+         <div className="card bg-primary text-white text-center">
+           <div className="card-body py-5">
+             <h2 className="h3 mb-3">Ready to Explore More Unique Artworks?</h2>
+             <p className="lead mb-4">
+               Dive into our extensive collection from artists around the globe. 
+               Find your next masterpiece today.
+             </p>
+             <button className="btn btn-light btn-lg" onClick={() => navigate('/search')}>
+               <i className="bi bi-search me-2"></i>
+               Browse Artworks
+             </button>
+           </div>
+         </div>
+       </div>
+     </section>
+   </div>
  );
 
 };

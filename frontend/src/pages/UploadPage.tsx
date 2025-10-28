@@ -4,6 +4,7 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { artworkAPI, artworkValidation, type CreateArtworkData } from '../services/artwork';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import '../styles/App.css';
 
 const UploadPage: React.FC = () => {
@@ -229,259 +230,301 @@ const UploadPage: React.FC = () => {
   };
 
   return (
-    <div className="upload-page">
-      <div className="upload-container">
-        <div className="upload-header">
-          <h1>Upload New Artwork</h1>
-          <p>Share your creative work with the world</p>
-        </div>
-
-        {errors.general && (
-          <div className="error-message">
-            <span>⚠️</span>
-            {errors.general}
-          </div>
-        )}
-
-        <form className="upload-form" onSubmit={handleSubmit}>
-          {/* Artwork Details Section */}
-          <div className="upload-section">
-            <h3>Artwork Details</h3>
-            <div className="form-group">
-              <label htmlFor="title">Artwork Title</label>
-              <input
-                type="text"
-                id="title"
-                name="title"
-                value={formData.title}
-                onChange={handleInputChange}
-                placeholder="e.g., 'Sunset Over the Ocean'"
-              />
-              {errors.title && <div className="field-error">{errors.title}</div>}
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="description">Description</label>
-              <textarea
-                id="description"
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                placeholder="Describe your artwork, its inspiration, and unique qualities..."
-                rows={4}
-              />
-              {errors.description && <div className="field-error">{errors.description}</div>}
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="price">Price (USD)</label>
-              <input
-                type="number"
-                id="price"
-                name="price"
-                value={formData.price}
-                onChange={handleInputChange}
-                placeholder="e.g., 250.00"
-                step="0.01"
-                min="0"
-              />
-              {errors.price && <div className="field-error">{errors.price}</div>}
-            </div>
+    <div className="container-fluid py-4">
+      <div className="row justify-content-center">
+        <div className="col-lg-8">
+          {/* Header Section */}
+          <div className="text-center mb-4">
+            <h1 className="display-4 text-primary mb-3">Upload New Artwork</h1>
+            <p className="lead text-muted">Share your creative work with the world</p>
           </div>
 
-          {/* Artwork Images Section */}
-          <div className="upload-section">
-            <h3>Artwork Images</h3>
-            <div 
-              className="file-upload-area"
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <div className="upload-icon">📷</div>
-              <p>Drag 'n' drop some files here, or click to select files</p>
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleFileSelect}
-                style={{ display: 'none' }}
-              />
+          {/* Error Message */}
+          {errors.general && (
+            <div className="alert alert-danger d-flex align-items-center mb-4" role="alert">
+              <i className="bi bi-exclamation-triangle me-2"></i>
+              {errors.general}
             </div>
-            
-            {errors.files && (
-              <div className="field-error">{errors.files}</div>
-            )}
+          )}
 
-            {/* Image Previews */}
-            {previewUrls.length > 0 && (
-              <div className="image-previews">
-                {previewUrls.map((url, index) => (
-                  <div key={index} className="image-preview">
-                    <img src={url} alt={`Preview ${index + 1}`} />
-                    <button
-                      type="button"
-                      className="remove-image"
-                      onClick={() => removeFile(index)}
-                    >
-                      ×
-                    </button>
-                    {index === 0 && <div className="primary-badge">Primary</div>}
+          <form onSubmit={handleSubmit}>
+            {/* Artwork Details Section */}
+            <div className="card mb-4">
+              <div className="card-header">
+                <h3 className="h5 mb-0 text-primary">Artwork Details</h3>
+              </div>
+              <div className="card-body">
+                <div className="mb-3">
+                  <label htmlFor="title" className="form-label">Artwork Title</label>
+                  <input
+                    type="text"
+                    className={`form-control ${errors.title ? 'is-invalid' : ''}`}
+                    id="title"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleInputChange}
+                    placeholder="e.g., 'Sunset Over the Ocean'"
+                  />
+                  {errors.title && <div className="invalid-feedback">{errors.title}</div>}
+                </div>
+
+                <div className="mb-3">
+                  <label htmlFor="description" className="form-label">Description</label>
+                  <textarea
+                    className={`form-control ${errors.description ? 'is-invalid' : ''}`}
+                    id="description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    placeholder="Describe your artwork, its inspiration, and unique qualities..."
+                    rows={4}
+                  />
+                  {errors.description && <div className="invalid-feedback">{errors.description}</div>}
+                </div>
+
+                <div className="mb-3">
+                  <label htmlFor="price" className="form-label">Price (USD)</label>
+                  <input
+                    type="number"
+                    className={`form-control ${errors.price ? 'is-invalid' : ''}`}
+                    id="price"
+                    name="price"
+                    value={formData.price}
+                    onChange={handleInputChange}
+                    placeholder="e.g., 250.00"
+                    step="0.01"
+                    min="0"
+                  />
+                  {errors.price && <div className="invalid-feedback">{errors.price}</div>}
+                </div>
+              </div>
+            </div>
+
+            {/* Artwork Images Section */}
+            <div className="card mb-4">
+              <div className="card-header">
+                <h3 className="h5 mb-0 text-primary">Artwork Images</h3>
+              </div>
+              <div className="card-body">
+                <div 
+                  className="border border-2 border-dashed rounded p-5 text-center"
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  style={{ cursor: 'pointer', borderColor: '#dee2e6' }}
+                >
+                  <div className="fs-1 mb-3">📷</div>
+                  <p className="text-muted">Drag 'n' drop some files here, or click to select files</p>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleFileSelect}
+                    style={{ display: 'none' }}
+                  />
+                </div>
+                
+                {errors.files && (
+                  <div className="alert alert-danger mt-3">{errors.files}</div>
+                )}
+
+                {/* Image Previews */}
+                {previewUrls.length > 0 && (
+                  <div className="row g-3 mt-3">
+                    {previewUrls.map((url, index) => (
+                      <div key={index} className="col-md-4 col-sm-6">
+                        <div className="position-relative">
+                          <img 
+                            src={url} 
+                            alt={`Preview ${index + 1}`} 
+                            className="img-fluid rounded"
+                            style={{width: '100%', height: '200px', objectFit: 'cover'}}
+                          />
+                          <button
+                            type="button"
+                            className="btn btn-danger btn-sm position-absolute top-0 end-0 m-2"
+                            onClick={() => removeFile(index)}
+                          >
+                            <i className="bi bi-x"></i>
+                          </button>
+                          {index === 0 && (
+                            <span className="badge bg-primary position-absolute top-0 start-0 m-2">
+                              Primary
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Technical Specifications Section */}
-          <div className="upload-section">
-            <h3>Technical Specifications</h3>
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="medium">Medium</label>
-                  <select
-                    id="medium"
-                    name="medium"
-                    value={formData.medium}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Select a medium</option>
-                    <option value="Oil on Canvas">Oil on Canvas</option>
-                    <option value="Acrylic">Acrylic</option>
-                    <option value="Watercolor">Watercolor</option>
-                    <option value="Digital Art">Digital Art</option>
-                    <option value="Photography">Photography</option>
-                    <option value="Sculpture">Sculpture</option>
-                    <option value="Mixed Media">Mixed Media</option>
-                    <option value="Pencil">Pencil</option>
-                    <option value="Charcoal">Charcoal</option>
-                    <option value="Other">Other</option>
-                  </select>
-                {errors.medium && <div className="field-error">{errors.medium}</div>}
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="style">Style</label>
-                  <select
-                    id="style"
-                    name="style"
-                    value={formData.style}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Select a style</option>
-                    <option value="Abstract">Abstract</option>
-                    <option value="Impressionism">Impressionism</option>
-                    <option value="Realism">Realism</option>
-                    <option value="Surrealism">Surrealism</option>
-                    <option value="Contemporary">Contemporary</option>
-                    <option value="Modern">Modern</option>
-                    <option value="Pop Art">Pop Art</option>
-                    <option value="Minimalism">Minimalism</option>
-                    <option value="Expressionism">Expressionism</option>
-                    <option value="Other">Other</option>
-                  </select>
-                {errors.style && <div className="field-error">{errors.style}</div>}
+                )}
               </div>
             </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="width">Width</label>
-                <input
-                  type="number"
-                  id="width"
-                  name="dimensions.width"
-                  value={formData.dimensions.width}
-                  onChange={handleInputChange}
-                  placeholder="0"
-                  min="0"
-                  step="0.1"
-                />
+            {/* Technical Specifications Section */}
+            <div className="card mb-4">
+              <div className="card-header">
+                <h3 className="h5 mb-0 text-primary">Technical Specifications</h3>
               </div>
+              <div className="card-body">
+                <div className="row g-3 mb-3">
+                  <div className="col-md-6">
+                    <label htmlFor="medium" className="form-label">Medium</label>
+                    <select
+                      id="medium"
+                      name="medium"
+                      className={`form-select ${errors.medium ? 'is-invalid' : ''}`}
+                      value={formData.medium}
+                      onChange={handleInputChange}
+                    >
+                      <option value="">Select a medium</option>
+                      <option value="Oil on Canvas">Oil on Canvas</option>
+                      <option value="Acrylic">Acrylic</option>
+                      <option value="Watercolor">Watercolor</option>
+                      <option value="Digital Art">Digital Art</option>
+                      <option value="Photography">Photography</option>
+                      <option value="Sculpture">Sculpture</option>
+                      <option value="Mixed Media">Mixed Media</option>
+                      <option value="Pencil">Pencil</option>
+                      <option value="Charcoal">Charcoal</option>
+                      <option value="Other">Other</option>
+                    </select>
+                    {errors.medium && <div className="invalid-feedback">{errors.medium}</div>}
+                  </div>
 
-              <div className="form-group">
-                <label htmlFor="height">Height</label>
-                <input
-                  type="number"
-                  id="height"
-                  name="dimensions.height"
-                  value={formData.dimensions.height}
-                  onChange={handleInputChange}
-                  placeholder="0"
-                  min="0"
-                  step="0.1"
-                />
-              </div>
+                  <div className="col-md-6">
+                    <label htmlFor="style" className="form-label">Style</label>
+                    <select
+                      id="style"
+                      name="style"
+                      className={`form-select ${errors.style ? 'is-invalid' : ''}`}
+                      value={formData.style}
+                      onChange={handleInputChange}
+                    >
+                      <option value="">Select a style</option>
+                      <option value="Abstract">Abstract</option>
+                      <option value="Impressionism">Impressionism</option>
+                      <option value="Realism">Realism</option>
+                      <option value="Surrealism">Surrealism</option>
+                      <option value="Contemporary">Contemporary</option>
+                      <option value="Modern">Modern</option>
+                      <option value="Pop Art">Pop Art</option>
+                      <option value="Minimalism">Minimalism</option>
+                      <option value="Expressionism">Expressionism</option>
+                      <option value="Other">Other</option>
+                    </select>
+                    {errors.style && <div className="invalid-feedback">{errors.style}</div>}
+                  </div>
+                </div>
 
-              <div className="form-group">
-                <label htmlFor="depth">Depth</label>
-                <input
-                  type="number"
-                  id="depth"
-                  name="dimensions.depth"
-                  value={formData.dimensions.depth}
-                  onChange={handleInputChange}
-                  placeholder="0"
-                  min="0"
-                  step="0.1"
-                />
-              </div>
+                <div className="row g-3 mb-3">
+                  <div className="col-md-3">
+                    <label htmlFor="width" className="form-label">Width</label>
+                    <input
+                      type="number"
+                      id="width"
+                      name="dimensions.width"
+                      className="form-control"
+                      value={formData.dimensions.width}
+                      onChange={handleInputChange}
+                      placeholder="0"
+                      min="0"
+                      step="0.1"
+                    />
+                  </div>
 
-              <div className="form-group">
-                <label htmlFor="unit">Unit</label>
-                  <select
-                    id="unit"
-                    name="dimensions.unit"
-                    value={formData.dimensions.unit}
+                  <div className="col-md-3">
+                    <label htmlFor="height" className="form-label">Height</label>
+                    <input
+                      type="number"
+                      id="height"
+                      name="dimensions.height"
+                      className="form-control"
+                      value={formData.dimensions.height}
+                      onChange={handleInputChange}
+                      placeholder="0"
+                      min="0"
+                      step="0.1"
+                    />
+                  </div>
+
+                  <div className="col-md-3">
+                    <label htmlFor="depth" className="form-label">Depth</label>
+                    <input
+                      type="number"
+                      id="depth"
+                      name="dimensions.depth"
+                      className="form-control"
+                      value={formData.dimensions.depth}
+                      onChange={handleInputChange}
+                      placeholder="0"
+                      min="0"
+                      step="0.1"
+                    />
+                  </div>
+
+                  <div className="col-md-3">
+                    <label htmlFor="unit" className="form-label">Unit</label>
+                    <select
+                      id="unit"
+                      name="dimensions.unit"
+                      className="form-select"
+                      value={formData.dimensions.unit}
+                      onChange={handleInputChange}
+                    >
+                      <option value="cm">cm</option>
+                      <option value="inch">inch</option>
+                      <option value="mm">mm</option>
+                      <option value="m">m</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="mb-3">
+                  <label htmlFor="tags" className="form-label">Tags</label>
+                  <input
+                    type="text"
+                    id="tags"
+                    name="tags"
+                    className="form-control"
+                    value={formData.tags}
                     onChange={handleInputChange}
-                  >
-                    <option value="cm">cm</option>
-                    <option value="inch">inch</option>
-                    <option value="mm">mm</option>
-                    <option value="m">m</option>
-                  </select>
+                    placeholder="Enter tags separated by commas"
+                  />
+                </div>
               </div>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="tags">Tags</label>
-              <input
-                type="text"
-                id="tags"
-                name="tags"
-                value={formData.tags}
-                onChange={handleInputChange}
-                placeholder="Enter tags separated by commas"
-              />
+            {/* Submit Buttons */}
+            <div className="d-flex gap-3 justify-content-end">
+              <button
+                type="button"
+                className="btn btn-outline-secondary"
+                onClick={() => navigate('/dashboard')}
+              >
+                <i className="bi bi-x-circle me-1"></i>
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <i className="bi bi-upload me-1"></i>
+                    Upload Artwork
+                  </>
+                )}
+              </button>
             </div>
-          </div>
-
-          {/* Submit Button */}
-          <div className="form-actions">
-            <button
-              type="button"
-              className="btn-cancel"
-              onClick={() => navigate('/dashboard')}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="btn-upload"
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <span className="spinner"></span>
-                  Uploading...
-                </>
-              ) : (
-                'Upload Artwork'
-              )}
-            </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );

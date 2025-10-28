@@ -3,6 +3,7 @@
 // ============================================
 import React, { useState, useEffect } from 'react';
 import { communityAPI, type Post } from '../services/community';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import '../styles/App.css';
 
 const CommunityPage: React.FC = () => {
@@ -44,304 +45,400 @@ const CommunityPage: React.FC = () => {
   };
 
   return (
-    <div className="community-page">
-      <div className="community-container">
-        {/* Welcome Section */}
-        <div className="welcome-section">
-          <div className="welcome-content">
-            <h1>Welcome to the Arthub Community!</h1>
-            <p>
+    <div className="container-fluid py-4">
+      {/* Welcome Section */}
+      <div className="row mb-5">
+        <div className="col-lg-8">
+          <div className="text-center">
+            <h1 className="display-4 text-primary mb-3">Welcome to the Arthub Community!</h1>
+            <p className="lead text-muted mb-4">
               Connect, share, and grow with fellow artists and art enthusiasts. 
               Find collaborations, discover resources, and get marketing insights.
             </p>
-            <button className="start-discussion-btn" onClick={handleStartDiscussion}>
-              <span className="discussion-icon">💬</span>
+            <button className="btn btn-primary btn-lg" onClick={handleStartDiscussion}>
+              <i className="bi bi-chat-dots me-2"></i>
               Start a Discussion
             </button>
           </div>
-          <div className="welcome-illustration">
-            <div className="artists-illustration">
-              <div className="artist-figure artist-1">🎨</div>
-              <div className="artist-figure artist-2">🖌️</div>
-              <div className="artist-figure artist-3">📸</div>
-              <div className="artist-figure artist-4">✏️</div>
-              <div className="art-supplies">🖼️</div>
-              <div className="art-supplies">🎭</div>
+        </div>
+        <div className="col-lg-4">
+          <div className="text-center">
+            <div className="fs-1 mb-3">🎨</div>
+            <div className="d-flex justify-content-center gap-3 mb-3">
+              <div className="fs-2">🖌️</div>
+              <div className="fs-2">📸</div>
+              <div className="fs-2">✏️</div>
+            </div>
+            <div className="d-flex justify-content-center gap-3">
+              <div className="fs-3">🖼️</div>
+              <div className="fs-3">🎭</div>
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="community-content">
-          {/* Main Content */}
-          <div className="main-content">
-            {/* Latest Discussion Threads */}
-            <div className="discussion-section">
-              <div className="section-header">
-                <h2>Latest Discussion Threads</h2>
-                <p>Join the conversation on various topics.</p>
-                <button className="new-thread-btn" onClick={handleNewThread}>
-                  <span className="thread-icon">💬</span>
-                  New Thread
-                </button>
+      <div className="row">
+        {/* Main Content */}
+        <div className="col-lg-8">
+          {/* Latest Discussion Threads */}
+          <div className="card mb-4">
+            <div className="card-header d-flex justify-content-between align-items-center">
+              <div>
+                <h2 className="h5 mb-1 text-primary">Latest Discussion Threads</h2>
+                <p className="text-muted mb-0">Join the conversation on various topics.</p>
               </div>
-
+              <button className="btn btn-outline-primary btn-sm" onClick={handleNewThread}>
+                <i className="bi bi-chat-dots me-1"></i>
+                New Thread
+              </button>
+            </div>
+            <div className="card-body">
               {loading ? (
-                <div className="loading-container">
-                  <div className="spinner"></div>
-                  <p>Loading discussions...</p>
+                <div className="text-center py-4">
+                  <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </div>
+                  <p className="mt-2 text-muted">Loading discussions...</p>
                 </div>
               ) : error ? (
-                <div className="error-container">
-                  <div className="error-icon">⚠️</div>
-                  <p>{error}</p>
+                <div className="alert alert-danger d-flex align-items-center" role="alert">
+                  <i className="bi bi-exclamation-triangle me-2"></i>
+                  {error}
                 </div>
               ) : (
-                <div className="discussion-list">
-                  <div className="discussion-item">
-                    <div className="discussion-icon">💬</div>
-                    <div className="discussion-content">
-                      <h3>Tips for selling art online in 2024?</h3>
-                      <div className="discussion-meta">
-                        <span className="author">by ArtfulCreator</span>
-                        <span className="time">2 hours ago</span>
-                        <span className="category">Marketing</span>
+                <div className="list-group list-group-flush">
+                  <div className="list-group-item d-flex align-items-start">
+                    <div className="flex-shrink-0 me-3">
+                      <i className="bi bi-chat-dots text-primary fs-4"></i>
+                    </div>
+                    <div className="flex-grow-1">
+                      <h5 className="mb-1">Tips for selling art online in 2024?</h5>
+                      <div className="d-flex gap-3 text-muted small">
+                        <span>by ArtfulCreator</span>
+                        <span>2 hours ago</span>
+                        <span className="badge bg-primary">Marketing</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="discussion-item">
-                    <div className="discussion-icon">💬</div>
-                    <div className="discussion-content">
-                      <h3>Best practices for protecting your artwork copyrights</h3>
-                      <div className="discussion-meta">
-                        <span className="author">by LegalCanvas</span>
-                        <span className="time">yesterday</span>
-                        <span className="category">Legal</span>
+                  <div className="list-group-item d-flex align-items-start">
+                    <div className="flex-shrink-0 me-3">
+                      <i className="bi bi-chat-dots text-primary fs-4"></i>
+                    </div>
+                    <div className="flex-grow-1">
+                      <h5 className="mb-1">Best practices for protecting your artwork copyrights</h5>
+                      <div className="d-flex gap-3 text-muted small">
+                        <span>by LegalCanvas</span>
+                        <span>yesterday</span>
+                        <span className="badge bg-warning">Legal</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="discussion-item">
-                    <div className="discussion-icon">💬</div>
-                    <div className="discussion-content">
-                      <h3>Sharing experience with digital painting tools</h3>
-                      <div className="discussion-meta">
-                        <span className="author">by PixelBrush</span>
-                        <span className="time">3 days ago</span>
-                        <span className="category">Technique</span>
+                  <div className="list-group-item d-flex align-items-start">
+                    <div className="flex-shrink-0 me-3">
+                      <i className="bi bi-chat-dots text-primary fs-4"></i>
+                    </div>
+                    <div className="flex-grow-1">
+                      <h5 className="mb-1">Sharing experience with digital painting tools</h5>
+                      <div className="d-flex gap-3 text-muted small">
+                        <span>by PixelBrush</span>
+                        <span>3 days ago</span>
+                        <span className="badge bg-info">Technique</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="discussion-item">
-                    <div className="discussion-icon">💬</div>
-                    <div className="discussion-content">
-                      <h3>Finding inspiration in everyday life</h3>
-                      <div className="discussion-meta">
-                        <span className="author">by DailyMuse</span>
-                        <span className="time">1 week ago</span>
-                        <span className="category">Inspiration</span>
+                  <div className="list-group-item d-flex align-items-start">
+                    <div className="flex-shrink-0 me-3">
+                      <i className="bi bi-chat-dots text-primary fs-4"></i>
+                    </div>
+                    <div className="flex-grow-1">
+                      <h5 className="mb-1">Finding inspiration in everyday life</h5>
+                      <div className="d-flex gap-3 text-muted small">
+                        <span>by DailyMuse</span>
+                        <span>1 week ago</span>
+                        <span className="badge bg-success">Inspiration</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="discussion-item">
-                    <div className="discussion-icon">💬</div>
-                    <div className="discussion-content">
-                      <h3>Feedback wanted: My latest abstract series</h3>
-                      <div className="discussion-meta">
-                        <span className="author">by ColorFlow</span>
-                        <span className="time">2 weeks ago</span>
-                        <span className="category">Critique</span>
+                  <div className="list-group-item d-flex align-items-start">
+                    <div className="flex-shrink-0 me-3">
+                      <i className="bi bi-chat-dots text-primary fs-4"></i>
+                    </div>
+                    <div className="flex-grow-1">
+                      <h5 className="mb-1">Feedback wanted: My latest abstract series</h5>
+                      <div className="d-flex gap-3 text-muted small">
+                        <span>by ColorFlow</span>
+                        <span>2 weeks ago</span>
+                        <span className="badge bg-secondary">Critique</span>
                       </div>
                     </div>
                   </div>
                 </div>
               )}
             </div>
+          </div>
 
-            {/* Collaboration Opportunities */}
-            <div className="collaboration-section">
-              <div className="section-header">
-                <h2>Collaboration Opportunities</h2>
-                <p>Find artists for your next project or offer your skills.</p>
-              </div>
-
-              <div className="collaboration-grid">
-                <div className="collaboration-card">
-                  <h3>Illustrator needed for children's book project</h3>
-                  <p>Looking for a talented illustrator to bring whimsical characters to life in a children's book series.</p>
-                  <div className="skill-tag">Illustration</div>
-                  <a href="#" className="view-details-link">
-                    View Details
-                    <span className="share-icon">↗</span>
-                  </a>
-                </div>
-
-                <div className="collaboration-card">
-                  <h3>Photographer for urban art documentation</h3>
-                  <p>Seeking a photographer to capture mural art and street installations for a gallery exhibition.</p>
-                  <div className="skill-tag">Photography</div>
-                  <a href="#" className="view-details-link">
-                    View Details
-                    <span className="share-icon">↗</span>
-                  </a>
-                </div>
-
-                <div className="collaboration-card">
-                  <h3>Graphic designer for art event branding</h3>
-                  <p>Creative designer to help with logos, flyers, and digital marketing materials for upcoming art events.</p>
-                  <div className="skill-tag">Graphic Design</div>
-                  <a href="#" className="view-details-link">
-                    View Details
-                    <span className="share-icon">↗</span>
-                  </a>
-                </div>
-
-                <div className="collaboration-card">
-                  <h3>Videographer for artist studio tour</h3>
-                  <p>Create an engaging video tour of my studio space for social media and portfolio purposes.</p>
-                  <div className="skill-tag">Videography</div>
-                  <a href="#" className="view-details-link">
-                    View Details
-                    <span className="share-icon">↗</span>
-                  </a>
-                </div>
-
-                <div className="collaboration-card">
-                  <h3>Web developer to build artist portfolio site</h3>
-                  <p>Seeking a developer to build a modern, responsive portfolio website for showcasing artwork.</p>
-                  <div className="skill-tag">Web Development</div>
-                  <a href="#" className="view-details-link">
-                    View Details
-                    <span className="share-icon">↗</span>
-                  </a>
-                </div>
-
-                <div className="collaboration-card">
-                  <h3>3D Artist for virtual gallery experience</h3>
-                  <p>Collaborate on creating an immersive 3D virtual gallery space for online art exhibitions.</p>
-                  <div className="skill-tag">3D Art</div>
-                  <a href="#" className="view-details-link">
-                    View Details
-                    <span className="share-icon">↗</span>
-                  </a>
-                </div>
-              </div>
+          {/* Collaboration Opportunities */}
+          <div className="card mb-4">
+            <div className="card-header">
+              <h2 className="h5 mb-1 text-primary">Collaboration Opportunities</h2>
+              <p className="text-muted mb-0">Find artists for your next project or offer your skills.</p>
             </div>
-
-            {/* Curated Resources */}
-            <div className="resources-section">
-              <div className="section-header">
-                <h2>Curated Resources</h2>
-                <p>Tools, guides, and inspiration for your creative journey.</p>
-              </div>
-
-              <div className="resources-grid">
-                <div className="resource-item">
-                  <span className="resource-icon">🔖</span>
-                  <h3>Top 10 Online Art Marketplaces</h3>
-                  <a href="#" className="read-more-link">Read more →</a>
+            <div className="card-body">
+              <div className="row g-3">
+                <div className="col-md-6 col-lg-4">
+                  <div className="card h-100">
+                    <div className="card-body d-flex flex-column">
+                      <h5 className="card-title">Illustrator needed for children's book project</h5>
+                      <p className="card-text text-muted">Looking for a talented illustrator to bring whimsical characters to life in a children's book series.</p>
+                      <div className="mt-auto">
+                        <span className="badge bg-primary mb-2">Illustration</span>
+                        <a href="#" className="btn btn-outline-primary btn-sm w-100">
+                          View Details <i className="bi bi-arrow-up-right ms-1"></i>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="resource-item">
-                  <span className="resource-icon">🔖</span>
-                  <h3>Beginner's Guide to Art Prints</h3>
-                  <a href="#" className="read-more-link">Read more →</a>
+                <div className="col-md-6 col-lg-4">
+                  <div className="card h-100">
+                    <div className="card-body d-flex flex-column">
+                      <h5 className="card-title">Photographer for urban art documentation</h5>
+                      <p className="card-text text-muted">Seeking a photographer to capture mural art and street installations for a gallery exhibition.</p>
+                      <div className="mt-auto">
+                        <span className="badge bg-info mb-2">Photography</span>
+                        <a href="#" className="btn btn-outline-primary btn-sm w-100">
+                          View Details <i className="bi bi-arrow-up-right ms-1"></i>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="resource-item">
-                  <span className="resource-icon">🔖</span>
-                  <h3>Understanding Color Theory for Digital Artists</h3>
-                  <a href="#" className="read-more-link">Read more →</a>
+                <div className="col-md-6 col-lg-4">
+                  <div className="card h-100">
+                    <div className="card-body d-flex flex-column">
+                      <h5 className="card-title">Graphic designer for art event branding</h5>
+                      <p className="card-text text-muted">Creative designer to help with logos, flyers, and digital marketing materials for upcoming art events.</p>
+                      <div className="mt-auto">
+                        <span className="badge bg-success mb-2">Graphic Design</span>
+                        <a href="#" className="btn btn-outline-primary btn-sm w-100">
+                          View Details <i className="bi bi-arrow-up-right ms-1"></i>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="resource-item">
-                  <span className="resource-icon">🔖</span>
-                  <h3>Legal Checklist for Freelance Artists</h3>
-                  <a href="#" className="read-more-link">Read more →</a>
-                </div>
-              </div>
-            </div>
-
-            {/* Marketing Insights */}
-            <div className="marketing-section">
-              <div className="section-header">
-                <h2>Marketing Insights</h2>
-                <p>Tips to help your art reach a wider audience.</p>
-              </div>
-
-              <div className="marketing-cards">
-                <div className="marketing-card">
-                  <div className="card-icon">💡</div>
-                  <h3>Leveraging Instagram for Art Sales</h3>
-                  <p>Discover strategies to showcase your art effectively on social media and reach potential buyers.</p>
-                  <a href="#" className="read-more-link">
-                    Read More
-                    <span className="arrow-icon">←</span>
-                  </a>
+                <div className="col-md-6 col-lg-4">
+                  <div className="card h-100">
+                    <div className="card-body d-flex flex-column">
+                      <h5 className="card-title">Videographer for artist studio tour</h5>
+                      <p className="card-text text-muted">Create an engaging video tour of my studio space for social media and portfolio purposes.</p>
+                      <div className="mt-auto">
+                        <span className="badge bg-warning mb-2">Videography</span>
+                        <a href="#" className="btn btn-outline-primary btn-sm w-100">
+                          View Details <i className="bi bi-arrow-up-right ms-1"></i>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="marketing-card">
-                  <div className="card-icon">💡</div>
-                  <h3>The Power of Email Newsletters for Artists</h3>
-                  <p>Build a loyal audience and drive sales with compelling email campaigns.</p>
-                  <a href="#" className="read-more-link">
-                    Read More
-                    <span className="arrow-icon">←</span>
-                  </a>
+                <div className="col-md-6 col-lg-4">
+                  <div className="card h-100">
+                    <div className="card-body d-flex flex-column">
+                      <h5 className="card-title">Web developer to build artist portfolio site</h5>
+                      <p className="card-text text-muted">Seeking a developer to build a modern, responsive portfolio website for showcasing artwork.</p>
+                      <div className="mt-auto">
+                        <span className="badge bg-secondary mb-2">Web Development</span>
+                        <a href="#" className="btn btn-outline-primary btn-sm w-100">
+                          View Details <i className="bi bi-arrow-up-right ms-1"></i>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="marketing-card">
-                  <div className="card-icon">💡</div>
-                  <h3>SEO Basics for Artist Websites</h3>
-                  <p>Improve your visibility on search engines so collectors can easily find your work.</p>
-                  <a href="#" className="read-more-link">
-                    Read More
-                    <span className="arrow-icon">←</span>
-                  </a>
+                <div className="col-md-6 col-lg-4">
+                  <div className="card h-100">
+                    <div className="card-body d-flex flex-column">
+                      <h5 className="card-title">3D Artist for virtual gallery experience</h5>
+                      <p className="card-text text-muted">Collaborate on creating an immersive 3D virtual gallery space for online art exhibitions.</p>
+                      <div className="mt-auto">
+                        <span className="badge bg-dark mb-2">3D Art</span>
+                        <a href="#" className="btn btn-outline-primary btn-sm w-100">
+                          View Details <i className="bi bi-arrow-up-right ms-1"></i>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Right Sidebar */}
-          <div className="sidebar">
-            {/* Recent Notifications */}
-            <div className="notifications-section">
-              <h3>Recent Notifications</h3>
-              <p>Stay updated on community activity.</p>
-
-              <div className="notifications-list">
-                <div className="notification-item">
-                  <span className="notification-icon">🔔</span>
-                  <div className="notification-content">
-                    <p>New reply in 'Tips for selling art online in 2024'.</p>
-                    <span className="notification-time">5 minutes ago</span>
+          {/* Curated Resources */}
+          <div className="card mb-4">
+            <div className="card-header">
+              <h2 className="h5 mb-1 text-primary">Curated Resources</h2>
+              <p className="text-muted mb-0">Tools, guides, and inspiration for your creative journey.</p>
+            </div>
+            <div className="card-body">
+              <div className="row g-3">
+                <div className="col-md-6">
+                  <div className="d-flex align-items-start">
+                    <div className="flex-shrink-0 me-3">
+                      <i className="bi bi-bookmark text-primary fs-4"></i>
+                    </div>
+                    <div className="flex-grow-1">
+                      <h5 className="mb-1">Top 10 Online Art Marketplaces</h5>
+                      <a href="#" className="btn btn-outline-primary btn-sm">Read more <i className="bi bi-arrow-right ms-1"></i></a>
+                    </div>
                   </div>
                 </div>
 
-                <div className="notification-item">
-                  <span className="notification-icon">🔔</span>
-                  <div className="notification-content">
-                    <p>Your collaboration request for 'Illustrator needed' received a new inquiry.</p>
-                    <span className="notification-time">30 minutes ago</span>
+                <div className="col-md-6">
+                  <div className="d-flex align-items-start">
+                    <div className="flex-shrink-0 me-3">
+                      <i className="bi bi-bookmark text-primary fs-4"></i>
+                    </div>
+                    <div className="flex-grow-1">
+                      <h5 className="mb-1">Beginner's Guide to Art Prints</h5>
+                      <a href="#" className="btn btn-outline-primary btn-sm">Read more <i className="bi bi-arrow-right ms-1"></i></a>
+                    </div>
                   </div>
                 </div>
 
-                <div className="notification-item">
-                  <span className="notification-icon">🔔</span>
-                  <div className="notification-content">
-                    <p>ArtfulCreator mentioned you in a discussion.</p>
-                    <span className="notification-time">1 hour ago</span>
+                <div className="col-md-6">
+                  <div className="d-flex align-items-start">
+                    <div className="flex-shrink-0 me-3">
+                      <i className="bi bi-bookmark text-primary fs-4"></i>
+                    </div>
+                    <div className="flex-grow-1">
+                      <h5 className="mb-1">Understanding Color Theory for Digital Artists</h5>
+                      <a href="#" className="btn btn-outline-primary btn-sm">Read more <i className="bi bi-arrow-right ms-1"></i></a>
+                    </div>
                   </div>
                 </div>
 
-                <div className="notification-item">
-                  <span className="notification-icon">🔔</span>
-                  <div className="notification-content">
-                    <p>Community event 'Virtual Studio Tour' starts in 2 hours!</p>
-                    <span className="notification-time">2 hours ago</span>
+                <div className="col-md-6">
+                  <div className="d-flex align-items-start">
+                    <div className="flex-shrink-0 me-3">
+                      <i className="bi bi-bookmark text-primary fs-4"></i>
+                    </div>
+                    <div className="flex-grow-1">
+                      <h5 className="mb-1">Legal Checklist for Freelance Artists</h5>
+                      <a href="#" className="btn btn-outline-primary btn-sm">Read more <i className="bi bi-arrow-right ms-1"></i></a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Marketing Insights */}
+          <div className="card mb-4">
+            <div className="card-header">
+              <h2 className="h5 mb-1 text-primary">Marketing Insights</h2>
+              <p className="text-muted mb-0">Tips to help your art reach a wider audience.</p>
+            </div>
+            <div className="card-body">
+              <div className="row g-3">
+                <div className="col-md-4">
+                  <div className="card h-100">
+                    <div className="card-body text-center">
+                      <div className="fs-1 mb-3">💡</div>
+                      <h5 className="card-title">Leveraging Instagram for Art Sales</h5>
+                      <p className="card-text text-muted">Discover strategies to showcase your art effectively on social media and reach potential buyers.</p>
+                      <a href="#" className="btn btn-outline-primary btn-sm">
+                        Read More <i className="bi bi-arrow-left ms-1"></i>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="col-md-4">
+                  <div className="card h-100">
+                    <div className="card-body text-center">
+                      <div className="fs-1 mb-3">💡</div>
+                      <h5 className="card-title">The Power of Email Newsletters for Artists</h5>
+                      <p className="card-text text-muted">Build a loyal audience and drive sales with compelling email campaigns.</p>
+                      <a href="#" className="btn btn-outline-primary btn-sm">
+                        Read More <i className="bi bi-arrow-left ms-1"></i>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="col-md-4">
+                  <div className="card h-100">
+                    <div className="card-body text-center">
+                      <div className="fs-1 mb-3">💡</div>
+                      <h5 className="card-title">SEO Basics for Artist Websites</h5>
+                      <p className="card-text text-muted">Improve your visibility on search engines so collectors can easily find your work.</p>
+                      <a href="#" className="btn btn-outline-primary btn-sm">
+                        Read More <i className="bi bi-arrow-left ms-1"></i>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Sidebar */}
+        <div className="col-lg-4">
+          {/* Recent Notifications */}
+          <div className="card">
+            <div className="card-header">
+              <h3 className="h5 mb-1 text-primary">Recent Notifications</h3>
+              <p className="text-muted mb-0">Stay updated on community activity.</p>
+            </div>
+            <div className="card-body">
+              <div className="list-group list-group-flush">
+                <div className="list-group-item d-flex align-items-start">
+                  <div className="flex-shrink-0 me-3">
+                    <i className="bi bi-bell text-primary"></i>
+                  </div>
+                  <div className="flex-grow-1">
+                    <p className="mb-1">New reply in 'Tips for selling art online in 2024'.</p>
+                    <small className="text-muted">5 minutes ago</small>
+                  </div>
+                </div>
+
+                <div className="list-group-item d-flex align-items-start">
+                  <div className="flex-shrink-0 me-3">
+                    <i className="bi bi-bell text-primary"></i>
+                  </div>
+                  <div className="flex-grow-1">
+                    <p className="mb-1">Your collaboration request for 'Illustrator needed' received a new inquiry.</p>
+                    <small className="text-muted">30 minutes ago</small>
+                  </div>
+                </div>
+
+                <div className="list-group-item d-flex align-items-start">
+                  <div className="flex-shrink-0 me-3">
+                    <i className="bi bi-bell text-primary"></i>
+                  </div>
+                  <div className="flex-grow-1">
+                    <p className="mb-1">ArtfulCreator mentioned you in a discussion.</p>
+                    <small className="text-muted">1 hour ago</small>
+                  </div>
+                </div>
+
+                <div className="list-group-item d-flex align-items-start">
+                  <div className="flex-shrink-0 me-3">
+                    <i className="bi bi-bell text-primary"></i>
+                  </div>
+                  <div className="flex-grow-1">
+                    <p className="mb-1">Community event 'Virtual Studio Tour' starts in 2 hours!</p>
+                    <small className="text-muted">2 hours ago</small>
                   </div>
                 </div>
               </div>

@@ -4,6 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { artworkAPI, type Artwork } from '../services/artwork';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import '../styles/App.css';
 
 const InventoryPage: React.FC = () => {
@@ -80,109 +81,100 @@ const InventoryPage: React.FC = () => {
   };
 
   return (
-    <div className="inventory-page">
-      <div className="inventory-container">
-        {/* Header Section */}
-        <div className="inventory-header">
-          <div className="header-content">
-            <h1>Inventory Management</h1>
-            <button className="upload-new-btn" onClick={handleUploadNew}>
-              <span className="upload-icon">📤</span>
-              Upload New Artwork
-            </button>
-          </div>
-        </div>
-
-        {/* Performance Analytics */}
-        <div className="analytics-section">
-          <h2>Performance Analytics</h2>
-          <div className="stats-grid">
-            <div className="stat-card">
-              <div className="stat-icon">🎨</div>
-              <div className="stat-content">
-                <h3>Total Artworks</h3>
-                <div className="stat-value">{stats.totalArtworks}</div>
-                <p>Currently listed for sale</p>
-              </div>
-            </div>
-
-            <div className="stat-card">
-              <div className="stat-icon">💰</div>
-              <div className="stat-content">
-                <h3>Total Sales</h3>
-                <div className="stat-value">${stats.totalSales.toLocaleString()}</div>
-                <p className="positive-change">+5% from last month</p>
-              </div>
-            </div>
-
-            <div className="stat-card">
-              <div className="stat-icon">💵</div>
-              <div className="stat-content">
-                <h3>Average Artwork Price</h3>
-                <div className="stat-value">${stats.averagePrice.toLocaleString()}</div>
-                <p>Stable over the last quarter</p>
-              </div>
-            </div>
-
-            <div className="stat-card">
-              <div className="stat-icon">👁️</div>
-              <div className="stat-content">
-                <h3>Artwork Views</h3>
-                <div className="stat-value">{stats.totalViews.toLocaleString()}</div>
-                <p className="positive-change">+12% from last month</p>
+    <div className="container-fluid py-4">
+      {/* Header Section */}
+      <div className="row mb-4">
+        <div className="col-12">
+          <div className="card shadow-sm">
+            <div className="card-body">
+              <div className="d-flex justify-content-between align-items-center">
+                <h1 className="h3 mb-0 text-primary">Inventory Management</h1>
+                <button className="btn btn-primary" onClick={handleUploadNew}>
+                  <i className="bi bi-upload me-2"></i>
+                  Upload New Artwork
+                </button>
               </div>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Charts Section */}
-        <div className="charts-section">
-          <div className="chart-container">
-            <div className="chart-header">
-              <h3>Artwork Views & Sales Trends</h3>
-              <span className="chart-icon">📈</span>
-            </div>
-            <div className="chart-placeholder">
-              <div className="chart-mock">
-                <div className="chart-lines">
-                  <div className="line views-line"></div>
-                  <div className="line sales-line"></div>
-                </div>
-                <div className="chart-legend">
-                  <div className="legend-item">
-                    <span className="legend-color views-color"></span>
-                    <span>Views</span>
+      {/* Performance Analytics */}
+      <div className="row mb-4">
+        <div className="col-12">
+          <div className="card shadow-sm">
+            <div className="card-body">
+              <h2 className="h5 mb-3 text-primary">Performance Analytics</h2>
+              <div className="row g-3">
+                <div className="col-md-3 col-sm-6">
+                  <div className="card border-0 bg-light">
+                    <div className="card-body text-center">
+                      <div className="fs-1 mb-2">🎨</div>
+                      <h6 className="card-title text-muted">Total Artworks</h6>
+                      <h3 className="text-primary">{stats.totalArtworks}</h3>
+                      <small className="text-muted">Currently listed for sale</small>
+                    </div>
                   </div>
-                  <div className="legend-item">
-                    <span className="legend-color sales-color"></span>
-                    <span>Sales</span>
+                </div>
+
+                <div className="col-md-3 col-sm-6">
+                  <div className="card border-0 bg-light">
+                    <div className="card-body text-center">
+                      <div className="fs-1 mb-2">💰</div>
+                      <h6 className="card-title text-muted">Total Sales</h6>
+                      <h3 className="text-success">${stats.totalSales.toLocaleString()}</h3>
+                      <small className="text-success">+5% from last month</small>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="col-md-3 col-sm-6">
+                  <div className="card border-0 bg-light">
+                    <div className="card-body text-center">
+                      <div className="fs-1 mb-2">💵</div>
+                      <h6 className="card-title text-muted">Average Price</h6>
+                      <h3 className="text-primary">${stats.averagePrice.toLocaleString()}</h3>
+                      <small className="text-muted">Stable over the last quarter</small>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="col-md-3 col-sm-6">
+                  <div className="card border-0 bg-light">
+                    <div className="card-body text-center">
+                      <div className="fs-1 mb-2">👁️</div>
+                      <h6 className="card-title text-muted">Artwork Views</h6>
+                      <h3 className="text-primary">{stats.totalViews.toLocaleString()}</h3>
+                      <small className="text-success">+12% from last month</small>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
+        </div>
+      </div>
 
-          <div className="chart-container">
-            <div className="chart-header">
-              <h3>Sales by Category</h3>
-              <span className="chart-icon">📊</span>
-            </div>
-            <div className="chart-placeholder">
-              <div className="chart-mock">
-                <div className="bar-chart">
-                  <div className="bar abstract-bar"></div>
-                  <div className="bar portrait-bar"></div>
-                  <div className="bar sculpture-bar"></div>
-                  <div className="bar digital-bar"></div>
-                </div>
-                <div className="chart-legend">
-                  <div className="legend-item">
-                    <span className="legend-color sales-color"></span>
-                    <span>Sales Value</span>
-                  </div>
-                  <div className="legend-item">
-                    <span className="legend-color count-color"></span>
-                    <span>Artworks Count</span>
+      {/* Charts Section */}
+      <div className="row mb-4">
+        <div className="col-lg-6 mb-3">
+          <div className="card shadow-sm h-100">
+            <div className="card-body">
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <h3 className="h6 mb-0">Artwork Views & Sales Trends</h3>
+                <i className="bi bi-graph-up text-primary"></i>
+              </div>
+              <div className="bg-light rounded p-3" style={{height: '200px'}}>
+                <div className="d-flex align-items-center justify-content-center h-100">
+                  <div className="text-center">
+                    <div className="mb-2">
+                      <div className="d-inline-block bg-primary rounded" style={{width: '100px', height: '3px', marginRight: '10px'}}></div>
+                      <small className="text-muted">Views</small>
+                    </div>
+                    <div>
+                      <div className="d-inline-block bg-success rounded" style={{width: '80px', height: '3px', marginRight: '10px'}}></div>
+                      <small className="text-muted">Sales</small>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -190,67 +182,111 @@ const InventoryPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Your Artworks Section */}
-        <div className="artworks-section">
-          <h2>Your Artworks</h2>
-          
-          {loading ? (
-            <div className="loading-container">
-              <div className="spinner"></div>
-              <p>Loading artworks...</p>
-            </div>
-          ) : error ? (
-            <div className="error-container">
-              <div className="error-icon">⚠️</div>
-              <p>{error}</p>
-            </div>
-          ) : artworks.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-icon">🎨</div>
-              <h3>No artworks found</h3>
-              <p>Start by uploading your first artwork to get started.</p>
-              <button className="upload-first-btn" onClick={handleUploadNew}>
-                Upload Your First Artwork
-              </button>
-            </div>
-          ) : (
-            <div className="artworks-grid">
-              {artworks.map((artwork) => (
-                <div key={artwork._id} className="artwork-card">
-                  <div className="artwork-image-container">
-                    <img
-                      src={artwork.images?.[0]?.url || 'https://via.placeholder.com/300x200/CCCCCC/FFFFFF?text=No+Image'}
-                      alt={artwork.title || 'Artwork'}
-                      className="artwork-image"
-                    />
+        <div className="col-lg-6 mb-3">
+          <div className="card shadow-sm h-100">
+            <div className="card-body">
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <h3 className="h6 mb-0">Sales by Category</h3>
+                <i className="bi bi-bar-chart text-primary"></i>
+              </div>
+              <div className="bg-light rounded p-3" style={{height: '200px'}}>
+                <div className="d-flex align-items-end justify-content-around h-100">
+                  <div className="text-center">
+                    <div className="bg-primary rounded mb-2" style={{width: '30px', height: '60px'}}></div>
+                    <small className="text-muted">Abstract</small>
                   </div>
-                  
-                  <div className="artwork-info">
-                    <h3 className="artwork-title">{artwork.title || 'Untitled'}</h3>
-                    <p className="artist-name">{artwork.artist?.name || 'Unknown Artist'}</p>
-                    <div className="artwork-price">${artwork.price?.toLocaleString() || '0'}</div>
+                  <div className="text-center">
+                    <div className="bg-primary rounded mb-2" style={{width: '30px', height: '45px'}}></div>
+                    <small className="text-muted">Portrait</small>
                   </div>
-
-                  <div className="artwork-actions">
-                    <button 
-                      className="edit-btn"
-                      onClick={() => handleEditArtwork(artwork._id)}
-                    >
-                      <span className="action-icon">✏️</span>
-                      Edit
-                    </button>
-                    <button 
-                      className="delete-btn"
-                      onClick={() => handleDeleteArtwork(artwork._id)}
-                    >
-                      <span className="action-icon">🗑️</span>
-                      Delete
-                    </button>
+                  <div className="text-center">
+                    <div className="bg-primary rounded mb-2" style={{width: '30px', height: '30px'}}></div>
+                    <small className="text-muted">Sculpture</small>
+                  </div>
+                  <div className="text-center">
+                    <div className="bg-primary rounded mb-2" style={{width: '30px', height: '40px'}}></div>
+                    <small className="text-muted">Digital</small>
                   </div>
                 </div>
-              ))}
+              </div>
             </div>
-          )}
+          </div>
+        </div>
+      </div>
+
+      {/* Your Artworks Section */}
+      <div className="row">
+        <div className="col-12">
+          <div className="card shadow-sm">
+            <div className="card-body">
+              <h2 className="h5 mb-3 text-primary">Your Artworks</h2>
+              
+              {loading ? (
+                <div className="text-center py-5">
+                  <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </div>
+                  <p className="mt-2 text-muted">Loading artworks...</p>
+                </div>
+              ) : error ? (
+                <div className="alert alert-danger d-flex align-items-center" role="alert">
+                  <i className="bi bi-exclamation-triangle me-2"></i>
+                  {error}
+                </div>
+              ) : artworks.length === 0 ? (
+                <div className="text-center py-5">
+                  <div className="fs-1 mb-3">🎨</div>
+                  <h3 className="h5 text-muted">No artworks found</h3>
+                  <p className="text-muted mb-3">Start by uploading your first artwork to get started.</p>
+                  <button className="btn btn-primary" onClick={handleUploadNew}>
+                    Upload Your First Artwork
+                  </button>
+                </div>
+              ) : (
+                <div className="row g-3">
+                  {artworks.map((artwork) => (
+                    <div key={artwork._id} className="col-lg-3 col-md-4 col-sm-6">
+                      <div className="card h-100">
+                        <div className="position-relative">
+                          <img
+                            src={artwork.images?.[0]?.url || 'https://via.placeholder.com/300x200/CCCCCC/FFFFFF?text=No+Image'}
+                            alt={artwork.title || 'Artwork'}
+                            className="card-img-top"
+                            style={{height: '200px', objectFit: 'cover'}}
+                          />
+                        </div>
+                        
+                        <div className="card-body d-flex flex-column">
+                          <h5 className="card-title">{artwork.title || 'Untitled'}</h5>
+                          <p className="card-text text-muted small">{artwork.artist?.name || 'Unknown Artist'}</p>
+                          <div className="text-primary fw-bold mb-3">${artwork.price?.toLocaleString() || '0'}</div>
+                          
+                          <div className="mt-auto">
+                            <div className="d-grid gap-2">
+                              <button 
+                                className="btn btn-outline-primary btn-sm"
+                                onClick={() => handleEditArtwork(artwork._id)}
+                              >
+                                <i className="bi bi-pencil me-1"></i>
+                                Edit
+                              </button>
+                              <button 
+                                className="btn btn-outline-danger btn-sm"
+                                onClick={() => handleDeleteArtwork(artwork._id)}
+                              >
+                                <i className="bi bi-trash me-1"></i>
+                                Delete
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
