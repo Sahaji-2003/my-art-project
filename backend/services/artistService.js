@@ -10,11 +10,18 @@ class ArtistService {
   async createProfile(userId, profileData) {
     // Check if profile already exists
     const existingProfile = await ArtistProfile.findOne({ userId });
+    
     if (existingProfile) {
-      throw new Error('Artist profile already exists');
+      // Update existing profile
+      const profile = await ArtistProfile.findOneAndUpdate(
+        { userId },
+        { $set: profileData },
+        { new: true, runValidators: true }
+      ).populate('userId', 'name email profilePicture');
+      return profile;
     }
 
-    // Create artist profile
+    // Create new artist profile
     const profile = await ArtistProfile.create({
       userId,
       ...profileData

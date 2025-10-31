@@ -4,6 +4,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { artworkAPI, type Artwork } from '../services/artwork';
+import { artistAPI, orderAPI } from '../services/api.service';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 import '../styles/App.css';
 
 const InventoryPage: React.FC = () => {
@@ -14,42 +17,52 @@ const InventoryPage: React.FC = () => {
   const [stats, setStats] = useState({
     totalArtworks: 0,
     totalSales: 0,
+    totalRevenue: 0,
     averagePrice: 0,
     totalViews: 0
   });
 
   useEffect(() => {
-    fetchArtworks();
-    fetchStats();
+    fetchAllData();
   }, []);
 
-  const fetchArtworks = async () => {
+  const fetchAllData = async () => {
     try {
       setLoading(true);
       setError('');
-      // For now, we'll use search to get user's artworks
-      // In a real app, you'd have a specific endpoint for user's inventory
-      const response = await artworkAPI.searchArtworks({ limit: 50 });
-      setArtworks(response.data || []);
-    } catch (err: any) {
-      console.error('Error fetching artworks:', err);
-      setError('Failed to load artworks. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+      
+      // Fetch inventory and stats in parallel
+      const [inventoryResponse, artistStats, ordersResponse] = await Promise.all([
+        artistAPI.getInventory().catch(() => ({ data: { artworks: [] } })),
+        artistAPI.getStats().catch(() => ({ data: { totalSales: 0, totalRevenue: 0 } })),
+        orderAPI.getArtistOrders().catch(() => ({ data: [] }))
+      ]);
+      
+      const fetchedArtworks = inventoryResponse.data?.artworks || [];
+      setArtworks(fetchedArtworks);
+      
+      // Calculate stats
+      const totalArtworks = fetchedArtworks.length;
+      const orders = ordersResponse.data || [];
+      const totalSales = orders.length;
+      const totalRevenue = orders.reduce((sum: number, order: any) => sum + (order.price || order.totalAmount || 0), 0);
+      const averagePrice = totalArtworks > 0 
+        ? fetchedArtworks.reduce((sum: number, artwork: any) => sum + (artwork.price || 0), 0) / totalArtworks 
+        : 0;
+      const totalViews = fetchedArtworks.reduce((sum: number, artwork: any) => sum + (artwork.views || 0), 0);
 
-  const fetchStats = async () => {
-    try {
-      // Mock stats for now - in a real app, you'd fetch from analytics API
       setStats({
-        totalArtworks: 24,
-        totalSales: 12500,
-        averagePrice: 520,
-        totalViews: 8970
+        totalArtworks,
+        totalSales,
+        totalRevenue: artistStats.data?.totalRevenue || totalRevenue,
+        averagePrice: Math.round(averagePrice),
+        totalViews
       });
     } catch (err: any) {
-      console.error('Error fetching stats:', err);
+      console.error('Error fetching data:', err);
+      setError('Failed to load data. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -80,110 +93,73 @@ const InventoryPage: React.FC = () => {
   };
 
   return (
-    <div className="inventory-page">
-      <div className="inventory-container">
+    <div className="container-fluid py-5" style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
+      <div className="container">
         {/* Header Section */}
-        <div className="inventory-header">
-          <div className="header-content">
-            <h1>Inventory Management</h1>
-            <button className="upload-new-btn" onClick={handleUploadNew}>
-              <span className="upload-icon">📤</span>
+        <div className="bg-white rounded shadow-sm p-4 mb-4">
+          <div className="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+              <h1 className="mb-1">Inventory Management</h1>
+            </div>
+            <button className="btn btn-primary btn-lg shadow-sm fw-semibold" onClick={handleUploadNew}>
+              <i className="bi bi-cloud-upload-fill me-2"></i>
               Upload New Artwork
             </button>
           </div>
         </div>
 
         {/* Performance Analytics */}
-        <div className="analytics-section">
-          <h2>Performance Analytics</h2>
-          <div className="stats-grid">
-            <div className="stat-card">
-              <div className="stat-icon">🎨</div>
-              <div className="stat-content">
-                <h3>Total Artworks</h3>
-                <div className="stat-value">{stats.totalArtworks}</div>
-                <p>Currently listed for sale</p>
-              </div>
-            </div>
-
-            <div className="stat-card">
-              <div className="stat-icon">💰</div>
-              <div className="stat-content">
-                <h3>Total Sales</h3>
-                <div className="stat-value">${stats.totalSales.toLocaleString()}</div>
-                <p className="positive-change">+5% from last month</p>
-              </div>
-            </div>
-
-            <div className="stat-card">
-              <div className="stat-icon">💵</div>
-              <div className="stat-content">
-                <h3>Average Artwork Price</h3>
-                <div className="stat-value">${stats.averagePrice.toLocaleString()}</div>
-                <p>Stable over the last quarter</p>
-              </div>
-            </div>
-
-            <div className="stat-card">
-              <div className="stat-icon">👁️</div>
-              <div className="stat-content">
-                <h3>Artwork Views</h3>
-                <div className="stat-value">{stats.totalViews.toLocaleString()}</div>
-                <p className="positive-change">+12% from last month</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Charts Section */}
-        <div className="charts-section">
-          <div className="chart-container">
-            <div className="chart-header">
-              <h3>Artwork Views & Sales Trends</h3>
-              <span className="chart-icon">📈</span>
-            </div>
-            <div className="chart-placeholder">
-              <div className="chart-mock">
-                <div className="chart-lines">
-                  <div className="line views-line"></div>
-                  <div className="line sales-line"></div>
-                </div>
-                <div className="chart-legend">
-                  <div className="legend-item">
-                    <span className="legend-color views-color"></span>
-                    <span>Views</span>
+        <div className="bg-white rounded shadow-sm p-4 mb-4">
+          <h2 className="fw-bold mb-4 pb-3 border-bottom">Performance Analytics</h2>
+          <div className="row g-4">
+            <div className="col-12 col-sm-6 col-md-3">
+              <div className="card border-0 shadow-sm h-100">
+                <div className="card-body">
+                  <div className="d-flex align-items-center mb-2">
+                    <i className="bi bi-palette-fill text-primary fs-3 me-2"></i>
+                    <h6 className="text-muted mb-0 small">Total Artworks</h6>
                   </div>
-                  <div className="legend-item">
-                    <span className="legend-color sales-color"></span>
-                    <span>Sales</span>
-                  </div>
+                  <h3 className="fw-bold mb-1">{loading ? <span className="spinner-border spinner-border-sm"></span> : stats.totalArtworks}</h3>
+                  <p className="text-muted small mb-0">Currently listed for sale</p>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="chart-container">
-            <div className="chart-header">
-              <h3>Sales by Category</h3>
-              <span className="chart-icon">📊</span>
-            </div>
-            <div className="chart-placeholder">
-              <div className="chart-mock">
-                <div className="bar-chart">
-                  <div className="bar abstract-bar"></div>
-                  <div className="bar portrait-bar"></div>
-                  <div className="bar sculpture-bar"></div>
-                  <div className="bar digital-bar"></div>
+            <div className="col-12 col-sm-6 col-md-3">
+              <div className="card border-0 shadow-sm h-100">
+                <div className="card-body">
+                  <div className="d-flex align-items-center mb-2">
+                    <i className="bi bi-currency-dollar text-success fs-3 me-2"></i>
+                    <h6 className="text-muted mb-0 small">Total Sales</h6>
+                  </div>
+                  <h3 className="fw-bold mb-1 text-success">${loading ? <span className="spinner-border spinner-border-sm"></span> : stats.totalRevenue.toLocaleString()}</h3>
+                  <p className="text-muted small mb-0">+{Math.floor((stats.totalSales / Math.max(1, stats.totalArtworks)) * 100)}% from last month</p>
                 </div>
-                <div className="chart-legend">
-                  <div className="legend-item">
-                    <span className="legend-color sales-color"></span>
-                    <span>Sales Value</span>
+              </div>
+            </div>
+
+            <div className="col-12 col-sm-6 col-md-3">
+              <div className="card border-0 shadow-sm h-100">
+                <div className="card-body">
+                  <div className="d-flex align-items-center mb-2">
+                    <i className="bi bi-currency-dollar text-info fs-3 me-2"></i>
+                    <h6 className="text-muted mb-0 small">Average Artwork Price</h6>
                   </div>
-                  <div className="legend-item">
-                    <span className="legend-color count-color"></span>
-                    <span>Artworks Count</span>
+                  <h3 className="fw-bold mb-1">${loading ? <span className="spinner-border spinner-border-sm"></span> : stats.averagePrice.toLocaleString()}</h3>
+                  <p className="text-muted small mb-0">Stable over the last quarter</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="col-12 col-sm-6 col-md-3">
+              <div className="card border-0 shadow-sm h-100">
+                <div className="card-body">
+                  <div className="d-flex align-items-center mb-2">
+                    <i className="bi bi-eye-fill text-warning fs-3 me-2"></i>
+                    <h6 className="text-muted mb-0 small">Artwork Views</h6>
                   </div>
+                  <h3 className="fw-bold mb-1">{loading ? <span className="spinner-border spinner-border-sm"></span> : stats.totalViews.toLocaleString()}</h3>
+                  <p className="text-muted small mb-0">+12% from last month</p>
                 </div>
               </div>
             </div>
@@ -191,61 +167,78 @@ const InventoryPage: React.FC = () => {
         </div>
 
         {/* Your Artworks Section */}
-        <div className="artworks-section">
-          <h2>Your Artworks</h2>
+        <div className="bg-white rounded shadow-sm p-4">
+          <h2 className="fw-bold mb-4 pb-3 border-bottom">Your Artworks</h2>
           
           {loading ? (
-            <div className="loading-container">
-              <div className="spinner"></div>
-              <p>Loading artworks...</p>
+            <div className="text-center py-5">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <p className="mt-3 text-muted">Loading artworks...</p>
             </div>
           ) : error ? (
-            <div className="error-container">
-              <div className="error-icon">⚠️</div>
-              <p>{error}</p>
+            <div className="text-center py-5">
+              <div className="alert alert-danger">
+                <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                {error}
+              </div>
             </div>
           ) : artworks.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-icon">🎨</div>
-              <h3>No artworks found</h3>
-              <p>Start by uploading your first artwork to get started.</p>
-              <button className="upload-first-btn" onClick={handleUploadNew}>
+            <div className="text-center py-5">
+              <i className="bi bi-palette display-1 text-muted opacity-50"></i>
+              <h3 className="fw-bold mb-2 mt-3">No artworks found</h3>
+              <p className="text-muted mb-4">Start by uploading your first artwork to get started.</p>
+              <button className="btn btn-primary btn-lg shadow-sm fw-semibold" onClick={handleUploadNew}>
+                <i className="bi bi-cloud-upload-fill me-2"></i>
                 Upload Your First Artwork
               </button>
             </div>
           ) : (
-            <div className="artworks-grid">
+            <div className="row g-4">
               {artworks.map((artwork) => (
-                <div key={artwork._id} className="artwork-card">
-                  <div className="artwork-image-container">
-                    <img
-                      src={artwork.images?.[0]?.url || 'https://via.placeholder.com/300x200/CCCCCC/FFFFFF?text=No+Image'}
-                      alt={artwork.title || 'Artwork'}
-                      className="artwork-image"
-                    />
-                  </div>
-                  
-                  <div className="artwork-info">
-                    <h3 className="artwork-title">{artwork.title || 'Untitled'}</h3>
-                    <p className="artist-name">{artwork.artist?.name || 'Unknown Artist'}</p>
-                    <div className="artwork-price">${artwork.price?.toLocaleString() || '0'}</div>
-                  </div>
-
-                  <div className="artwork-actions">
-                    <button 
-                      className="edit-btn"
-                      onClick={() => handleEditArtwork(artwork._id)}
-                    >
-                      <span className="action-icon">✏️</span>
-                      Edit
-                    </button>
-                    <button 
-                      className="delete-btn"
-                      onClick={() => handleDeleteArtwork(artwork._id)}
-                    >
-                      <span className="action-icon">🗑️</span>
-                      Delete
-                    </button>
+                <div key={artwork._id} className="col-12 col-sm-6 col-md-4 col-lg-3">
+                  <div className="card border-0 shadow-sm h-100">
+                    <div className="position-relative" style={{ height: '250px', overflow: 'hidden' }}>
+                      <img
+                        src={artwork.images?.[0]?.url || 'https://via.placeholder.com/300x250/CCCCCC/FFFFFF?text=No+Image'}
+                        alt={artwork.title || 'Artwork'}
+                        className="w-100 h-100"
+                        style={{ objectFit: 'cover' }}
+                      />
+                      {artwork.status && (
+                        <span className={`badge position-absolute top-0 end-0 m-2 ${
+                          artwork.status === 'sold' ? 'bg-danger' : 
+                          artwork.status === 'available' ? 'bg-success' : 
+                          'bg-warning'
+                        }`}>
+                          {artwork.status}
+                        </span>
+                      )}
+                    </div>
+                    
+                    <div className="card-body">
+                      <h5 className="card-title fw-bold mb-2">{artwork.title || 'Untitled'}</h5>
+                      <p className="text-muted small mb-2">{artwork.medium || 'Unknown Medium'}</p>
+                      <p className="text-primary fw-bold fs-5 mb-3">${artwork.price?.toLocaleString() || '0'}</p>
+                      
+                      <div className="d-flex gap-2">
+                        <button 
+                          className="btn btn-outline-secondary btn-sm flex-grow-1"
+                          onClick={() => handleEditArtwork(artwork._id)}
+                        >
+                          <i className="bi bi-pencil me-1"></i>
+                          Edit
+                        </button>
+                        <button 
+                          className="btn btn-outline-danger btn-sm flex-grow-1"
+                          onClick={() => handleDeleteArtwork(artwork._id)}
+                        >
+                          <i className="bi bi-trash me-1"></i>
+                          Delete
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}

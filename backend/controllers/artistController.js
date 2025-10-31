@@ -3,13 +3,19 @@
 // controllers/artistController.js
 // ============================================
 const artistService = require('../services/artistService');
+const ArtistProfile = require('../models/ArtistProfile');
 
 exports.createProfile = async (req, res, next) => {
   try {
+    // Check if profile exists first
+    const existingProfile = await ArtistProfile.findOne({ userId: req.user.id });
+    
     const profile = await artistService.createProfile(req.user.id, req.body);
-    res.status(201).json({
+    
+    const message = existingProfile ? 'Artist profile updated successfully' : 'Artist profile created successfully';
+    res.status(existingProfile ? 200 : 201).json({
       success: true,
-      message: 'Artist profile created successfully',
+      message,
       data: profile
     });
   } catch (error) {
@@ -76,6 +82,34 @@ exports.getStats = async (req, res, next) => {
     res.status(200).json({
       success: true,
       data: stats
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.uploadProfilePicture = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No image file provided'
+      });
+    }
+
+    // Return the URL path relative to the frontend public directory
+    // The file is saved in frontend/public/userProfile, so the URL is /userProfile/filename
+    const imageUrl = `/userProfile/${req.file.filename}`;
+    
+    res.status(200).json({
+      success: true,
+      message: 'Profile picture uploaded successfully',
+      data: {
+        url: imageUrl,
+        filename: req.file.filename,
+        originalname: req.file.originalname,
+        size: req.file.size
+      }
     });
   } catch (error) {
     next(error);

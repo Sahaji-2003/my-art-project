@@ -63,23 +63,7 @@
  
   
  
- /* Navbar */
- 
- .navbar {
- 
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
- 
-  padding: 1rem 0;
- 
-  position: sticky;
- 
-  top: 0;
- 
-  z-index: 1000;
- 
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
- 
- }
+ /* Navbar - Removed global styles as we use Bootstrap classes now */
  
  
   
@@ -7553,4 +7537,70 @@
   .inventory-header h1 {
     font-size: 1.25rem;
   }
+}
+
+/* ============================================
+   PROFILE SIDEBAR STYLES
+   ============================================ */
+
+.profile-sidebar {
+  position: sticky;
+  top: 80px;
+}
+
+.profile-sidebar .list-group-item {
+  border-left: none;
+  border-right: none;
+  padding: 1rem;
+  transition: all 0.2s ease;
+}
+
+.profile-sidebar .list-group-item:first-child {
+  border-top: none;
+}
+
+.profile-sidebar .list-group-item:last-child {
+  border-bottom: none;
+}
+
+.profile-sidebar .list-group-item:hover {
+  background-color: #f8f9fa;
+}
+
+.profile-sidebar .list-group-item.active {
+  background-color: rgba(74, 144, 226, 0.1);
+  border-left: 3px solid #4A90E2;
+  color: #4A90E2;
+}
+
+.profile-sidebar .list-group-item.active i {
+  color: #4A90E2;
+}
+
+.profile-sidebar .list-group-item i {
+  color: #6c757d;
+  transition: color 0.2s ease;
+}
+
+.profile-sidebar .list-group-item:hover i {
+  color: #4A90E2;
+}
+
+/* Custom scrollbar for sidebar */
+.profile-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.profile-sidebar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.profile-sidebar::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+.profile-sidebar::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }

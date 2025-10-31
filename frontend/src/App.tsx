@@ -18,6 +18,9 @@ import SearchPage from './pages/SearchPage';
 import PurchasePage from './pages/PurchasePage';
 import CommunityPage from './pages/CommunityPage';
 import InventoryPage from './pages/InventoryPage';
+import MyPurchasesPage from './pages/MyPurchasesPage';
+import PasswordPage from './pages/PasswordPage';
+import SettingsPage from './pages/SettingsPage';
 
 import Header from './components/Header';
 
@@ -257,6 +260,66 @@ function App() {
              <AuthenticatedLayout>
 
                <ArtistProfilePage />
+
+             </AuthenticatedLayout>
+
+           </ProtectedRoute>
+
+         } 
+
+       />
+
+       <Route 
+
+         path="/my-purchases" 
+
+         element={
+
+           <ProtectedRoute>
+
+             <AuthenticatedLayout>
+
+               <MyPurchasesPage />
+
+             </AuthenticatedLayout>
+
+           </ProtectedRoute>
+
+         } 
+
+       />
+
+       <Route 
+
+         path="/password" 
+
+         element={
+
+           <ProtectedRoute>
+
+             <AuthenticatedLayout>
+
+               <PasswordPage />
+
+             </AuthenticatedLayout>
+
+           </ProtectedRoute>
+
+         } 
+
+       />
+
+       <Route 
+
+         path="/settings" 
+
+         element={
+
+           <ProtectedRoute>
+
+             <AuthenticatedLayout>
+
+               <SettingsPage />
 
              </AuthenticatedLayout>
 

@@ -2,10 +2,14 @@
 // src/pages/CommunityPage.tsx
 // ============================================
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { communityAPI, type Post } from '../services/community';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 import '../styles/App.css';
 
 const CommunityPage: React.FC = () => {
+  const navigate = useNavigate();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
@@ -23,327 +27,180 @@ const CommunityPage: React.FC = () => {
     } catch (err: any) {
       console.error('Error fetching posts:', err);
       setError('Failed to load community posts. Please try again.');
+      setPosts([]);
     } finally {
       setLoading(false);
     }
   };
 
   const handleStartDiscussion = () => {
-    // Navigate to create post page or open modal
+    // TODO: Navigate to create post page or open modal
     console.log('Start discussion clicked');
   };
 
   const handleNewThread = () => {
-    // Navigate to create post page or open modal
+    // TODO: Navigate to create post page or open modal
     console.log('New thread clicked');
   };
 
-  const handleViewDetails = (postId: string) => {
-    // Navigate to post details page
+  const handlePostClick = (postId: string) => {
+    // TODO: Navigate to post details page
     console.log('View details for post:', postId);
   };
 
   return (
-    <div className="community-page">
-      <div className="community-container">
+    <div className="community-page bg-light min-vh-100 py-4">
+      <div className="community-container container">
         {/* Welcome Section */}
-        <div className="welcome-section">
-          <div className="welcome-content">
-            <h1>Welcome to the Arthub Community!</h1>
-            <p>
-              Connect, share, and grow with fellow artists and art enthusiasts. 
-              Find collaborations, discover resources, and get marketing insights.
-            </p>
-            <button className="start-discussion-btn" onClick={handleStartDiscussion}>
-              <span className="discussion-icon">💬</span>
-              Start a Discussion
-            </button>
-          </div>
-          <div className="welcome-illustration">
-            <div className="artists-illustration">
-              <div className="artist-figure artist-1">🎨</div>
-              <div className="artist-figure artist-2">🖌️</div>
-              <div className="artist-figure artist-3">📸</div>
-              <div className="artist-figure artist-4">✏️</div>
-              <div className="art-supplies">🖼️</div>
-              <div className="art-supplies">🎭</div>
+        <div className="welcome-section rounded-4 shadow-sm border-0 overflow-hidden mb-4">
+          <div className="row g-4 align-items-center">
+            <div className="col-lg-7 welcome-content">
+              <h1 className="display-4 fw-bold mb-3">Welcome to the Arthub Community!</h1>
+              <p className="lead text-muted mb-4">
+                Connect, share, and grow with fellow artists and art enthusiasts. 
+                Find collaborations, discover resources, and get marketing insights.
+              </p>
+              <button className="btn btn-primary btn-lg px-4 py-2 rounded-pill shadow-sm fw-semibold" onClick={handleStartDiscussion}>
+                <i className="bi bi-chat-dots-fill me-2"></i>
+                Start a Discussion
+              </button>
+            </div>
+            <div className="col-lg-5 welcome-illustration d-none d-lg-block">
+              <div className="artists-illustration text-center">
+                <div className="display-1">🎨</div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="community-content">
+        <div className="community-content row g-4">
           {/* Main Content */}
-          <div className="main-content">
+          <div className="main-content col-lg-8">
             {/* Latest Discussion Threads */}
-            <div className="discussion-section">
-              <div className="section-header">
-                <h2>Latest Discussion Threads</h2>
-                <p>Join the conversation on various topics.</p>
-                <button className="new-thread-btn" onClick={handleNewThread}>
-                  <span className="thread-icon">💬</span>
+            <div className="discussion-section bg-white rounded-4 shadow-sm p-4">
+              <div className="section-header d-flex justify-content-between align-items-start mb-4">
+                <div>
+                  <h2 className="fw-bold mb-2">Latest Discussion Threads</h2>
+                  <p className="text-muted mb-0">Join the conversation on various topics.</p>
+                </div>
+                <button className="btn btn-outline-primary btn-sm rounded-pill" onClick={handleNewThread}>
+                  <i className="bi bi-plus-circle me-2"></i>
                   New Thread
                 </button>
               </div>
 
               {loading ? (
-                <div className="loading-container">
-                  <div className="spinner"></div>
-                  <p>Loading discussions...</p>
+                <div className="loading-container text-center py-5">
+                  <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </div>
+                  <p className="mt-3 text-muted">Loading discussions...</p>
                 </div>
               ) : error ? (
-                <div className="error-container">
-                  <div className="error-icon">⚠️</div>
-                  <p>{error}</p>
+                <div className="error-container text-center py-5">
+                  <div className="alert alert-danger">
+                    <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                    {error}
+                  </div>
+                </div>
+              ) : posts.length > 0 ? (
+                <div className="discussion-list">
+                  {posts.map((post) => (
+                    <div 
+                      key={post._id} 
+                      className="discussion-item p-3 bg-light rounded shadow-sm mb-3 cursor-pointer"
+                      onClick={() => handlePostClick(post._id)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <div className="d-flex gap-3">
+                        <div className="discussion-icon text-primary">
+                          <i className="bi bi-chat-dots fs-4"></i>
+                        </div>
+                        <div className="discussion-content flex-grow-1">
+                          <h3 className="fw-semibold mb-2">{post.title}</h3>
+                          <p className="text-muted small mb-2">{post.content.substring(0, 150)}...</p>
+                          <div className="discussion-meta d-flex align-items-center gap-3 flex-wrap">
+                            <span className="author text-primary fw-semibold">
+                              <i className="bi bi-person-circle me-1"></i>
+                              {post.author.name}
+                            </span>
+                            <span className="time text-muted small">
+                              <i className="bi bi-clock me-1"></i>
+                              {new Date(post.createdAt).toLocaleDateString()}
+                            </span>
+                            <span className="badge bg-secondary">
+                              <i className="bi bi-heart-fill me-1"></i>
+                              {post.likes || 0}
+                            </span>
+                            <span className="badge bg-info">
+                              <i className="bi bi-chat-dots me-1"></i>
+                              {post.comments || 0}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ) : (
-                <div className="discussion-list">
-                  <div className="discussion-item">
-                    <div className="discussion-icon">💬</div>
-                    <div className="discussion-content">
-                      <h3>Tips for selling art online in 2024?</h3>
-                      <div className="discussion-meta">
-                        <span className="author">by ArtfulCreator</span>
-                        <span className="time">2 hours ago</span>
-                        <span className="category">Marketing</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="discussion-item">
-                    <div className="discussion-icon">💬</div>
-                    <div className="discussion-content">
-                      <h3>Best practices for protecting your artwork copyrights</h3>
-                      <div className="discussion-meta">
-                        <span className="author">by LegalCanvas</span>
-                        <span className="time">yesterday</span>
-                        <span className="category">Legal</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="discussion-item">
-                    <div className="discussion-icon">💬</div>
-                    <div className="discussion-content">
-                      <h3>Sharing experience with digital painting tools</h3>
-                      <div className="discussion-meta">
-                        <span className="author">by PixelBrush</span>
-                        <span className="time">3 days ago</span>
-                        <span className="category">Technique</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="discussion-item">
-                    <div className="discussion-icon">💬</div>
-                    <div className="discussion-content">
-                      <h3>Finding inspiration in everyday life</h3>
-                      <div className="discussion-meta">
-                        <span className="author">by DailyMuse</span>
-                        <span className="time">1 week ago</span>
-                        <span className="category">Inspiration</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="discussion-item">
-                    <div className="discussion-icon">💬</div>
-                    <div className="discussion-content">
-                      <h3>Feedback wanted: My latest abstract series</h3>
-                      <div className="discussion-meta">
-                        <span className="author">by ColorFlow</span>
-                        <span className="time">2 weeks ago</span>
-                        <span className="category">Critique</span>
-                      </div>
-                    </div>
-                  </div>
+                <div className="alert alert-info text-center py-4">
+                  <i className="bi bi-info-circle me-2"></i>
+                  No discussions available. Start the first discussion!
                 </div>
               )}
             </div>
 
-            {/* Collaboration Opportunities */}
-            <div className="collaboration-section">
-              <div className="section-header">
-                <h2>Collaboration Opportunities</h2>
-                <p>Find artists for your next project or offer your skills.</p>
-              </div>
-
-              <div className="collaboration-grid">
-                <div className="collaboration-card">
-                  <h3>Illustrator needed for children's book project</h3>
-                  <p>Looking for a talented illustrator to bring whimsical characters to life in a children's book series.</p>
-                  <div className="skill-tag">Illustration</div>
-                  <a href="#" className="view-details-link">
-                    View Details
-                    <span className="share-icon">↗</span>
-                  </a>
-                </div>
-
-                <div className="collaboration-card">
-                  <h3>Photographer for urban art documentation</h3>
-                  <p>Seeking a photographer to capture mural art and street installations for a gallery exhibition.</p>
-                  <div className="skill-tag">Photography</div>
-                  <a href="#" className="view-details-link">
-                    View Details
-                    <span className="share-icon">↗</span>
-                  </a>
-                </div>
-
-                <div className="collaboration-card">
-                  <h3>Graphic designer for art event branding</h3>
-                  <p>Creative designer to help with logos, flyers, and digital marketing materials for upcoming art events.</p>
-                  <div className="skill-tag">Graphic Design</div>
-                  <a href="#" className="view-details-link">
-                    View Details
-                    <span className="share-icon">↗</span>
-                  </a>
-                </div>
-
-                <div className="collaboration-card">
-                  <h3>Videographer for artist studio tour</h3>
-                  <p>Create an engaging video tour of my studio space for social media and portfolio purposes.</p>
-                  <div className="skill-tag">Videography</div>
-                  <a href="#" className="view-details-link">
-                    View Details
-                    <span className="share-icon">↗</span>
-                  </a>
-                </div>
-
-                <div className="collaboration-card">
-                  <h3>Web developer to build artist portfolio site</h3>
-                  <p>Seeking a developer to build a modern, responsive portfolio website for showcasing artwork.</p>
-                  <div className="skill-tag">Web Development</div>
-                  <a href="#" className="view-details-link">
-                    View Details
-                    <span className="share-icon">↗</span>
-                  </a>
-                </div>
-
-                <div className="collaboration-card">
-                  <h3>3D Artist for virtual gallery experience</h3>
-                  <p>Collaborate on creating an immersive 3D virtual gallery space for online art exhibitions.</p>
-                  <div className="skill-tag">3D Art</div>
-                  <a href="#" className="view-details-link">
-                    View Details
-                    <span className="share-icon">↗</span>
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            {/* Curated Resources */}
-            <div className="resources-section">
-              <div className="section-header">
-                <h2>Curated Resources</h2>
-                <p>Tools, guides, and inspiration for your creative journey.</p>
-              </div>
-
-              <div className="resources-grid">
-                <div className="resource-item">
-                  <span className="resource-icon">🔖</span>
-                  <h3>Top 10 Online Art Marketplaces</h3>
-                  <a href="#" className="read-more-link">Read more →</a>
-                </div>
-
-                <div className="resource-item">
-                  <span className="resource-icon">🔖</span>
-                  <h3>Beginner's Guide to Art Prints</h3>
-                  <a href="#" className="read-more-link">Read more →</a>
-                </div>
-
-                <div className="resource-item">
-                  <span className="resource-icon">🔖</span>
-                  <h3>Understanding Color Theory for Digital Artists</h3>
-                  <a href="#" className="read-more-link">Read more →</a>
-                </div>
-
-                <div className="resource-item">
-                  <span className="resource-icon">🔖</span>
-                  <h3>Legal Checklist for Freelance Artists</h3>
-                  <a href="#" className="read-more-link">Read more →</a>
-                </div>
-              </div>
-            </div>
-
-            {/* Marketing Insights */}
-            <div className="marketing-section">
-              <div className="section-header">
-                <h2>Marketing Insights</h2>
-                <p>Tips to help your art reach a wider audience.</p>
-              </div>
-
-              <div className="marketing-cards">
-                <div className="marketing-card">
-                  <div className="card-icon">💡</div>
-                  <h3>Leveraging Instagram for Art Sales</h3>
-                  <p>Discover strategies to showcase your art effectively on social media and reach potential buyers.</p>
-                  <a href="#" className="read-more-link">
-                    Read More
-                    <span className="arrow-icon">←</span>
-                  </a>
-                </div>
-
-                <div className="marketing-card">
-                  <div className="card-icon">💡</div>
-                  <h3>The Power of Email Newsletters for Artists</h3>
-                  <p>Build a loyal audience and drive sales with compelling email campaigns.</p>
-                  <a href="#" className="read-more-link">
-                    Read More
-                    <span className="arrow-icon">←</span>
-                  </a>
-                </div>
-
-                <div className="marketing-card">
-                  <div className="card-icon">💡</div>
-                  <h3>SEO Basics for Artist Websites</h3>
-                  <p>Improve your visibility on search engines so collectors can easily find your work.</p>
-                  <a href="#" className="read-more-link">
-                    Read More
-                    <span className="arrow-icon">←</span>
-                  </a>
-                </div>
+            {/* Additional Community Features - These can be added via API in future */}
+            <div className="mt-4 text-center">
+              <div className="alert alert-info">
+                <i className="bi bi-info-circle me-2"></i>
+                More community features coming soon! Stay tuned for collaboration opportunities and resources.
               </div>
             </div>
           </div>
 
           {/* Right Sidebar */}
-          <div className="sidebar">
-            {/* Recent Notifications */}
-            <div className="notifications-section">
-              <h3>Recent Notifications</h3>
-              <p>Stay updated on community activity.</p>
-
-              <div className="notifications-list">
-                <div className="notification-item">
-                  <span className="notification-icon">🔔</span>
-                  <div className="notification-content">
-                    <p>New reply in 'Tips for selling art online in 2024'.</p>
-                    <span className="notification-time">5 minutes ago</span>
-                  </div>
+          <div className="sidebar col-lg-4">
+            {/* Community Stats */}
+            <div className="notifications-section bg-white rounded-4 shadow-sm p-4 mb-4">
+              <h3 className="fw-bold mb-3 pb-2 border-bottom">Community Stats</h3>
+              <div className="d-flex flex-column gap-3">
+                <div className="d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                  <span className="text-muted">Total Posts</span>
+                  <span className="fw-bold text-primary">{posts.length}</span>
                 </div>
-
-                <div className="notification-item">
-                  <span className="notification-icon">🔔</span>
-                  <div className="notification-content">
-                    <p>Your collaboration request for 'Illustrator needed' received a new inquiry.</p>
-                    <span className="notification-time">30 minutes ago</span>
-                  </div>
+                <div className="d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                  <span className="text-muted">Active Members</span>
+                  <span className="fw-bold text-success">Growing</span>
                 </div>
-
-                <div className="notification-item">
-                  <span className="notification-icon">🔔</span>
-                  <div className="notification-content">
-                    <p>ArtfulCreator mentioned you in a discussion.</p>
-                    <span className="notification-time">1 hour ago</span>
-                  </div>
+                <div className="d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                  <span className="text-muted">This Week</span>
+                  <span className="fw-bold text-info">+{posts.filter(p => {
+                    const postDate = new Date(p.createdAt);
+                    const weekAgo = new Date();
+                    weekAgo.setDate(weekAgo.getDate() - 7);
+                    return postDate >= weekAgo;
+                  }).length}</span>
                 </div>
+              </div>
+            </div>
 
-                <div className="notification-item">
-                  <span className="notification-icon">🔔</span>
-                  <div className="notification-content">
-                    <p>Community event 'Virtual Studio Tour' starts in 2 hours!</p>
-                    <span className="notification-time">2 hours ago</span>
-                  </div>
-                </div>
+            {/* Quick Actions */}
+            <div className="notifications-section bg-white rounded-4 shadow-sm p-4">
+              <h3 className="fw-bold mb-3 pb-2 border-bottom">Quick Actions</h3>
+              <div className="d-grid gap-2">
+                <button className="btn btn-primary btn-sm rounded-pill" onClick={handleStartDiscussion}>
+                  <i className="bi bi-plus-circle me-2"></i>
+                  Start Discussion
+                </button>
+                <button className="btn btn-outline-secondary btn-sm rounded-pill" onClick={() => navigate('/search')}>
+                  <i className="bi bi-search me-2"></i>
+                  Browse Artworks
+                </button>
+                <button className="btn btn-outline-secondary btn-sm rounded-pill" onClick={() => navigate('/community')}>
+                  <i className="bi bi-people me-2"></i>
+                  Find Artists
+                </button>
               </div>
             </div>
           </div>

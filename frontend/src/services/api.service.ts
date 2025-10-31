@@ -169,6 +169,18 @@ export const artistAPI = {
     return response.data;
   },
 
+  uploadProfilePicture: async (file: File): Promise<ApiResponse<{ url: string }>> => {
+    const formData = new FormData();
+    formData.append('profilePicture', file);
+    
+    const response = await apiClient.post('/artists/upload-profile-picture', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
   getAllArtists: async (page = 1, limit = 10): Promise<ApiResponse<any[]>> => {
     const response = await apiClient.get(`/artists?page=${page}&limit=${limit}`);
     return response.data;
