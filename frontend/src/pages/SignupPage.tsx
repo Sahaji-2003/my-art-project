@@ -4,6 +4,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { loginAPI, formValidation } from '../services/login';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 import '../styles/App.css';
 
 const SignupPage: React.FC = () => {
@@ -14,6 +15,7 @@ const SignupPage: React.FC = () => {
     password: '',
   });
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<{ name?: string; email?: string; password?: string; general?: string }>({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,12 +49,9 @@ const SignupPage: React.FC = () => {
     setErrors({});
 
     try {
-      const response = await loginAPI.signup(formData);
+      await loginAPI.signup(formData);
       
-      // Save authentication data
-      loginAPI.saveAuthData(response.data.token, response.data.user);
-
-      // Navigate to dashboard
+      // Navigate to login page after successful signup
       navigate('/login');
     } catch (err: any) {
       setErrors({
@@ -118,15 +117,26 @@ const SignupPage: React.FC = () => {
 
           <div className="form-group">
             <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              disabled={loading}
-              autoComplete="new-password"
-            />
+            <div className="password-input-wrapper">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                disabled={loading}
+                autoComplete="new-password"
+              />
+              <button
+                type="button"
+                className="password-toggle-btn"
+                onClick={() => setShowPassword(!showPassword)}
+                disabled={loading}
+                tabIndex={-1}
+              >
+                <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'}`}></i>
+              </button>
+            </div>
             {errors.password && (
               <div className="field-error">{errors.password}</div>
             )}

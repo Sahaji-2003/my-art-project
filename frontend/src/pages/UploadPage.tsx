@@ -193,6 +193,23 @@ const UploadPage: React.FC = () => {
       );
 
       // Prepare artwork data matching backend model structure
+      const dimensions: any = {
+        unit: formData.dimensions.unit as 'cm' | 'inch' | 'mm' | 'm'
+      };
+      
+      // Only include dimension values if they exist and are valid numbers
+      if (formData.dimensions.width && !isNaN(parseFloat(formData.dimensions.width))) {
+        dimensions.width = parseFloat(formData.dimensions.width);
+      }
+      if (formData.dimensions.height && !isNaN(parseFloat(formData.dimensions.height))) {
+        dimensions.height = parseFloat(formData.dimensions.height);
+      }
+      if (formData.dimensions.depth && !isNaN(parseFloat(formData.dimensions.depth))) {
+        dimensions.depth = parseFloat(formData.dimensions.depth);
+      }
+
+      const tagsArray = formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+
       const artworkData: CreateArtworkData = {
         title: formData.title.trim(),
         description: formData.description.trim(),
@@ -200,13 +217,8 @@ const UploadPage: React.FC = () => {
         medium: formData.medium as CreateArtworkData['medium'],
         style: formData.style as CreateArtworkData['style'],
         images: uploadedImages,
-        dimensions: {
-          width: parseFloat(formData.dimensions.width) || undefined,
-          height: parseFloat(formData.dimensions.height) || undefined,
-          depth: parseFloat(formData.dimensions.depth) || undefined,
-          unit: formData.dimensions.unit as 'cm' | 'inch' | 'mm' | 'm'
-        },
-        tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+        dimensions: Object.keys(dimensions).length > 1 ? dimensions : undefined,
+        tags: tagsArray.length > 0 ? tagsArray : undefined,
         status: 'available'
       };
 

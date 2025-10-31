@@ -5,7 +5,7 @@
 import axios from 'axios';
 import type { AxiosResponse, AxiosError } from 'axios';
 
-const BASE_URL = 'http://localhost:3000/api/v1';
+const BASE_URL = 'http://localhost:3001/api/v1';
 
 // Create axios instance for login service
 const loginClient = axios.create({

@@ -145,7 +145,6 @@ const SearchPage: React.FC = () => {
         {/* Main Search Bar */}
         <form className="main-search-form" onSubmit={handleSearch}>
           <div className="search-input-container">
-            <span className="search-icon">🔍</span>
             <input
               type="text"
               placeholder="Search artworks, artists, styles..."

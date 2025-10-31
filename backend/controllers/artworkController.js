@@ -6,6 +6,11 @@ const artworkService = require('../services/artworkService');
 
 exports.createArtwork = async (req, res, next) => {
   try {
+    console.log('Creating artwork with data:', {
+      artistId: req.user.id,
+      artworkData: JSON.stringify(req.body, null, 2)
+    });
+    
     const artwork = await artworkService.createArtwork(req.user.id, req.body);
     res.status(201).json({
       success: true,
@@ -13,6 +18,7 @@ exports.createArtwork = async (req, res, next) => {
       data: artwork
     });
   } catch (error) {
+    console.error('Error in createArtwork controller:', error);
     next(error);
   }
 };
@@ -92,16 +98,17 @@ exports.uploadImage = async (req, res, next) => {
       });
     }
 
-    // For now, we'll return a mock URL since we don't have file storage set up
-    // In a real application, you would upload to AWS S3, Cloudinary, or similar
-    const imageUrl = `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=Uploaded+Image`;
+    // Return the URL path relative to the frontend public directory
+    // The file is saved in frontend/public/assets/images, so the URL is /assets/images/filename
+    const imageUrl = `/assets/images/${req.file.filename}`;
     
     res.status(200).json({
       success: true,
       message: 'Image uploaded successfully',
       data: {
         url: imageUrl,
-        filename: req.file.originalname,
+        filename: req.file.filename,
+        originalname: req.file.originalname,
         size: req.file.size
       }
     });

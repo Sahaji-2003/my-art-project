@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import { artistAPI, artworkAPI, getUser } from '../services/api.service';
+import { artistAPI, getUser } from '../services/api.service';
+
+import 'bootstrap/dist/css/bootstrap.min.css';
+
+import 'bootstrap-icons/font/bootstrap-icons.css';
 
 import '../styles/App.css';
 
@@ -28,11 +32,11 @@ interface Stats {
 
 interface Activity {
 
- icon: string;
-
  text: string;
 
  time: string;
+
+ iconClass: string;
 
 }
 
@@ -63,13 +67,13 @@ const DashboardPage: React.FC = () => {
 
  const [activities] = useState<Activity[]>([
 
-   { icon: '🎨', text: "Artist Emily Chen uploaded 'Cityscape Dreams'.", time: '2 hours ago' },
+   { iconClass: 'bi-palette-fill', text: "Artist Emily Chen uploaded 'Cityscape Dreams'.", time: '2 hours ago' },
 
-   { icon: '🛒', text: "A buyer purchased 'Abstract Harmony' by David Lee.", time: 'Yesterday' },
+   { iconClass: 'bi-cart-check-fill', text: "A buyer purchased 'Abstract Harmony' by David Lee.", time: 'Yesterday' },
 
-   { icon: '💬', text: "Sarah Miller posted in 'Marketing Tips for Artists'.", time: '2 days ago' },
+   { iconClass: 'bi-chat-dots-fill', text: "Sarah Miller posted in 'Marketing Tips for Artists'.", time: '2 days ago' },
 
-   { icon: '🎉', text: 'Welcome new artist Alex Johnson to Arthub!', time: '3 days ago' }
+   { iconClass: 'bi-balloon-heart-fill', text: 'Welcome new artist Alex Johnson to Arthub!', time: '3 days ago' }
 
  ]);
 
@@ -154,17 +158,17 @@ const DashboardPage: React.FC = () => {
 
  return (
 
-   <>
+  <>
 
-     <div className="dashboard-page">
+    <div className="dashboard-page py-4 py-md-5">
 
-       <div className="dashboard-container">
+      <div className="dashboard-container container-fluid px-3 px-md-4 px-lg-5">
 
-         {/* Hero Section */}
+        {/* Hero Section */}
 
-         <section className="dashboard-hero">
+        <section className="dashboard-hero mb-4 mb-md-5">
 
-           <div className="hero-content-dashboard">
+          <div className="hero-content-dashboard row g-4">
 
              <h1>Discover, Create, Connect: Your Art Journey Starts Here.</h1>
 
@@ -178,11 +182,11 @@ const DashboardPage: React.FC = () => {
 
              </p>
 
-             <button className="btn btn-primary" onClick={() => navigate('/upload')}>
+            <button className="btn btn-primary" type="button" onClick={() => navigate('/upload')}>
 
-               Start Creating Now
+              Start Creating Now
 
-             </button>
+            </button>
 
            </div>
 
@@ -221,15 +225,15 @@ const DashboardPage: React.FC = () => {
 
          {/* Platform Overview */}
 
-         <section className="platform-overview">
+         <section className="platform-overview mb-4 mb-md-5">
 
-           <h2>Your Platform Overview</h2>
+           <h2 className="mb-4 mb-md-5">Your Platform Overview</h2>
 
-           <div className="stats-grid">
+          <div className="stats-grid row gx-3 gx-md-4 gx-lg-5 gy-4">
 
-             <div className="stat-card">
+            <div className="stat-card col-12 col-sm-6 col-md-6 col-lg-3 mb-3 mb-lg-0 d-flex justify-content-center">
 
-               <div className="stat-icon">🎨</div>
+               <div className="stat-icon"><i className="bi bi-palette-fill"></i></div>
 
                <div className="stat-content">
 
@@ -241,13 +245,13 @@ const DashboardPage: React.FC = () => {
 
                </div>
 
-             </div>
+            </div>
 
-             
+            
 
-             <div className="stat-card">
+             <div className="stat-card col-12 col-sm-6 col-md-6 col-lg-3 mb-3 mb-lg-0 d-flex justify-content-center">
 
-               <div className="stat-icon">💰</div>
+               <div className="stat-icon"><i className="bi bi-cash-stack"></i></div>
 
                <div className="stat-content">
 
@@ -259,13 +263,13 @@ const DashboardPage: React.FC = () => {
 
                </div>
 
-             </div>
+            </div>
 
-             
+            
 
-             <div className="stat-card">
+            <div className="stat-card col-12 col-sm-6 col-md-6 col-lg-3 mb-3 mb-lg-0 d-flex justify-content-center">
 
-               <div className="stat-icon">👨‍🎨</div>
+              <div className="stat-icon"><i className="bi bi-person-badge-fill"></i></div>
 
                <div className="stat-content">
 
@@ -277,13 +281,13 @@ const DashboardPage: React.FC = () => {
 
                </div>
 
-             </div>
+            </div>
 
-             
+            
 
-             <div className="stat-card">
+            <div className="stat-card col-12 col-sm-6 col-md-6 col-lg-3 mb-3 mb-lg-0 d-flex justify-content-center">
 
-               <div className="stat-icon">😊</div>
+              <div className="stat-icon"><i className="bi bi-emoji-smile-fill"></i></div>
 
                <div className="stat-content">
 
@@ -306,75 +310,75 @@ const DashboardPage: React.FC = () => {
 
          {/* Quick Access Features */}
 
-         <section className="quick-access">
+         <section className="quick-access mb-4 mb-md-5">
 
-           <h2>Quick Access to Features</h2>
+           <h2 className="mb-4 mb-md-5">Quick Access to Features</h2>
 
-           <div className="features-grid-dashboard">
+          <div className="features-grid-dashboard row gx-4 gx-md-5 gx-lg-6 gy-4">
 
-             <div className="feature-card-dashboard" onClick={() => navigate('/upload')}>
+            <div className="feature-card-dashboard col-12 col-sm-6 col-md-4 col-lg-3" onClick={() => navigate('/upload')} style={{ cursor: 'pointer' }}>
 
-               <div className="feature-icon-dashboard">☁️</div>
+               <div className="feature-icon-dashboard"><i className="bi bi-cloud-upload-fill"></i></div>
 
                <h3>Upload New Artwork</h3>
 
                <p>Showcase your latest creations to a global audience.</p>
 
-             </div>
+            </div>
 
-             
+            
 
-             <div className="feature-card-dashboard" onClick={() => navigate('/artist-profile')}>
+            <div className="feature-card-dashboard col-12 col-sm-6 col-md-4 col-lg-3" onClick={() => navigate('/artist-profile')} style={{ cursor: 'pointer' }}>
 
-               <div className="feature-icon-dashboard">👤</div>
+               <div className="feature-icon-dashboard"><i className="bi bi-person-circle"></i></div>
 
                <h3>Manage Your Profile</h3>
 
                <p>Update your artist bio, portfolio, and contact details.</p>
 
-             </div>
+            </div>
 
-             
+            
 
-             <div className="feature-card-dashboard" onClick={() => navigate('/inventory')}>
+            <div className="feature-card-dashboard col-12 col-sm-6 col-md-4 col-lg-3" onClick={() => navigate('/inventory')} style={{ cursor: 'pointer' }}>
 
-               <div className="feature-icon-dashboard">📋</div>
+               <div className="feature-icon-dashboard"><i className="bi bi-clipboard-check-fill"></i></div>
 
                <h3>Inventory & Sales</h3>
 
                <p>Track your listings, sales, and artwork availability.</p>
 
-             </div>
+            </div>
 
-             
+            
 
-             <div className="feature-card-dashboard" onClick={() => navigate('/community')}>
+            <div className="feature-card-dashboard col-12 col-sm-6 col-md-4 col-lg-3" onClick={() => navigate('/community')} style={{ cursor: 'pointer' }}>
 
-               <div className="feature-icon-dashboard">👥</div>
+               <div className="feature-icon-dashboard"><i className="bi bi-people-fill"></i></div>
 
                <h3>Explore Community</h3>
 
                <p>Connect with fellow artists, share insights, and collaborate.</p>
 
-             </div>
+            </div>
 
-             
+            
 
-             <div className="feature-card-dashboard" onClick={() => navigate('/search')}>
+            <div className="feature-card-dashboard col-12 col-sm-6 col-md-4 col-lg-3" onClick={() => navigate('/search')} style={{ cursor: 'pointer' }}>
 
-               <div className="feature-icon-dashboard">🔍</div>
+               <div className="feature-icon-dashboard"><i className="bi bi-search"></i></div>
 
                <h3>Discover New Art</h3>
 
                <p>Browse a curated selection of unique artworks from various artists.</p>
 
-             </div>
+            </div>
 
-             
+            
 
-             <div className="feature-card-dashboard" onClick={() => navigate('/favorites')}>
+            <div className="feature-card-dashboard col-12 col-sm-6 col-md-4 col-lg-3" onClick={() => navigate('/favorites')} style={{ cursor: 'pointer' }}>
 
-               <div className="feature-icon-dashboard">❤️</div>
+               <div className="feature-icon-dashboard"><i className="bi bi-heart-fill"></i></div>
 
                <h3>Your Favorites</h3>
 
@@ -391,17 +395,17 @@ const DashboardPage: React.FC = () => {
 
          {/* Recent Activity */}
 
-         <section className="recent-activity">
+         <section className="recent-activity mb-4 mb-md-5">
 
-           <h2>Recent Activity</h2>
+           <h2 className="mb-4 mb-md-5">Recent Activity</h2>
 
-           <div className="activity-list">
+          <div className="activity-list list-group gap-3">
 
-             {activities.map((activity, index) => (
+            {activities.map((activity, index) => (
 
-               <div key={index} className="activity-item">
+              <div key={index} className="activity-item list-group-item">
 
-                 <div className="activity-icon">{activity.icon}</div>
+                 <div className="activity-icon"><i className={`bi ${activity.iconClass}`}></i></div>
 
                  <div className="activity-content">
 
@@ -424,7 +428,7 @@ const DashboardPage: React.FC = () => {
 
          {/* CTA Section */}
 
-         <section className="dashboard-cta">
+         <section className="dashboard-cta my-4 my-md-5">
 
            <div className="cta-content-dashboard">
 
@@ -438,11 +442,11 @@ const DashboardPage: React.FC = () => {
 
              </p>
 
-             <button className="btn btn-light" onClick={() => navigate('/search')}>
+            <button className="btn btn-light" type="button" onClick={() => navigate('/search')}>
 
-               Browse Artworks
+              Browse Artworks
 
-             </button>
+            </button>
 
            </div>
 

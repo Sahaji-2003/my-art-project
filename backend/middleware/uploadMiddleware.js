@@ -3,9 +3,29 @@
 // ============================================
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 
-// Configure multer for file uploads
-const storage = multer.memoryStorage(); // Store files in memory for now
+// Path to frontend public assets images directory
+const uploadDir = path.join(__dirname, '../../frontend/public/assets/images');
+
+// Ensure the upload directory exists
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// Configure multer for disk storage
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    // Generate unique filename: timestamp-random-originalname
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = path.extname(file.originalname);
+    const baseName = path.basename(file.originalname, ext).replace(/[^a-z0-9]/gi, '-').toLowerCase();
+    cb(null, `${baseName}-${uniqueSuffix}${ext}`);
+  }
+});
 
 const fileFilter = (req, file, cb) => {
   // Check if file is an image

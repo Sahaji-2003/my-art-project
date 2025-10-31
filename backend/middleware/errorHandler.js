@@ -6,7 +6,13 @@ const errorHandler = (err, req, res, next) => {
     error.message = err.message;
   
     // Log error for debugging
-    console.error(err);
+    console.error('Error Details:', {
+      name: err.name,
+      message: err.message,
+      stack: err.stack,
+      code: err.code,
+      errors: err.errors
+    });
   
     // Mongoose bad ObjectId
     if (err.name === 'CastError') {
@@ -28,7 +34,8 @@ const errorHandler = (err, req, res, next) => {
   
     res.status(error.statusCode || 500).json({
       success: false,
-      error: error.message || 'Server Error'
+      error: error.message || 'Server Error',
+      details: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
   };
   

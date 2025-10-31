@@ -14,6 +14,30 @@ class ArtworkService {
       throw new Error('Artist profile not found. Please create an artist profile first.');
     }
 
+    // Clean up dimensions - remove undefined values
+    if (artworkData.dimensions) {
+      Object.keys(artworkData.dimensions).forEach(key => {
+        if (artworkData.dimensions[key] === undefined || artworkData.dimensions[key] === '') {
+          delete artworkData.dimensions[key];
+        }
+      });
+      
+      // If only unit exists, make sure it's valid
+      if (Object.keys(artworkData.dimensions).length === 1 && artworkData.dimensions.unit) {
+        // Keep dimensions object with just unit if that's all we have
+      }
+    }
+
+    // Ensure images array is not empty
+    if (!artworkData.images || artworkData.images.length === 0) {
+      throw new Error('At least one image is required');
+    }
+
+    console.log('Creating artwork with cleaned data:', {
+      artistId,
+      artworkData: JSON.stringify(artworkData, null, 2)
+    });
+
     const artwork = await Artwork.create({
       artistId,
       ...artworkData
