@@ -155,6 +155,28 @@ class ArtworkService {
     await artwork.save();
     return { likes: artwork.likes.length, isLiked: likeIndex === -1 };
   }
+
+  async getTrendingArtworks(limit = 8) {
+    const artworks = await Artwork.find({ status: 'available' })
+      .populate('artistId', 'name email profilePicture')
+      .sort({ 
+        // Sort by likes count (descending), then by views, then by creation date
+        createdAt: -1 
+      })
+      .limit(parseInt(limit));
+
+    // Sort by likes count in JavaScript since MongoDB doesn't support array length in sort
+    const sortedArtworks = artworks.sort((a, b) => {
+      const aLikes = a.likes ? a.likes.length : 0;
+      const bLikes = b.likes ? b.likes.length : 0;
+      if (aLikes !== bLikes) {
+        return bLikes - aLikes;
+      }
+      return (b.views || 0) - (a.views || 0);
+    });
+
+    return sortedArtworks.slice(0, limit);
+  }
 }
 
 module.exports = new ArtworkService();

@@ -309,7 +309,7 @@ export const reviewAPI = {
 // Community API
 export const communityAPI = {
   sendConnectionRequest: async (data: ConnectionData): Promise<ApiResponse<any>> => {
-    const response = await apiClient.post('/community', data);
+    const response = await apiClient.post('/community/connections', data);
     return response.data;
   },
 
@@ -324,12 +324,12 @@ export const communityAPI = {
   },
 
   updateConnectionStatus: async (connectionId: string, status: string): Promise<ApiResponse<any>> => {
-    const response = await apiClient.put(`/community/${connectionId}`, { status });
+    const response = await apiClient.put(`/community/connections/${connectionId}`, { status });
     return response.data;
   },
 
   deleteConnection: async (connectionId: string): Promise<ApiResponse<any>> => {
-    const response = await apiClient.delete(`/community/${connectionId}`);
+    const response = await apiClient.delete(`/community/connections/${connectionId}`);
     return response.data;
   },
 };

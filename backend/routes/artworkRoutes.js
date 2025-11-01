@@ -12,6 +12,9 @@ const { uploadSingle } = require('../middleware/uploadMiddleware');
 // Search artworks (public)
 router.get('/search', artworkController.searchArtwork);
 
+// Get trending artworks (public)
+router.get('/trending', artworkController.getTrendingArtworks);
+
 // Get single artwork (public)
 router.get('/:artworkId', artworkController.getArtwork);
 

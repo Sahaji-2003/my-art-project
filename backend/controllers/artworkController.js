@@ -116,3 +116,16 @@ exports.uploadImage = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.getTrendingArtworks = async (req, res, next) => {
+  try {
+    const { limit = 8 } = req.query;
+    const artworks = await artworkService.getTrendingArtworks(parseInt(limit));
+    res.status(200).json({
+      success: true,
+      data: artworks
+    });
+  } catch (error) {
+    next(error);
+  }
+};

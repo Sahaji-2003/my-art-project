@@ -9,6 +9,8 @@ const Artwork = require('../models/Artwork');
 const Order = require('../models/Order');
 const Review = require('../models/Review');
 const Community = require('../models/Community');
+const Post = require('../models/Post');
+const Comment = require('../models/Comment');
 const Analytics = require('../models/Analytics');
 const Notification = require('../models/Notification');
 
@@ -37,6 +39,8 @@ const seedData = async () => {
       Order.deleteMany(),
       Review.deleteMany(),
       Community.deleteMany(),
+      Post.deleteMany(),
+      Comment.deleteMany(),
       Analytics.deleteMany(),
       Notification.deleteMany()
     ]);
@@ -447,9 +451,240 @@ const seedData = async () => {
         status: 'pending',
         connectionType: 'mentorship',
         message: 'Would love to learn from you.'
+      },
+      {
+        senderId: users[3]._id,
+        receiverId: users[0]._id,
+        status: 'accepted',
+        connectionType: 'collaboration',
+        message: 'Interested in collaborating on a photography project!'
+      },
+      {
+        senderId: users[4]._id,
+        receiverId: users[2]._id,
+        status: 'pending',
+        connectionType: 'networking',
+        message: 'Love your digital art style! Would love to connect.'
+      },
+      {
+        senderId: specialUser._id,
+        receiverId: users[3]._id,
+        status: 'accepted',
+        connectionType: 'general',
+        message: 'Hi David! Looking forward to working with you.'
+      },
+      {
+        senderId: users[6]._id,
+        receiverId: users[0]._id,
+        status: 'pending',
+        connectionType: 'mentorship',
+        message: 'Could you mentor me on portrait painting techniques?'
+      },
+      {
+        senderId: users[7]._id,
+        receiverId: specialUser._id,
+        status: 'accepted',
+        connectionType: 'collaboration',
+        message: 'Great to connect! Let\'s explore opportunities.'
       }
     ]);
     console.log('🤝 Community connections inserted');
+
+    // Community Posts
+    const posts = await Post.insertMany([
+      {
+        authorId: users[0]._id,
+        title: 'Tips for selling art online in 2024?',
+        content: 'Hey everyone! I\'ve been trying to sell my art online but struggling to find the right platform. What are the best practices for marketing and selling digital art? Any tips on pricing strategies or building an audience would be greatly appreciated!',
+        category: 'Marketing',
+        likes: [users[1]._id, users[2]._id, users[3]._id],
+        views: 45
+      },
+      {
+        authorId: users[2]._id,
+        title: 'Best practices for protecting your artwork copyrights',
+        content: 'I\'m new to selling art and want to make sure my work is protected. What are the essential steps to copyright my artwork? Should I watermark everything or are there better approaches?',
+        category: 'Legal',
+        likes: [users[0]._id, users[4]._id, specialUser._id],
+        views: 32
+      },
+      {
+        authorId: users[1]._id,
+        title: 'Sharing experience with digital painting tools',
+        content: 'I\'ve been experimenting with Procreate and Photoshop lately. The learning curve is interesting! Anyone else using these tools? Would love to share techniques and learn from your experiences.',
+        category: 'Technique',
+        likes: [users[3]._id, users[5]._id],
+        views: 28
+      },
+      {
+        authorId: users[4]._id,
+        title: 'Finding inspiration in everyday life',
+        content: 'Sometimes I feel stuck and uninspired. How do you all find new ideas? I\'ve been trying to look at ordinary objects differently and it\'s helping, but would love to hear other perspectives!',
+        category: 'Inspiration',
+        likes: [users[0]._id, users[1]._id, users[2]._id, users[6]._id],
+        views: 67
+      },
+      {
+        authorId: specialUser._id,
+        title: 'Feedback wanted: My latest abstract series',
+        content: 'I\'ve just completed a series of abstract pieces exploring color theory and emotional expression. Looking for constructive feedback on composition and color choices. Would appreciate honest opinions!',
+        category: 'Critique',
+        likes: [users[0]._id, users[3]._id, users[4]._id],
+        views: 51
+      },
+      {
+        authorId: users[3]._id,
+        title: 'Collaboration opportunity: Looking for a sculptor',
+        content: 'I\'m a photographer planning a mixed-media exhibition combining photography and sculpture. Looking for a talented sculptor to collaborate on a unique installation. Budget is flexible and credit will be shared.',
+        category: 'General',
+        likes: [users[1]._id, specialUser._id],
+        views: 39
+      },
+      {
+        authorId: users[5]._id,
+        title: 'Portfolio website recommendations?',
+        content: 'I need to create a professional portfolio website to showcase my work. What platforms do you recommend? Squarespace, Wix, WordPress, or should I hire a developer? Looking for something clean and easy to maintain.',
+        category: 'General',
+        likes: [users[2]._id, users[6]._id, users[7]._id],
+        views: 54
+      },
+      {
+        authorId: users[6]._id,
+        title: 'Print quality tips for digital art',
+        content: 'I\'ve been having issues with print quality when selling my digital art as physical prints. The colors look great on screen but different when printed. Any advice on resolution, color profiles, or print-on-demand services?',
+        category: 'Technique',
+        likes: [users[2]._id, users[4]._id, specialUser._id],
+        views: 41
+      },
+      {
+        authorId: users[7]._id,
+        title: 'Social media strategy for artists',
+        content: 'Instagram algorithm changes are making it harder to reach my audience. What\'s working for you? Should I focus more on Reels, carousel posts, or maybe try other platforms like TikTok or Pinterest?',
+        category: 'Marketing',
+        likes: [users[0]._id, users[1]._id, users[3]._id],
+        views: 73
+      },
+      {
+        authorId: users[0]._id,
+        title: 'Artist retreat recommendations',
+        content: 'Planning to attend my first artist retreat next year. Any recommendations? Looking for something that offers a good balance of learning, networking, and creative time. Budget-conscious options are welcome!',
+        category: 'General',
+        likes: [users[4]._id, users[5]._id, users[6]._id, users[7]._id],
+        views: 38
+      },
+      {
+        authorId: specialUser._id,
+        title: 'Commissions pricing guide',
+        content: 'I\'ve been getting more commission requests lately but struggling with pricing. How do you calculate prices for custom work? Do you charge by the hour, by size, or flat rate? Would love some practical examples.',
+        category: 'Marketing',
+        likes: [users[0]._id, users[1]._id, users[2]._id, users[3]._id, users[6]._id],
+        views: 62
+      },
+      {
+        authorId: users[2]._id,
+        title: 'Balancing creativity with commercial viability',
+        content: 'How do you all balance creating work you love with making art that sells? Sometimes I feel like I\'m compromising my artistic vision for commercial appeal. Any thoughts on this dilemma?',
+        category: 'Inspiration',
+        likes: [users[4]._id, users[7]._id, specialUser._id],
+        views: 49
+      }
+    ]);
+    console.log('📝 Community posts inserted');
+
+    // Comments on Posts
+    const comments = await Comment.insertMany([
+      {
+        postId: posts[0]._id,
+        authorId: users[1]._id,
+        content: 'I\'ve had great success with Etsy and building my own website. The key is consistent posting and engaging with your audience!',
+        likes: [users[2]._id]
+      },
+      {
+        postId: posts[0]._id,
+        authorId: users[5]._id,
+        content: 'Don\'t forget about Instagram! It\'s been my main driver for sales. Good hashtags and Reels make a huge difference.',
+        likes: []
+      },
+      {
+        postId: posts[1]._id,
+        authorId: specialUser._id,
+        content: 'For digital art, you\'re automatically protected by copyright when you create it. But registering with the copyright office gives you better legal standing if issues arise.',
+        likes: [users[0]._id, users[4]._id]
+      },
+      {
+        postId: posts[2]._id,
+        authorId: users[6]._id,
+        content: 'Procreate is amazing! I started with it and it\'s so intuitive. There are tons of free brushes available too.',
+        likes: [users[1]._id]
+      },
+      {
+        postId: posts[2]._id,
+        authorId: users[3]._id,
+        content: 'Photoshop has a steeper learning curve but more professional tools. Try both and see which workflow suits you better!',
+        likes: []
+      },
+      {
+        postId: posts[3]._id,
+        authorId: users[7]._id,
+        content: 'I keep a sketchbook with me everywhere I go! Even mundane things like coffee cups or street signs can spark ideas.',
+        likes: [users[0]._id, users[4]._id]
+      },
+      {
+        postId: posts[4]._id,
+        authorId: users[0]._id,
+        content: 'Love the bold color choices! The composition feels balanced but maybe try adding more contrast in the center piece?',
+        likes: [specialUser._id]
+      },
+      {
+        postId: posts[4]._id,
+        authorId: users[4]._id,
+        content: 'The emotional depth is really coming through. Great work!',
+        likes: [users[3]._id]
+      },
+      {
+        postId: posts[5]._id,
+        authorId: users[1]._id,
+        content: 'I\'d be interested! Check out my portfolio and let me know if my style fits your vision.',
+        likes: []
+      },
+      {
+        postId: posts[6]._id,
+        authorId: users[4]._id,
+        content: 'I use WordPress with a custom theme. More work initially but complete control. For easy setup, Squarespace is great.',
+        likes: [users[5]._id, users[6]._id]
+      },
+      {
+        postId: posts[7]._id,
+        authorId: specialUser._id,
+        content: 'Make sure you\'re using RGB for screen and CMYK for print. DPI should be at least 300 for high-quality prints.',
+        likes: [users[6]._id]
+      },
+      {
+        postId: posts[8]._id,
+        authorId: users[0]._id,
+        content: 'Reels are definitely the way to go now! Process videos perform the best for me.',
+        likes: [users[1]._id, users[3]._id]
+      },
+      {
+        postId: posts[9]._id,
+        authorId: users[2]._id,
+        content: 'Look into local art residencies! They\'re usually more affordable and still offer great experiences.',
+        likes: []
+      },
+      {
+        postId: posts[10]._id,
+        authorId: users[7]._id,
+        content: 'I charge hourly for detailed work and flat rate for simpler pieces. Base it on your living wage plus materials.',
+        likes: [users[0]._id, users[1]._id, specialUser._id]
+      },
+      {
+        postId: posts[11]._id,
+        authorId: specialUser._id,
+        content: 'This is the eternal struggle! I try to do 80% passion projects and 20% commercial work to keep balance.',
+        likes: [users[2]._id, users[6]._id]
+      }
+    ]);
+    console.log('💬 Comments inserted');
 
     // Analytics
     const analytics = await Analytics.insertMany([

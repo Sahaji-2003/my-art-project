@@ -271,6 +271,17 @@ export const artworkAPI = {
       console.error('Error fetching recent artworks:', error);
       throw new Error(error.response?.data?.message || 'Failed to fetch recent artworks');
     }
+  },
+
+  // Get trending artworks
+  getTrendingArtworks: async (limit: number = 8): Promise<{ success: boolean; data: Artwork[] }> => {
+    try {
+      const response = await artworkClient.get(`/artworks/trending?limit=${limit}`);
+      return response.data;
+    } catch (error: any) {
+      console.error('Error fetching trending artworks:', error);
+      throw new Error(error.response?.data?.message || 'Failed to fetch trending artworks');
+    }
   }
 };
 

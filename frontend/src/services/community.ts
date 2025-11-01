@@ -45,14 +45,15 @@ export interface Post {
   _id: string;
   title: string;
   content: string;
+  category?: string;
   author: {
     _id: string;
     name: string;
     profilePicture?: string;
   };
   images?: string[];
-  likes: number;
-  comments: number;
+  likes: number | string[];
+  comments: number | any[];
   isLiked?: boolean;
   createdAt: string;
   updatedAt: string;
@@ -126,7 +127,7 @@ export const communityAPI = {
   },
 
   // Create new post
-  createPost: async (postData: { title: string; content: string; images?: string[] }): Promise<PostResponse> => {
+  createPost: async (postData: { title: string; content: string; category?: string; images?: string[] }): Promise<PostResponse> => {
     try {
       const response = await communityClient.post('/community/posts', postData);
       return response.data;
