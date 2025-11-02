@@ -27,7 +27,7 @@ import Header from './components/Header';
 
 import Footer from './components/Footer';
 
-import { isAuthenticated } from './services/api.service';
+import { isAuthenticated, getUser } from './services/api.service';
 
 import './styles/App.css';
 
@@ -49,8 +49,15 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
 const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
- return !isAuthenticated() ? <>{children}</> : <Navigate to="/dashboard" />;
+  if (!isAuthenticated()) {
+    return <>{children}</>;
+  }
 
+  // Check if user is an artist to redirect accordingly
+  const user = getUser();
+  const redirectTo = user?.isArtist ? '/dashboard' : '/profile';
+  
+  return <Navigate to={redirectTo} />;
 };
 
 

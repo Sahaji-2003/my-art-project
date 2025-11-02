@@ -51,8 +51,12 @@ const LoginPage: React.FC = () => {
       // Save authentication data
       loginAPI.saveAuthData(response.data.token, response.data.user);
 
-      // Navigate to dashboard
-      navigate('/dashboard');
+      // Navigate based on isArtist status
+      if (response.data.user.isArtist) {
+        navigate('/dashboard');
+      } else {
+        navigate('/profile');
+      }
     } catch (err: any) {
       setErrors({
         general: err.message || 'Invalid credentials. Please check your email and password.'

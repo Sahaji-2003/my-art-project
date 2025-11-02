@@ -49,15 +49,15 @@ const seedData = async () => {
     const hashedPassword = await bcrypt.hash('Password123!', salt);
 
     const users = await User.insertMany([
-      { name: 'Alice Johnson',     email: 'alice@example.com',     password: hashedPassword, profilePicture: '/assets/images/pexels-shvetsa-3683209.jpg' },
-      { name: 'Bob Smith',         email: 'bob@example.com',       password: hashedPassword, profilePicture: '/assets/images/close-up-portrait-curly-handsome-european-male.jpg' },
-      { name: 'Clara Wilson',      email: 'clara@example.com',     password: hashedPassword, profilePicture: '/assets/images/images (1).jpeg' },
-      { name: 'David Brown',       email: 'david@example.com',     password: hashedPassword, profilePicture: '/assets/images/smiling-caucasian-young-guy-wearing-pink-shirt-isolated-white-background.jpg' },
-      { name: 'Ella Davis',        email: 'ella@example.com',      password: hashedPassword, profilePicture: '/assets/images/images (3).jpeg' },
-      { name: 'Frank Miller',      email: 'frank@example.com',     password: hashedPassword, profilePicture: '/assets/images/young-bearded-man-black-shirt-looking-aside-confused.jpg' },
-      { name: 'Grace Lee',         email: 'grace@example.com',     password: hashedPassword, profilePicture: '/assets/images/images.jpeg' },
-      { name: 'Hank Green',        email: 'hank@example.com',      password: hashedPassword, profilePicture: '/assets/images/pexels-expect-best-79873-707265.jpg' },
-      { name: 'Special User',      email: 'user@gmail.com',        password: hashedPassword, profilePicture: '/assets/images/pexels-rakicevic-nenad-233369-1262302.jpg' }
+      { name: 'Alice Johnson',     email: 'alice@example.com',     password: hashedPassword, profilePicture: '/userProfile/bot-1761939632102-692067132.jpg' },
+      { name: 'Bob Smith',         email: 'bob@example.com',       password: hashedPassword, profilePicture: '/userProfile/bot-1762014179428-889837139.jpg' },
+      { name: 'Clara Wilson',      email: 'clara@example.com',     password: hashedPassword, profilePicture: '/userProfile/bot-1762055836250-715483052.jpg' },
+      { name: 'David Brown',       email: 'david@example.com',     password: hashedPassword, profilePicture: '/userProfile/bot-1762072017858-602461795.jpg' },
+      { name: 'Ella Davis',        email: 'ella@example.com',      password: hashedPassword, profilePicture: '/userProfile/bot-1762072400877-865788130.jpg' },
+      { name: 'Frank Miller',      email: 'frank@example.com',     password: hashedPassword, profilePicture: '/userProfile/psychedelic-art-mountain-744040-3709-1762081811743-762367019.jpg' },
+      { name: 'Grace Lee',         email: 'grace@example.com',     password: hashedPassword, profilePicture: '/userProfile/organization-flow--1--1762098725924-376128990.jpg' },
+      { name: 'Hank Green',        email: 'hank@example.com',      password: hashedPassword, profilePicture: '/userProfile/bot-1761939632102-692067132.jpg' },
+      { name: 'Special User',      email: 'user@gmail.com',        password: hashedPassword, profilePicture: '/userProfile/bot-1762014179428-889837139.jpg' }
     ]);
     console.log('👥 Users inserted');
 
@@ -141,7 +141,7 @@ const seedData = async () => {
         title: 'City Reflections',
         description: 'Acrylic painting depicting the glow of city lights on a rainy night.',
         price: 500,
-        images: [{ url: '/assets/images/art/pexels-zaksheuskaya-709412-1561020.jpg', isPrimary: true }],
+        images: [{ url: '/assets/images/art/pexels-rakicevic-nenad-233369-1262302.jpg', isPrimary: true }],
         medium: 'Acrylic',
         style: 'Contemporary',
         tags: ['city','rain','urban']
@@ -151,7 +151,7 @@ const seedData = async () => {
         title: 'Silent Stone',
         description: 'Abstract sculpture carved from granite, symbolizing stillness.',
         price: 1200,
-        images: [{ url: '/assets/images/art/pexels-expect-best-79873-707265.jpg', isPrimary: true }],
+        images: [{ url: '/assets/images/art/pexels-pixabay-52718.jpg', isPrimary: true }],
         medium: 'Sculpture',
         style: 'Minimalism',
         tags: ['sculpture','stone','abstract']
@@ -161,7 +161,7 @@ const seedData = async () => {
         title: 'Dreamscape',
         description: 'Digital surreal art exploring imagination and dreams.',
         price: 350,
-        images: [{ url: '/assets/images/art/pexels-rakicevic-nenad-233369-1262302.jpg', isPrimary: true }],
+        images: [{ url: '/assets/images/art/pexels-ahorablue-1042206.jpg', isPrimary: true }],
         medium: 'Digital Art',
         style: 'Surrealism',
         tags: ['digital','dream','fantasy']
@@ -171,7 +171,7 @@ const seedData = async () => {
         title: 'Sunset Melody',
         description: 'Oil on canvas capturing the symphony of colors during sunset.',
         price: 750,
-        images: [{ url: '/assets/images/art/images.jpeg', isPrimary: true }],
+        images: [{ url: '/assets/images/art/pexels-mccutcheon-1209843.jpg', isPrimary: true }],
         medium: 'Oil on Canvas',
         style: 'Impressionism',
         tags: ['sunset','landscape','color']
@@ -181,7 +181,7 @@ const seedData = async () => {
         title: 'Portrait of Silence',
         description: 'Photography print capturing a moment of deep thought.',
         price: 300,
-        images: [{ url: '/assets/images/art/images (1).jpeg', isPrimary: true }],
+        images: [{ url: '/assets/images/art/pexels-pixabay-206784.jpg', isPrimary: true }],
         medium: 'Photography',
         style: 'Realism',
         tags: ['portrait','thought','human']
@@ -191,7 +191,7 @@ const seedData = async () => {
         title: 'Textures of Time',
         description: 'Mixed media piece reflecting layers of memory and material.',
         price: 600,
-        images: [{ url: '/assets/images/art/images (3).jpeg', isPrimary: true }],
+        images: [{ url: '/assets/images/art/pexels-emrecan-2110945.jpg', isPrimary: true }],
         medium: 'Mixed Media',
         style: 'Expressionism',
         tags: ['texture','memory','mixed media']
@@ -201,7 +201,7 @@ const seedData = async () => {
         title: 'Monochrome Silence',
         description: 'Charcoal on paper drawing emphasizing shape and void.',
         price: 400,
-        images: [{ url: '/assets/images/art/pexels-shvetsa-3683209.jpg', isPrimary: true }],
+        images: [{ url: '/assets/images/art/pexels-ekrulila-3246665.jpg', isPrimary: true }],
         medium: 'Charcoal',
         style: 'Minimalism',
         tags: ['charcoal','paper','monochrome']
@@ -211,7 +211,7 @@ const seedData = async () => {
         title: 'Urban Pop',
         description: 'Pop-art digital illustration based on city icons.',
         price: 450,
-        images: [{ url: '/assets/images/art/close-up-portrait-curly-handsome-european-male.jpg', isPrimary: true }],
+        images: [{ url: '/assets/images/art/pexels-mikebirdy-189528.jpg', isPrimary: true }],
         medium: 'Digital Art',
         style: 'Pop Art',
         tags: ['pop art','city','illustration']
@@ -222,7 +222,7 @@ const seedData = async () => {
         title: 'Special Artwork 1',
         description: 'Oil painting by Special User exploring light and shadow.',
         price: 800,
-        images: [{ url: '/assets/images/art/smiling-caucasian-young-guy-wearing-pink-shirt-isolated-white-background.jpg', isPrimary: true }],
+        images: [{ url: '/assets/images/art/pexels-steve-1585325.jpg', isPrimary: true }],
         medium: 'Oil on Canvas',
         style: 'Contemporary',
         tags: ['special','light','shadow']
@@ -232,7 +232,7 @@ const seedData = async () => {
         title: 'Special Artwork 2',
         description: 'Digital art piece from Special User featuring abstract geometry.',
         price: 650,
-        images: [{ url: '/assets/images/art/young-bearded-man-black-shirt-looking-aside-confused.jpg', isPrimary: true }],
+        images: [{ url: '/assets/images/art/artwork_sahaji_chaurasia_1762060172911-636741544.webp', isPrimary: true }],
         medium: 'Digital Art',
         style: 'Pop Art',
         tags: ['digital','abstract','geometry']
@@ -242,7 +242,7 @@ const seedData = async () => {
         title: 'Special Artwork 3',
         description: 'Sculpture combining recycled materials – by Special User.',
         price: 900,
-        images: [{ url: '/assets/images/art/pexels-zaksheuskaya-709412-1561020.jpg', isPrimary: true }],
+        images: [{ url: '/assets/images/art/artwork_sahaji_chaurasia_1762060634242-902988328.webp', isPrimary: true }],
         medium: 'Sculpture',
         style: 'Modern',
         tags: ['sculpture','recycled','modern']
@@ -252,7 +252,7 @@ const seedData = async () => {
         title: 'Special Artwork 4',
         description: 'Mixed media collage by Special User about time and memory.',
         price: 700,
-        images: [{ url: '/assets/images/art/pexels-expect-best-79873-707265.jpg', isPrimary: true }],
+        images: [{ url: '/assets/images/art/artwork_sahaji_chaurasia_1762072382652-919325477.webp', isPrimary: true }],
         medium: 'Mixed Media',
         style: 'Expressionism',
         tags: ['collage','memory','mixed']
@@ -262,7 +262,7 @@ const seedData = async () => {
         title: 'Special Artwork 5',
         description: 'Photography print by Special User of urban textures.',
         price: 550,
-        images: [{ url: '/assets/images/art/pexels-rakicevic-nenad-233369-1262302.jpg', isPrimary: true }],
+        images: [{ url: '/assets/images/art/pexels-scottwebb-1029611.jpg', isPrimary: true }],
         medium: 'Photography',
         style: 'Contemporary',
         tags: ['photography','urban','texture']
