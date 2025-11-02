@@ -1,44 +1,7 @@
 // ============================================
 // src/services/artist.ts
 // ============================================
-import axios from 'axios';
-
-const BASE_URL = 'http://localhost:3001/api/v1';
-
-// Create axios instance for artist API
-const artistClient = axios.create({
-  baseURL: BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// Request interceptor to add token
-artistClient.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('arthub_token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// Response interceptor for error handling
-artistClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('arthub_token');
-      localStorage.removeItem('arthub_user');
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
-  }
-);
+import { artistAPI as apiArtistAPI, apiClient } from './api.service';
 
 // Type definitions
 export interface Artist {
@@ -107,86 +70,8 @@ export interface ArtistsResponse {
   };
 }
 
-// Artist API functions
-export const artistAPI = {
-  // Get artist profile
-  getProfile: async (): Promise<ArtistResponse> => {
-    try {
-      const response = await artistClient.get('/artists/profile');
-      return response.data;
-    } catch (error: any) {
-      console.error('Error fetching artist profile:', error);
-      throw new Error(error.response?.data?.message || 'Failed to fetch artist profile');
-    }
-  },
-
-  // Create or update artist profile
-  createOrUpdateProfile: async (profileData: Partial<ArtistProfile>): Promise<ArtistResponse> => {
-    try {
-      const response = await artistClient.post('/artists/profile', profileData);
-      return response.data;
-    } catch (error: any) {
-      console.error('Error creating/updating artist profile:', error);
-      throw new Error(error.response?.data?.message || 'Failed to create/update artist profile');
-    }
-  },
-
-  // Get artist by ID
-  getArtist: async (artistId: string): Promise<ArtistResponse> => {
-    try {
-      const response = await artistClient.get(`/artists/${artistId}`);
-      return response.data;
-    } catch (error: any) {
-      console.error('Error fetching artist:', error);
-      throw new Error(error.response?.data?.message || 'Failed to fetch artist');
-    }
-  },
-
-  // Search artists
-  searchArtists: async (query: string, filters: any = {}): Promise<ArtistsResponse> => {
-    try {
-      const params = new URLSearchParams({ q: query, ...filters });
-      const response = await artistClient.get(`/artists/search?${params.toString()}`);
-      return response.data;
-    } catch (error: any) {
-      console.error('Error searching artists:', error);
-      throw new Error(error.response?.data?.message || 'Failed to search artists');
-    }
-  },
-
-  // Get featured artists
-  getFeaturedArtists: async (limit: number = 6): Promise<ArtistsResponse> => {
-    try {
-      const response = await artistClient.get(`/artists/featured?limit=${limit}`);
-      return response.data;
-    } catch (error: any) {
-      console.error('Error fetching featured artists:', error);
-      throw new Error(error.response?.data?.message || 'Failed to fetch featured artists');
-    }
-  },
-
-  // Follow/Unfollow artist
-  toggleFollow: async (artistId: string): Promise<{ success: boolean; data: any }> => {
-    try {
-      const response = await artistClient.post(`/artists/${artistId}/follow`);
-      return response.data;
-    } catch (error: any) {
-      console.error('Error toggling follow:', error);
-      throw new Error(error.response?.data?.message || 'Failed to toggle follow');
-    }
-  },
-
-  // Get artist stats
-  getStats: async (): Promise<{ success: boolean; data: any }> => {
-    try {
-      const response = await artistClient.get('/artists/stats');
-      return response.data;
-    } catch (error: any) {
-      console.error('Error fetching artist stats:', error);
-      throw new Error(error.response?.data?.message || 'Failed to fetch artist stats');
-    }
-  }
-};
+// Re-export artistAPI from api.service.ts to maintain compatibility
+export const artistAPI = apiArtistAPI;
 
 // Form validation helpers
 export const artistValidation = {

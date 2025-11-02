@@ -192,7 +192,6 @@ const PurchasePage: React.FC = () => {
     
     try {
       const orderPayload = {
-        artworkId: artworkId,
         shippingAddress: {
           street: orderData.address,
           city: orderData.city,
@@ -204,7 +203,7 @@ const PurchasePage: React.FC = () => {
         notes: `Phone: ${orderData.phone || 'N/A'}`
       };
 
-      const response = await orderAPI.createOrder(orderPayload);
+      const response = await orderAPI.createOrder(artworkId!, orderPayload);
       
       if (response.success) {
         setShowSuccessModal(true);

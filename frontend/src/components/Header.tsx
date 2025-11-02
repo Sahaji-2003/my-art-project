@@ -17,15 +17,12 @@ const Header: React.FC = () => {
         try {
           const response = await artistAPI.getProfile();
           if (response.success && response.data?.profilePicture) {
-            console.log('Profile picture:', response.data.profilePicture);
             setProfilePicture(`${response.data.profilePicture}`);
           }
         } catch (error) {
           // Profile doesn't exist or not an artist yet
-          console.log('No artist profile found');
         }
       } else if (currentUser?.profilePicture) {
-        console.log('Current user profile picture:', currentUser.profilePicture);
         setProfilePicture(currentUser.profilePicture);
       }
     };

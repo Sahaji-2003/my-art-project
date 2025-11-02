@@ -46,18 +46,3 @@ exports.protect = async (req, res, next) => {
     next(error);
   }
 };
-
-// Middleware to check if user is an artist
-exports.isArtist = async (req, res, next) => {
-  try {
-    if (!req.user.isArtist) {
-      return res.status(403).json({
-        success: false,
-        error: 'Access denied. Artist profile required.'
-      });
-    }
-    next();
-  } catch (error) {
-    next(error);
-  }
-};

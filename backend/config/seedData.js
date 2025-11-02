@@ -1,7 +1,7 @@
 // seed/seedData.js
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-require('dotenv').config({ path: '../.env' });
+require('dotenv').config();
 
 const User = require('../models/User');
 const ArtistProfile = require('../models/ArtistProfile');
@@ -16,10 +16,8 @@ const Notification = require('../models/Notification');
 
 const connectDB = async () => {
   try {
-    await mongoose.connect('mongodb://localhost:27017/arthub', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    });
+    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/arthub';
+    await mongoose.connect(mongoUri);
     console.log('✅ MongoDB Connected');
   } catch (err) {
     console.error('❌ Connection error:', err);
@@ -139,7 +137,7 @@ const seedData = async () => {
     // Artworks
     const artworks = await Artwork.insertMany([
       {
-        artistId: users[0]._1?._id || users[0]._id,
+        artistId: users[0]._id,
         title: 'City Reflections',
         description: 'Acrylic painting depicting the glow of city lights on a rainy night.',
         price: 500,

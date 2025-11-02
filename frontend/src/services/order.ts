@@ -1,44 +1,7 @@
 // ============================================
 // src/services/order.ts
 // ============================================
-import axios from 'axios';
-
-const BASE_URL = 'http://localhost:3001/api/v1';
-
-// Create axios instance for order API
-const orderClient = axios.create({
-  baseURL: BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// Request interceptor to add token
-orderClient.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('arthub_token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// Response interceptor for error handling
-orderClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('arthub_token');
-      localStorage.removeItem('arthub_user');
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
-  }
-);
+import { orderAPI as apiOrderAPI, apiClient } from './api.service';
 
 // Type definitions
 export interface Order {
@@ -111,83 +74,38 @@ export interface CreateOrderData {
   notes?: string;
 }
 
-// Order API functions
+// Re-export orderAPI from api.service.ts and extend with additional methods
 export const orderAPI = {
-  // Create new order
-  createOrder: async (orderData: CreateOrderData): Promise<OrderResponse> => {
-    try {
-      const response = await orderClient.post('/orders', orderData);
-      return response.data;
-    } catch (error: any) {
-      console.error('Error creating order:', error);
-      throw new Error(error.response?.data?.message || 'Failed to create order');
-    }
+  ...apiOrderAPI,
+  
+  // Override createOrder to maintain compatibility - accepts artworkId and orderData separately
+  createOrder: async (artworkId: string, orderData: CreateOrderData): Promise<OrderResponse> => {
+    const response = await apiClient.post(`/orders/${artworkId}/purchase`, orderData);
+    return response.data;
   },
-
-  // Get order by ID
-  getOrder: async (orderId: string): Promise<OrderResponse> => {
-    try {
-      const response = await orderClient.get(`/orders/${orderId}`);
-      return response.data;
-    } catch (error: any) {
-      console.error('Error fetching order:', error);
-      throw new Error(error.response?.data?.message || 'Failed to fetch order');
-    }
-  },
-
-  // Get user's orders
+  
+  // Get user's orders with pagination
   getUserOrders: async (page: number = 1, limit: number = 10): Promise<OrdersResponse> => {
-    try {
-      const response = await orderClient.get(`/orders/user?page=${page}&limit=${limit}`);
-      return response.data;
-    } catch (error: any) {
-      console.error('Error fetching user orders:', error);
-      throw new Error(error.response?.data?.message || 'Failed to fetch user orders');
-    }
+    const response = await apiClient.get(`/orders/my-orders?page=${page}&limit=${limit}`);
+    return response.data;
   },
 
-  // Get seller's orders
+  // Get seller's orders (alias for getArtistOrders)
   getSellerOrders: async (page: number = 1, limit: number = 10): Promise<OrdersResponse> => {
-    try {
-      const response = await orderClient.get(`/orders/seller?page=${page}&limit=${limit}`);
-      return response.data;
-    } catch (error: any) {
-      console.error('Error fetching seller orders:', error);
-      throw new Error(error.response?.data?.message || 'Failed to fetch seller orders');
-    }
-  },
-
-  // Update order status
-  updateOrderStatus: async (orderId: string, status: Order['status'], trackingNumber?: string): Promise<OrderResponse> => {
-    try {
-      const response = await orderClient.put(`/orders/${orderId}/status`, { status, trackingNumber });
-      return response.data;
-    } catch (error: any) {
-      console.error('Error updating order status:', error);
-      throw new Error(error.response?.data?.message || 'Failed to update order status');
-    }
+    const response = await apiClient.get(`/orders/artist-orders?page=${page}&limit=${limit}`);
+    return response.data;
   },
 
   // Cancel order
   cancelOrder: async (orderId: string, reason?: string): Promise<OrderResponse> => {
-    try {
-      const response = await orderClient.put(`/orders/${orderId}/cancel`, { reason });
-      return response.data;
-    } catch (error: any) {
-      console.error('Error cancelling order:', error);
-      throw new Error(error.response?.data?.message || 'Failed to cancel order');
-    }
+    const response = await apiClient.put(`/orders/${orderId}/cancel`, { reason });
+    return response.data;
   },
 
   // Get order statistics
   getOrderStats: async (): Promise<{ success: boolean; data: any }> => {
-    try {
-      const response = await orderClient.get('/orders/stats');
-      return response.data;
-    } catch (error: any) {
-      console.error('Error fetching order stats:', error);
-      throw new Error(error.response?.data?.message || 'Failed to fetch order stats');
-    }
+    const response = await apiClient.get('/orders/stats');
+    return response.data;
   }
 };
 

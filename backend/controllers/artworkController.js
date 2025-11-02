@@ -6,11 +6,6 @@ const artworkService = require('../services/artworkService');
 
 exports.createArtwork = async (req, res, next) => {
   try {
-    console.log('Creating artwork with data:', {
-      artistId: req.user.id,
-      artworkData: JSON.stringify(req.body, null, 2)
-    });
-    
     const artwork = await artworkService.createArtwork(req.user.id, req.body);
     res.status(201).json({
       success: true,
@@ -18,7 +13,6 @@ exports.createArtwork = async (req, res, next) => {
       data: artwork
     });
   } catch (error) {
-    console.error('Error in createArtwork controller:', error);
     next(error);
   }
 };

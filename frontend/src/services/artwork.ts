@@ -1,44 +1,7 @@
 // ============================================
 // src/services/artwork.ts
 // ============================================
-import axios from 'axios';
-
-const BASE_URL = 'http://localhost:3001/api/v1';
-
-// Create axios instance for artwork API
-const artworkClient = axios.create({
-  baseURL: BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// Request interceptor to add token
-artworkClient.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('arthub_token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// Response interceptor for error handling
-artworkClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('arthub_token');
-      localStorage.removeItem('arthub_user');
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
-  }
-);
+import { artworkAPI as apiArtworkAPI, apiClient } from './api.service';
 
 // Type definitions matching backend Artwork.js model
 export interface Artwork {
@@ -138,153 +101,39 @@ export interface UploadResponse {
   message?: string;
 }
 
-// Artwork API functions
+// Extend api.service artworkAPI with additional methods
 export const artworkAPI = {
-  // Search artworks
+  ...apiArtworkAPI,
+  
+  // Search artworks with enhanced error handling
   searchArtworks: async (filters: SearchFilters = {}): Promise<SearchResponse> => {
-    try {
-      const queryParams = new URLSearchParams();
-      
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== '' && value !== null) {
-          queryParams.append(key, String(value));
-        }
-      });
-
-      const response = await artworkClient.get(`/artworks/search?${queryParams.toString()}`);
-      return response.data;
-    } catch (error: any) {
-      console.error('Error searching artworks:', error);
-      throw new Error(error.response?.data?.message || 'Failed to search artworks');
-    }
-  },
-
-  // Get single artwork by ID
-  getArtwork: async (artworkId: string): Promise<ArtworkResponse> => {
-    try {
-      const response = await artworkClient.get(`/artworks/${artworkId}`);
-      return response.data;
-    } catch (error: any) {
-      console.error('Error fetching artwork:', error);
-      throw new Error(error.response?.data?.message || 'Failed to fetch artwork');
-    }
-  },
-
-  // Create new artwork
-  createArtwork: async (artworkData: CreateArtworkData): Promise<ArtworkResponse> => {
-    try {
-      const response = await artworkClient.post('/artworks', artworkData);
-      return response.data;
-    } catch (error: any) {
-      console.error('Error creating artwork:', error);
-      throw new Error(error.response?.data?.message || 'Failed to create artwork');
-    }
-  },
-
-  // Update artwork
-  updateArtwork: async (artworkId: string, artworkData: Partial<Artwork>): Promise<ArtworkResponse> => {
-    try {
-      const response = await artworkClient.put(`/artworks/${artworkId}`, artworkData);
-      return response.data;
-    } catch (error: any) {
-      console.error('Error updating artwork:', error);
-      throw new Error(error.response?.data?.message || 'Failed to update artwork');
-    }
-  },
-
-  // Delete artwork
-  deleteArtwork: async (artworkId: string): Promise<{ success: boolean; message: string }> => {
-    try {
-      const response = await artworkClient.delete(`/artworks/${artworkId}`);
-      return response.data;
-    } catch (error: any) {
-      console.error('Error deleting artwork:', error);
-      throw new Error(error.response?.data?.message || 'Failed to delete artwork');
-    }
-  },
-
-  // Upload artwork image
-  uploadImage: async (file: File, artName?: string): Promise<UploadResponse> => {
-    try {
-      const formData = new FormData();
-      formData.append('image', file);
-      if (artName) {
-        formData.append('artName', artName);
+    const queryParams = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== '' && value !== null) {
+        queryParams.append(key, String(value));
       }
-      
-      const response = await artworkClient.post('/artworks/upload-image', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      return response.data;
-    } catch (error: any) {
-      console.error('Error uploading image:', error);
-      throw new Error(error.response?.data?.message || 'Failed to upload image');
-    }
-  },
-
-  // Toggle like on artwork
-  toggleLike: async (artworkId: string): Promise<{ success: boolean; data: any }> => {
-    try {
-      const response = await artworkClient.post(`/artworks/${artworkId}/like`);
-      return response.data;
-    } catch (error: any) {
-      console.error('Error toggling like:', error);
-      throw new Error(error.response?.data?.message || 'Failed to toggle like');
-    }
+    });
+    const response = await apiClient.get(`/artworks/search?${queryParams.toString()}`);
+    return response.data;
   },
 
   // Get artworks by artist
   getArtworksByArtist: async (artistId: string, filters: SearchFilters = {}): Promise<SearchResponse> => {
-    try {
-      const queryParams = new URLSearchParams();
-      
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== '' && value !== null) {
-          queryParams.append(key, String(value));
-        }
-      });
-
-      const response = await artworkClient.get(`/artists/${artistId}/artworks?${queryParams.toString()}`);
-      return response.data;
-    } catch (error: any) {
-      console.error('Error fetching artist artworks:', error);
-      throw new Error(error.response?.data?.message || 'Failed to fetch artist artworks');
-    }
-  },
-
-  // Get featured artworks
-  getFeaturedArtworks: async (limit: number = 6): Promise<SearchResponse> => {
-    try {
-      const response = await artworkClient.get(`/artworks/featured?limit=${limit}`);
-      return response.data;
-    } catch (error: any) {
-      console.error('Error fetching featured artworks:', error);
-      throw new Error(error.response?.data?.message || 'Failed to fetch featured artworks');
-    }
-  },
-
-  // Get recent artworks
-  getRecentArtworks: async (limit: number = 12): Promise<SearchResponse> => {
-    try {
-      const response = await artworkClient.get(`/artworks/recent?limit=${limit}`);
-      return response.data;
-    } catch (error: any) {
-      console.error('Error fetching recent artworks:', error);
-      throw new Error(error.response?.data?.message || 'Failed to fetch recent artworks');
-    }
+    const queryParams = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== '' && value !== null) {
+        queryParams.append(key, String(value));
+      }
+    });
+    const url = `/artworks/artists/${artistId}/artworks${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const response = await apiClient.get(url);
+    return response.data;
   },
 
   // Get trending artworks
   getTrendingArtworks: async (limit: number = 8): Promise<{ success: boolean; data: Artwork[] }> => {
-    try {
-      const response = await artworkClient.get(`/artworks/trending?limit=${limit}`);
-      return response.data;
-    } catch (error: any) {
-      console.error('Error fetching trending artworks:', error);
-      throw new Error(error.response?.data?.message || 'Failed to fetch trending artworks');
-    }
+    const response = await apiClient.get(`/artworks/trending?limit=${limit}`);
+    return response.data;
   }
 };
 

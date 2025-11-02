@@ -169,12 +169,12 @@ const CommunityPage: React.FC = () => {
               <h2 className="h2 fw-bold mb-2">Welcome to the Community!</h2>
               <p className="text-muted mb-3">
                 Connect, share, and grow with fellow artists. Find collaborations, discover resources, and get insights.
-              </p>
+            </p>
               <button className="btn btn-primary btn-sm fw-semibold" onClick={handleStartDiscussion}>
                 <i className="bi bi-chat-dots-fill me-2"></i>
                 Start Discussion
-              </button>
-            </div>
+            </button>
+          </div>
             <div className="col-lg-5 d-none d-lg-block text-center">
               <i className="bi bi-people-fill display-3 text-primary opacity-50"></i>
             </div>
@@ -228,14 +228,14 @@ const CommunityPage: React.FC = () => {
                 <div className="text-center py-4">
                   <div className="spinner-border text-primary" role="status">
                     <span className="visually-hidden">Loading...</span>
-                  </div>
+                </div>
                   <p className="mt-2 text-muted small">Loading...</p>
                 </div>
               ) : error && !showCreateModal ? (
                 <div className="alert alert-danger">
                   <i className="bi bi-exclamation-triangle-fill me-2"></i>
                   {error}
-                </div>
+                      </div>
               ) : posts.length > 0 ? (
                 <div>
                   {posts.map((post) => (
@@ -248,7 +248,7 @@ const CommunityPage: React.FC = () => {
                       <div className="d-flex justify-content-between align-items-start mb-2">
                         <h5 className="h5 fw-semibold mb-0">{post.title}</h5>
                         <span className={`badge ${getCategoryColor(post.category)} ms-2`}>{post.category || 'General'}</span>
-                      </div>
+                    </div>
                       <p className="text-muted small mb-2">{post.content.substring(0, 150)}...</p>
                       <div className="d-flex align-items-center gap-3 flex-wrap">
                         <span className="text-primary small">
@@ -273,15 +273,15 @@ const CommunityPage: React.FC = () => {
                       </div>
                     </div>
                   ))}
-                </div>
+                  </div>
               ) : (
                 <div className="alert alert-info text-center py-3">
                   <i className="bi bi-info-circle me-2"></i>
                   No discussions found. Start the first discussion!
-                </div>
+                      </div>
               )}
-            </div>
-          </div>
+                    </div>
+                  </div>
 
           {/* Right Sidebar */}
           <div className="col-lg-4">
@@ -301,11 +301,11 @@ const CommunityPage: React.FC = () => {
                   <i className="bi bi-box-seam me-2"></i>
                   My Inventory
                 </button>
-              </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
             </div>
-          </div>
-        </div>
-      </div>
 
       {/* Create Post Modal */}
       {showCreateModal && (
@@ -324,7 +324,7 @@ const CommunityPage: React.FC = () => {
                       {error}
                 </div>
                   )}
-                  
+
                   <div className="mb-3">
                     <label htmlFor="postTitle" className="form-label fw-semibold">Title</label>
                     <input

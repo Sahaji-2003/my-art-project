@@ -1,20 +1,8 @@
 // ============================================
 // src/services/login.ts
 // ============================================
-
-import axios from 'axios';
+import { authAPI, apiClient } from './api.service';
 import type { AxiosResponse, AxiosError } from 'axios';
-
-const BASE_URL = 'http://localhost:3001/api/v1';
-
-// Create axios instance for login service
-const loginClient = axios.create({
-  baseURL: BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  timeout: 10000, // 10 seconds timeout
-});
 
 // Type definitions
 export interface LoginCredentials {
@@ -53,7 +41,7 @@ export interface AuthError {
   };
 }
 
-// Login API functions
+// Login API functions - wrap authAPI with enhanced error handling
 export const loginAPI = {
   /**
    * Authenticate user with email and password
@@ -62,19 +50,15 @@ export const loginAPI = {
    */
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
     try {
-      const response: AxiosResponse<AuthResponse> = await loginClient.post('/auth/login', credentials);
-      return response.data;
+      return await authAPI.login(credentials);
     } catch (error) {
       const axiosError = error as AxiosError<AuthError>;
       
       if (axiosError.response) {
-        // Server responded with error status
         throw new Error(axiosError.response.data?.error || 'Login failed');
       } else if (axiosError.request) {
-        // Request was made but no response received
         throw new Error('Network error. Please check your connection.');
       } else {
-        // Something else happened
         throw new Error('An unexpected error occurred');
       }
     }
@@ -87,19 +71,15 @@ export const loginAPI = {
    */
   signup: async (credentials: SignupCredentials): Promise<AuthResponse> => {
     try {
-      const response: AxiosResponse<AuthResponse> = await loginClient.post('/auth/signup', credentials);
-      return response.data;
+      return await authAPI.signup(credentials);
     } catch (error) {
       const axiosError = error as AxiosError<AuthError>;
       
       if (axiosError.response) {
-        // Server responded with error status
         throw new Error(axiosError.response.data?.error || 'Signup failed');
       } else if (axiosError.request) {
-        // Request was made but no response received
         throw new Error('Network error. Please check your connection.');
       } else {
-        // Something else happened
         throw new Error('An unexpected error occurred');
       }
     }

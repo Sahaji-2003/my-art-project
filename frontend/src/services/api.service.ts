@@ -376,4 +376,5 @@ export const isAuthenticated = (): boolean => {
   return !!getAuthToken();
 };
 
+export { apiClient };
 export default apiClient;

@@ -33,11 +33,6 @@ class ArtworkService {
       throw new Error('At least one image is required');
     }
 
-    console.log('Creating artwork with cleaned data:', {
-      artistId,
-      artworkData: JSON.stringify(artworkData, null, 2)
-    });
-
     const artwork = await Artwork.create({
       artistId,
       ...artworkData

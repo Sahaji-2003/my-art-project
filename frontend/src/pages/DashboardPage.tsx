@@ -190,8 +190,8 @@ const DashboardPage: React.FC = () => {
           >
             View All
             <i className="bi bi-arrow-right ms-2"></i>
-          </button>
-               </div>
+            </button>
+           </div>
 
         {loading ? (
           <div className="text-center py-5">
@@ -199,7 +199,7 @@ const DashboardPage: React.FC = () => {
               <span className="visually-hidden">Loading...</span>
             </div>
             <p className="mt-3 text-muted">Loading trending artworks...</p>
-            </div>
+                 </div>
         ) : trendingArtworks.length > 0 ? (
           <div className="position-relative">
             <button
@@ -223,7 +223,7 @@ const DashboardPage: React.FC = () => {
                   isLiking={likingArtworks.has(artwork._id)}
                 />
               ))}
-            </div>
+               </div>
 
             <button
               className="btn btn-light rounded-circle position-absolute end-0 top-50 translate-middle-y shadow-lg border-0 d-none d-md-flex align-items-center justify-content-center"
@@ -261,7 +261,7 @@ const DashboardPage: React.FC = () => {
                 <p className="text-muted small mb-0">Showcase your latest creations to a global audience.</p>
               </div>
             </div>
-            </div>
+               </div>
 
           <div className="col-12 col-sm-6 col-md-4 col-lg-3">
             <div 
@@ -279,7 +279,7 @@ const DashboardPage: React.FC = () => {
                 <p className="text-muted small mb-0">Update your artist bio, portfolio, and contact details.</p>
               </div>
             </div>
-            </div>
+               </div>
 
           <div className="col-12 col-sm-6 col-md-4 col-lg-3">
             <div 
@@ -295,8 +295,8 @@ const DashboardPage: React.FC = () => {
                 </div>
                 <h3 className="h6 fw-semibold mb-2">Inventory & Sales</h3>
                 <p className="text-muted small mb-0">Track your listings, sales, and artwork availability.</p>
-              </div>
             </div>
+               </div>
             </div>
 
           <div className="col-12 col-sm-6 col-md-4 col-lg-3">
@@ -310,11 +310,11 @@ const DashboardPage: React.FC = () => {
               <div className="card-body p-4 text-center">
                 <div className="bg-warning bg-opacity-10 rounded-circle p-3 d-inline-flex mb-3">
                   <i className="bi bi-people-fill text-warning fs-3"></i>
-                </div>
+               </div>
                 <h3 className="h6 fw-semibold mb-2">Explore Community</h3>
                 <p className="text-muted small mb-0">Connect with fellow artists, share insights, and collaborate.</p>
-              </div>
-            </div>
+             </div>
+           </div>
             </div>
 
           <div className="col-12 col-sm-6 col-md-4 col-lg-3">
@@ -328,10 +328,10 @@ const DashboardPage: React.FC = () => {
               <div className="card-body p-4 text-center">
                 <div className="bg-danger bg-opacity-10 rounded-circle p-3 d-inline-flex mb-3">
                   <i className="bi bi-search text-danger fs-3"></i>
-                </div>
+            </div>
                 <h3 className="h6 fw-semibold mb-2">Discover New Art</h3>
                 <p className="text-muted small mb-0">Browse a curated selection of unique artworks from various artists.</p>
-              </div>
+            </div>
             </div>
             </div>
 

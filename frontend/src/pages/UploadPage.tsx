@@ -75,8 +75,8 @@ const UploadPage: React.FC = () => {
     const file = files[0];
     if (!file) return;
 
-    const isValidType = file.type.startsWith('image/');
-    const isValidSize = file.size <= 10 * 1024 * 1024; // 10MB limit
+      const isValidType = file.type.startsWith('image/');
+      const isValidSize = file.size <= 10 * 1024 * 1024; // 10MB limit
 
     if (!isValidType || !isValidSize) {
       setErrors(prev => ({
@@ -217,25 +217,24 @@ const UploadPage: React.FC = () => {
       let uploadedImages: Array<{ url: string; isPrimary: boolean }> = [];
       
       if (selectedFiles.length > 0) {
-        const artName = formData.title.trim().toLowerCase().replace(/[^a-z0-9]/gi, '_');
         uploadedImages = await Promise.all(
-          selectedFiles.map(async (file, index) => {
-            try {
-              const uploadResponse = await artworkAPI.uploadImage(file, artName);
-              return {
-                url: uploadResponse.data.url,
-                isPrimary: index === 0
-              };
-            } catch (uploadError) {
-              console.warn('Image upload failed, using placeholder:', uploadError);
-              // Fallback to placeholder if upload fails
-              return {
-                url: `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=Image+${index + 1}`,
-                isPrimary: index === 0
-              };
-            }
-          })
-        );
+        selectedFiles.map(async (file, index) => {
+          try {
+              const uploadResponse = await artworkAPI.uploadImage(file);
+            return {
+              url: uploadResponse.data.url,
+              isPrimary: index === 0
+            };
+          } catch (uploadError) {
+            console.warn('Image upload failed, using placeholder:', uploadError);
+            // Fallback to placeholder if upload fails
+            return {
+              url: `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=Image+${index + 1}`,
+              isPrimary: index === 0
+            };
+          }
+        })
+      );
       } else if (isEditMode && editingArtwork?.images && editingArtwork.images.length > 0) {
         // Keep existing images if no new files are selected
         uploadedImages = editingArtwork.images;
@@ -278,7 +277,7 @@ const UploadPage: React.FC = () => {
         console.log('Artwork updated successfully:', response);
       } else {
         response = await artworkAPI.createArtwork(artworkData);
-        console.log('Artwork created successfully:', response);
+      console.log('Artwork created successfully:', response);
       }
       
       // Show success modal
@@ -402,15 +401,15 @@ const UploadPage: React.FC = () => {
                     className="img-fluid rounded"
                     style={{ maxHeight: '400px', objectFit: 'contain' }}
                   />
-                  <button
-                    type="button"
+                    <button
+                      type="button"
                     className="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 rounded-circle"
                     style={{ width: '32px', height: '32px' }}
                     onClick={removeFile}
-                  >
+                    >
                     <i className="bi bi-x"></i>
-                  </button>
-                </div>
+                    </button>
+                  </div>
               </div>
             )}
           </div>
@@ -423,25 +422,25 @@ const UploadPage: React.FC = () => {
                 <label htmlFor="medium" className="form-label fw-semibold">
                   Medium <span className="text-danger">*</span>
                 </label>
-                <select
-                  id="medium"
-                  name="medium"
+                  <select
+                    id="medium"
+                    name="medium"
                   className={`form-select ${errors.medium ? 'is-invalid' : ''}`}
-                  value={formData.medium}
-                  onChange={handleInputChange}
-                >
-                  <option value="">Select a medium</option>
-                  <option value="Oil on Canvas">Oil on Canvas</option>
-                  <option value="Acrylic">Acrylic</option>
-                  <option value="Watercolor">Watercolor</option>
-                  <option value="Digital Art">Digital Art</option>
-                  <option value="Photography">Photography</option>
-                  <option value="Sculpture">Sculpture</option>
-                  <option value="Mixed Media">Mixed Media</option>
-                  <option value="Pencil">Pencil</option>
-                  <option value="Charcoal">Charcoal</option>
-                  <option value="Other">Other</option>
-                </select>
+                    value={formData.medium}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Select a medium</option>
+                    <option value="Oil on Canvas">Oil on Canvas</option>
+                    <option value="Acrylic">Acrylic</option>
+                    <option value="Watercolor">Watercolor</option>
+                    <option value="Digital Art">Digital Art</option>
+                    <option value="Photography">Photography</option>
+                    <option value="Sculpture">Sculpture</option>
+                    <option value="Mixed Media">Mixed Media</option>
+                    <option value="Pencil">Pencil</option>
+                    <option value="Charcoal">Charcoal</option>
+                    <option value="Other">Other</option>
+                  </select>
                 {errors.medium && <div className="invalid-feedback">{errors.medium}</div>}
               </div>
 
@@ -449,25 +448,25 @@ const UploadPage: React.FC = () => {
                 <label htmlFor="style" className="form-label fw-semibold">
                   Style <span className="text-danger">*</span>
                 </label>
-                <select
-                  id="style"
-                  name="style"
+                  <select
+                    id="style"
+                    name="style"
                   className={`form-select ${errors.style ? 'is-invalid' : ''}`}
-                  value={formData.style}
-                  onChange={handleInputChange}
-                >
-                  <option value="">Select a style</option>
-                  <option value="Abstract">Abstract</option>
-                  <option value="Impressionism">Impressionism</option>
-                  <option value="Realism">Realism</option>
-                  <option value="Surrealism">Surrealism</option>
-                  <option value="Contemporary">Contemporary</option>
-                  <option value="Modern">Modern</option>
-                  <option value="Pop Art">Pop Art</option>
-                  <option value="Minimalism">Minimalism</option>
-                  <option value="Expressionism">Expressionism</option>
-                  <option value="Other">Other</option>
-                </select>
+                    value={formData.style}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Select a style</option>
+                    <option value="Abstract">Abstract</option>
+                    <option value="Impressionism">Impressionism</option>
+                    <option value="Realism">Realism</option>
+                    <option value="Surrealism">Surrealism</option>
+                    <option value="Contemporary">Contemporary</option>
+                    <option value="Modern">Modern</option>
+                    <option value="Pop Art">Pop Art</option>
+                    <option value="Minimalism">Minimalism</option>
+                    <option value="Expressionism">Expressionism</option>
+                    <option value="Other">Other</option>
+                  </select>
                 {errors.style && <div className="invalid-feedback">{errors.style}</div>}
               </div>
             </div>
@@ -520,18 +519,18 @@ const UploadPage: React.FC = () => {
 
               <div className="col-md-3">
                 <label htmlFor="unit" className="form-label fw-semibold">Unit</label>
-                <select
-                  id="unit"
-                  name="dimensions.unit"
+                  <select
+                    id="unit"
+                    name="dimensions.unit"
                   className="form-select"
-                  value={formData.dimensions.unit}
-                  onChange={handleInputChange}
-                >
-                  <option value="cm">cm</option>
-                  <option value="inch">inch</option>
-                  <option value="mm">mm</option>
-                  <option value="m">m</option>
-                </select>
+                    value={formData.dimensions.unit}
+                    onChange={handleInputChange}
+                  >
+                    <option value="cm">cm</option>
+                    <option value="inch">inch</option>
+                    <option value="mm">mm</option>
+                    <option value="m">m</option>
+                  </select>
               </div>
             </div>
 
