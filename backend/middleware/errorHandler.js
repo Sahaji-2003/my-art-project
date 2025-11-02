@@ -35,6 +35,7 @@ const errorHandler = (err, req, res, next) => {
     res.status(error.statusCode || 500).json({
       success: false,
       error: error.message || 'Server Error',
+      message: error.message || 'Server Error', // Include message field for frontend compatibility
       details: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
   };

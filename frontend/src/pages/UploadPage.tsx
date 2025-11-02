@@ -71,26 +71,57 @@ const UploadPage: React.FC = () => {
   };
 
   const handleFiles = (files: File[]) => {
-    // Only take the first file
-    const file = files[0];
-    if (!file) return;
+    if (files.length === 0) return;
 
+    // Validate all files
+    const validFiles: File[] = [];
+    const errors: string[] = [];
+
+    for (const file of files) {
       const isValidType = file.type.startsWith('image/');
       const isValidSize = file.size <= 10 * 1024 * 1024; // 10MB limit
 
-    if (!isValidType || !isValidSize) {
+      if (!isValidType) {
+        errors.push(`${file.name} is not a valid image file`);
+        continue;
+      }
+      if (!isValidSize) {
+        errors.push(`${file.name} exceeds 10MB limit`);
+        continue;
+      }
+      validFiles.push(file);
+    }
+
+    // Check max limit (4 images total)
+    const totalFiles = selectedFiles.length + validFiles.length;
+    if (totalFiles > 4) {
       setErrors(prev => ({
         ...prev,
-        files: 'Please select a valid image file (max 10MB)'
+        files: `Maximum 4 images allowed. You can add ${4 - selectedFiles.length} more.`
       }));
       return;
     }
 
-    setSelectedFiles([file]);
+    if (errors.length > 0) {
+      setErrors(prev => ({
+        ...prev,
+        files: errors.join(', ')
+      }));
+    } else {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.files;
+        return newErrors;
+      });
+    }
+
+    // Add valid files to selected files
+    const newFiles = [...selectedFiles, ...validFiles];
+    setSelectedFiles(newFiles);
     
-    // Create preview URL
-    const newPreviewUrl = URL.createObjectURL(file);
-    setPreviewUrls([newPreviewUrl]);
+    // Create preview URLs for new files
+    const newPreviewUrls = validFiles.map(file => URL.createObjectURL(file));
+    setPreviewUrls([...previewUrls, ...newPreviewUrls]);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -103,12 +134,27 @@ const UploadPage: React.FC = () => {
     handleFiles(files);
   };
 
-  const removeFile = () => {
-    if (previewUrls[0]) {
-      URL.revokeObjectURL(previewUrls[0]);
+  const removeFile = (index: number) => {
+    // Revoke object URL if it's a blob URL
+    if (previewUrls[index] && previewUrls[index].startsWith('blob:')) {
+      URL.revokeObjectURL(previewUrls[index]);
     }
-    setSelectedFiles([]);
-    setPreviewUrls([]);
+    
+    // Remove file and preview
+    const newFiles = selectedFiles.filter((_, i) => i !== index);
+    const newUrls = previewUrls.filter((_, i) => i !== index);
+    
+    setSelectedFiles(newFiles);
+    setPreviewUrls(newUrls);
+    
+    // Clear errors if no files
+    if (newFiles.length === 0) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.files;
+        return newErrors;
+      });
+    }
   };
 
   // Fetch artwork data when in edit mode
@@ -140,7 +186,7 @@ const UploadPage: React.FC = () => {
           
           // Set preview URLs from existing images
           if (artwork.images && artwork.images.length > 0) {
-            setPreviewUrls([artwork.images[0].url]);
+            setPreviewUrls(artwork.images.map((img: { url: string; isPrimary?: boolean }) => img.url));
           }
         } catch (err: any) {
           console.error('Error fetching artwork for edit:', err);
@@ -187,10 +233,12 @@ const UploadPage: React.FC = () => {
       newErrors.style = styleValidation.message || 'Style is required';
     }
 
-    // Validate images
-    const imagesValidation = artworkValidation.validateImages(selectedFiles);
-    if (!imagesValidation.isValid && !(isEditMode && editingArtwork?.images && editingArtwork.images.length > 0)) {
-      newErrors.files = imagesValidation.message || 'Please select at least one image';
+    // Validate images (must have at least one - either new or existing)
+    const hasExistingImages = isEditMode && editingArtwork?.images && editingArtwork.images.length > 0;
+    if (selectedFiles.length === 0 && !hasExistingImages) {
+      newErrors.files = 'At least one image is required';
+    } else if (selectedFiles.length > 4) {
+      newErrors.files = 'Maximum 4 images allowed';
     }
 
     // Validate tags
@@ -217,24 +265,53 @@ const UploadPage: React.FC = () => {
       let uploadedImages: Array<{ url: string; isPrimary: boolean }> = [];
       
       if (selectedFiles.length > 0) {
-        uploadedImages = await Promise.all(
-        selectedFiles.map(async (file, index) => {
-          try {
-              const uploadResponse = await artworkAPI.uploadImage(file);
+        // Upload all files at once using FormData
+        const formData = new FormData();
+        selectedFiles.forEach(file => {
+          formData.append('images', file);
+        });
+
+        try {
+          // Upload multiple images
+          const uploadResponse = await artworkAPI.uploadMultipleImages(formData);
+          
+          // Handle response - could be array or single object
+          const uploaded = Array.isArray(uploadResponse.data) 
+            ? uploadResponse.data 
+            : [uploadResponse.data];
+          
+          uploadedImages = uploaded.map((img: any, index: number) => {
+            const imageUrl = typeof img === 'string' ? img : (img.url || '');
             return {
-              url: uploadResponse.data.url,
+              url: imageUrl,
               isPrimary: index === 0
             };
-          } catch (uploadError) {
-            console.warn('Image upload failed, using placeholder:', uploadError);
-            // Fallback to placeholder if upload fails
-            return {
-              url: `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=Image+${index + 1}`,
-              isPrimary: index === 0
-            };
-          }
-        })
-      );
+          });
+        } catch (uploadError: any) {
+          console.warn('Bulk upload failed, trying individual uploads:', uploadError);
+          // Fallback to individual uploads
+          uploadedImages = await Promise.all(
+            selectedFiles.map(async (file, index) => {
+              try {
+                const uploadResponse = await artworkAPI.uploadImage(file);
+                const uploadData = uploadResponse.data;
+                const imageUrl = typeof uploadData === 'string' 
+                  ? uploadData 
+                  : (typeof uploadData === 'object' && uploadData.url ? uploadData.url : '');
+                return {
+                  url: imageUrl || `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=Image+${index + 1}`,
+                  isPrimary: index === 0
+                };
+              } catch (err) {
+                console.warn('Image upload failed, using placeholder:', err);
+                return {
+                  url: `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=Image+${index + 1}`,
+                  isPrimary: index === 0
+                };
+              }
+            })
+          );
+        }
       } else if (isEditMode && editingArtwork?.images && editingArtwork.images.length > 0) {
         // Keep existing images if no new files are selected
         uploadedImages = editingArtwork.images;
@@ -373,12 +450,13 @@ const UploadPage: React.FC = () => {
               onClick={() => fileInputRef.current?.click()}
             >
               <i className="bi bi-cloud-upload display-3 text-primary mb-3"></i>
-              <p className="mb-2">Drag 'n' drop an image here, or click to select a file</p>
-              <p className="text-muted small mb-0">Max 10MB</p>
+              <p className="mb-2">Drag 'n' drop images here, or click to select files</p>
+              <p className="text-muted small mb-0">Max 4 images, 10MB each</p>
               <input
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
+                multiple
                 onChange={handleFileSelect}
                 style={{ display: 'none' }}
               />
@@ -391,25 +469,43 @@ const UploadPage: React.FC = () => {
               </div>
             )}
 
-            {/* Image Preview */}
+            {/* Image Previews */}
             {previewUrls.length > 0 && (
               <div className="mt-3">
-                <div className="position-relative d-inline-block" style={{ maxWidth: '100%' }}>
-                  <img 
-                    src={previewUrls[0]} 
-                    alt="Preview" 
-                    className="img-fluid rounded"
-                    style={{ maxHeight: '400px', objectFit: 'contain' }}
-                  />
-                    <button
-                      type="button"
-                    className="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 rounded-circle"
-                    style={{ width: '32px', height: '32px' }}
-                    onClick={removeFile}
-                    >
-                    <i className="bi bi-x"></i>
-                    </button>
+                <div className="row g-3">
+                  {previewUrls.map((url, index) => (
+                    <div key={index} className="col-6 col-md-4 col-lg-3">
+                      <div className="position-relative">
+                        <img 
+                          src={url} 
+                          alt={`Preview ${index + 1}`} 
+                          className="img-fluid rounded border"
+                          style={{ width: '100%', height: '200px', objectFit: 'cover' }}
+                        />
+                        <button
+                          type="button"
+                          className="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 rounded-circle"
+                          style={{ width: '28px', height: '28px', fontSize: '12px' }}
+                          onClick={() => removeFile(index)}
+                          title="Remove image"
+                        >
+                          <i className="bi bi-x"></i>
+                        </button>
+                        {index === 0 && (
+                          <span className="badge bg-primary position-absolute top-0 start-0 m-1">
+                            Primary
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {previewUrls.length >= 4 && (
+                  <div className="alert alert-info mt-2 mb-0">
+                    <i className="bi bi-info-circle me-2"></i>
+                    Maximum 4 images reached
                   </div>
+                )}
               </div>
             )}
           </div>

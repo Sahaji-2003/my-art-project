@@ -11,6 +11,15 @@ const { protect } = require('../middleware/authMiddleware');
 // Get artwork reviews (public)
 router.get('/artwork/:artworkId', reviewController.getArtworkReviews);
 
+// Get all reviews for artist's artworks (public)
+router.get('/artist/:artistId', reviewController.getArtistReviews);
+
+// Check if review exists for an order (protected)
+router.get('/check/:orderId', protect, reviewController.checkReviewExists);
+
+// Get review for an order (protected)
+router.get('/order/:orderId/review', protect, reviewController.getOrderReview);
+
 // Create review (protected)
 router.post('/', protect, reviewController.createReview);
 

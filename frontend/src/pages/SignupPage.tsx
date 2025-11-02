@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authAPI } from '../services/api.service';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -7,17 +7,31 @@ import '../styles/App.css';
 
 const SignupPage: React.FC = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState<'signup' | 'otp'>('signup');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
   });
-  const [otp, setOtp] = useState('');
-  const [generatedOTP, setGeneratedOTP] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState<{ name?: string; email?: string; password?: string; otp?: string; general?: string }>({});
+  const [errors, setErrors] = useState<{ name?: string; email?: string; password?: string; captcha?: string; general?: string }>({});
+  
+  // Simple CAPTCHA
+  const [captchaAnswer, setCaptchaAnswer] = useState('');
+  const [captcha, setCaptcha] = useState({ num1: 0, num2: 0, operator: '+' });
+  
+  // Generate new CAPTCHA
+  const generateCaptcha = () => {
+    const num1 = Math.floor(Math.random() * 10) + 1;
+    const num2 = Math.floor(Math.random() * 10) + 1;
+    setCaptcha({ num1, num2, operator: '+' });
+    setCaptchaAnswer('');
+  };
+  
+  // Initialize CAPTCHA on component mount
+  useEffect(() => {
+    generateCaptcha();
+  }, []);
 
   const validateSignup = () => {
     const newErrors: any = {};
@@ -38,6 +52,15 @@ const SignupPage: React.FC = () => {
       newErrors.password = 'Password is required';
     } else if (formData.password.length < 8) {
       newErrors.password = 'Password must be at least 8 characters long';
+    }
+    
+    // Validate CAPTCHA
+    const expectedAnswer = captcha.num1 + captcha.num2;
+    if (!captchaAnswer.trim()) {
+      newErrors.captcha = 'Please solve the CAPTCHA';
+    } else if (parseInt(captchaAnswer) !== expectedAnswer) {
+      newErrors.captcha = 'Incorrect answer. Please try again.';
+      generateCaptcha(); // Generate new CAPTCHA on wrong answer
     }
     
     return { isValid: Object.keys(newErrors).length === 0, errors: newErrors };
@@ -72,40 +95,7 @@ const SignupPage: React.FC = () => {
     setErrors({});
 
     try {
-      // Generate OTP (dummy implementation - in production, this would come from backend)
-      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-      setGeneratedOTP(otpCode);
-      
-      // In production, you would call an API to send OTP to email
-      // For now, just proceed to OTP step
-      setStep('otp');
-    } catch (err: any) {
-      setErrors({
-        general: err.message || 'Registration failed. Please try again.'
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleOTPSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!otp.trim()) {
-      setErrors({ otp: 'OTP is required' });
-      return;
-    }
-
-    if (otp !== generatedOTP) {
-      setErrors({ otp: 'Invalid OTP' });
-      return;
-    }
-
-    setLoading(true);
-    setErrors({});
-
-    try {
-      // Now actually sign up the user
+      // Sign up the user
       await authAPI.signup({
         name: formData.name,
         email: formData.email,
@@ -116,16 +106,11 @@ const SignupPage: React.FC = () => {
       navigate('/login');
     } catch (err: any) {
       setErrors({
-        general: err.message || 'Registration failed. Please try again.'
+        general: err.response?.data?.message || err.response?.data?.error || err.message || 'Registration failed. Please try again.'
       });
     } finally {
       setLoading(false);
     }
-  };
-
-  const copyOTP = () => {
-    navigator.clipboard.writeText(generatedOTP);
-    alert('OTP copied to clipboard!');
   };
 
   return (
@@ -147,10 +132,7 @@ const SignupPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Step 1: Signup Form */}
-              {step === 'signup' && (
-                <>
-                  <form onSubmit={handleSignupSubmit}>
+              <form onSubmit={handleSignupSubmit}>
                     <div className="mb-3">
                       <label htmlFor="name" className="form-label fw-semibold">Full Name</label>
                       <input
@@ -211,6 +193,43 @@ const SignupPage: React.FC = () => {
                       <div className="form-text">Must be at least 8 characters long</div>
                     </div>
 
+                    {/* CAPTCHA */}
+                    <div className="mb-3">
+                      <label htmlFor="captcha" className="form-label fw-semibold">
+                        Prove you're not a robot
+                      </label>
+                      <div className="d-flex align-items-center gap-3">
+                        <div className="border rounded p-2 bg-light text-center" style={{ minWidth: '120px', fontFamily: 'monospace', fontSize: '1.2rem', fontWeight: 'bold' }}>
+                          {captcha.num1} + {captcha.num2} = ?
+                        </div>
+                        <input
+                          type="number"
+                          className={`form-control ${errors.captcha ? 'is-invalid' : ''}`}
+                          id="captcha"
+                          value={captchaAnswer}
+                          onChange={(e) => {
+                            setCaptchaAnswer(e.target.value);
+                            if (errors.captcha) {
+                              setErrors(prev => ({ ...prev, captcha: undefined }));
+                            }
+                          }}
+                          placeholder="Answer"
+                          disabled={loading}
+                          style={{ maxWidth: '100px' }}
+                        />
+                        <button
+                          type="button"
+                          className="btn btn-outline-secondary btn-sm"
+                          onClick={generateCaptcha}
+                          disabled={loading}
+                          title="Refresh CAPTCHA"
+                        >
+                          <i className="bi bi-arrow-clockwise"></i>
+                        </button>
+                      </div>
+                      {errors.captcha && <div className="invalid-feedback d-block">{errors.captcha}</div>}
+                    </div>
+
                     <button 
                       type="submit" 
                       className="btn btn-primary w-100"
@@ -257,72 +276,6 @@ const SignupPage: React.FC = () => {
                       </button>
                     </div>
                   </div>
-                </>
-              )}
-
-              {/* Step 2: OTP Verification */}
-              {step === 'otp' && (
-                <form onSubmit={handleOTPSubmit}>
-                  <div className="alert alert-info">
-                    <div className="d-flex align-items-center justify-content-between">
-                      <div>
-                        <i className="bi bi-info-circle-fill me-2"></i>
-                        <strong>Your OTP:</strong> <span className="font-monospace fs-5 fw-bold">{generatedOTP}</span>
-                      </div>
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-outline-primary"
-                        onClick={copyOTP}
-                      >
-                        <i className="bi bi-clipboard me-1"></i>
-                        Copy
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="mb-3">
-                    <label htmlFor="otp" className="form-label fw-semibold">Enter OTP</label>
-                    <input
-                      type="text"
-                      className="form-control text-center font-monospace"
-                      id="otp"
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                      placeholder="000000"
-                      maxLength={6}
-                      disabled={loading}
-                    />
-                    {errors.otp && <div className="invalid-feedback d-block">{errors.otp}</div>}
-                  </div>
-
-                  <div className="d-flex gap-2">
-                    <button
-                      type="submit"
-                      className="btn btn-primary flex-grow-1"
-                      disabled={loading}
-                    >
-                      {loading ? (
-                        <>
-                          <span className="spinner-border spinner-border-sm me-2"></span>
-                          Verifying...
-                        </>
-                      ) : (
-                        <>
-                          <i className="bi bi-check-circle me-2"></i>
-                          Verify & Sign Up
-                        </>
-                      )}
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary"
-                      onClick={() => setStep('signup')}
-                    >
-                      <i className="bi bi-arrow-left"></i>
-                    </button>
-                  </div>
-                </form>
-              )}
 
               <div className="text-center mt-4">
                 <span className="text-muted">Already have an account? </span>

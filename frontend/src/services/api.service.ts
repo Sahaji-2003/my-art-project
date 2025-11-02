@@ -259,8 +259,17 @@ export const artworkAPI = {
 
   uploadImage: async (file: File): Promise<ApiResponse<{ url: string }>> => {
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append('images', file);
     
+    const response = await apiClient.post('/artworks/upload-image', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  uploadMultipleImages: async (formData: FormData): Promise<ApiResponse<any>> => {
     const response = await apiClient.post('/artworks/upload-image', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -317,6 +326,17 @@ export const reviewAPI = {
 
   deleteReview: async (reviewId: string): Promise<ApiResponse<any>> => {
     const response = await apiClient.delete(`/reviews/${reviewId}`);
+    return response.data;
+  },
+
+  checkReviewExists: async (orderId: string): Promise<ApiResponse<any>> => {
+    const response = await apiClient.get(`/reviews/check/${orderId}`);
+    return response.data;
+  },
+
+  getArtistReviews: async (artistId: string, limit?: number): Promise<ApiResponse<any>> => {
+    const url = limit ? `/reviews/artist/${artistId}?limit=${limit}` : `/reviews/artist/${artistId}`;
+    const response = await apiClient.get(url);
     return response.data;
   },
 };

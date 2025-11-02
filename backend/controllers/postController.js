@@ -55,9 +55,9 @@ exports.getAllPosts = async (req, res, next) => {
         post.author = post.authorId;
         delete post.authorId;
       }
-      // Keep likes array for frontend compatibility
-      // Transform comments to count (comments are stored separately)
-      post.comments = 0; // Will be calculated if needed
+      // Use the commentsCount from aggregation, or default to 0
+      post.comments = post.commentsCount || 0;
+      delete post.commentsCount;
       return post;
     });
     
@@ -114,6 +114,11 @@ exports.toggleLike = async (req, res, next) => {
       postObj.author = postObj.authorId;
       delete postObj.authorId;
     }
+    
+    // Get comment count for the post
+    const Comment = require('../models/Comment');
+    const commentCount = await Comment.countDocuments({ postId: req.params.postId });
+    postObj.comments = commentCount;
     
     res.status(200).json({
       success: true,

@@ -3,17 +3,18 @@
 // controllers/artistController.js
 // ============================================
 const artistService = require('../services/artistService');
-const ArtistProfile = require('../models/ArtistProfile');
+const User = require('../models/User');
 
 exports.createProfile = async (req, res, next) => {
   try {
-    // Check if profile exists first
-    const existingProfile = await ArtistProfile.findOne({ userId: req.user.id });
+    // Check if user is already an artist
+    const user = await User.findById(req.user.id);
+    const isNewProfile = !user.isArtist;
     
     const profile = await artistService.createProfile(req.user.id, req.body);
     
-    const message = existingProfile ? 'Artist profile updated successfully' : 'Artist profile created successfully';
-    res.status(existingProfile ? 200 : 201).json({
+    const message = isNewProfile ? 'Artist profile created successfully' : 'Artist profile updated successfully';
+    res.status(isNewProfile ? 201 : 200).json({
       success: true,
       message,
       data: profile

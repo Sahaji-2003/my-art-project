@@ -1,69 +1,64 @@
 
-
 // ============================================
 // services/artistService.js
 // ============================================
-const ArtistProfile = require('../models/ArtistProfile');
 const User = require('../models/User');
 
 class ArtistService {
   async createProfile(userId, profileData) {
-    // Check if profile already exists
-    const existingProfile = await ArtistProfile.findOne({ userId });
-    
-    if (existingProfile) {
-      // Update existing profile
-      const profile = await ArtistProfile.findOneAndUpdate(
-        { userId },
-        { $set: profileData },
-        { new: true, runValidators: true }
-      ).populate('userId', 'name email profilePicture');
-      return profile;
+    // Update user with artist profile data and set isArtist to true
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { 
+        $set: { 
+          ...profileData,
+          isArtist: true 
+        } 
+      },
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    if (!user) {
+      throw new Error('User not found');
     }
 
-    // Create new artist profile
-    const profile = await ArtistProfile.create({
-      userId,
-      ...profileData
-    });
-
-    // Update user's isArtist flag
-    await User.findByIdAndUpdate(userId, { isArtist: true });
-
-    return profile;
+    return user;
   }
 
   async getProfile(userId) {
-    const profile = await ArtistProfile.findOne({ userId }).populate('userId', 'name email profilePicture');
-    if (!profile) {
-      throw new Error('Artist profile not found');
+    const user = await User.findById(userId).select('-password');
+    if (!user) {
+      throw new Error('User not found');
     }
-    return profile;
+    if (!user.isArtist) {
+      throw new Error('User is not an artist');
+    }
+    return user;
   }
 
   async updateProfile(userId, updateData) {
-    const profile = await ArtistProfile.findOneAndUpdate(
-      { userId },
+    const user = await User.findByIdAndUpdate(
+      userId,
       { $set: updateData },
       { new: true, runValidators: true }
-    ).populate('userId', 'name email profilePicture');
+    ).select('-password');
 
-    if (!profile) {
-      throw new Error('Artist profile not found');
+    if (!user) {
+      throw new Error('User not found');
     }
-    return profile;
+    return user;
   }
 
   async getAllArtists(page = 1, limit = 10) {
     const skip = (page - 1) * limit;
     
-    const artists = await ArtistProfile.find()
-      .populate('userId', 'name email profilePicture')
+    const artists = await User.find({ isArtist: true })
+      .select('-password')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
-    const total = await ArtistProfile.countDocuments();
+    const total = await User.countDocuments({ isArtist: true });
 
     return {
       artists,
@@ -77,15 +72,15 @@ class ArtistService {
   }
 
   async getArtistStats(userId) {
-    const profile = await ArtistProfile.findOne({ userId });
-    if (!profile) {
-      throw new Error('Artist profile not found');
+    const user = await User.findById(userId).select('-password');
+    if (!user || !user.isArtist) {
+      throw new Error('Artist not found');
     }
 
     return {
-      totalSales: profile.totalSales,
-      totalRevenue: profile.totalRevenue,
-      rating: profile.rating
+      totalSales: user.totalSales || 0,
+      totalRevenue: user.totalRevenue || 0,
+      rating: user.rating || 0
     };
   }
 }

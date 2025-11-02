@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema({
   },
   isArtist: {
     type: Boolean,
-    default: false // User becomes artist when they create an artist profile
+    default: false
   },
   isEmailVerified: {
     type: Boolean,
@@ -35,6 +35,43 @@ const userSchema = new mongoose.Schema({
   profilePicture: {
     type: String,
     default: null
+  },
+  // Artist-specific fields (merged from ArtistProfile)
+  bio: {
+    type: String,
+    trim: true,
+    maxlength: [1000, 'Bio cannot exceed 1000 characters'],
+    default: null
+  },
+  portfolio: {
+    type: String,
+    trim: true,
+    maxlength: [2000, 'Portfolio description cannot exceed 2000 characters'],
+    default: null
+  },
+  socialMediaLinks: {
+    facebook: { type: String, default: '' },
+    instagram: { type: String, default: '' },
+    twitter: { type: String, default: '' },
+    website: { type: String, default: '' }
+  },
+  isVerified: {
+    type: Boolean,
+    default: false
+  },
+  rating: {
+    type: Number,
+    default: 0,
+    min: 0,
+    max: 5
+  },
+  totalSales: {
+    type: Number,
+    default: 0
+  },
+  totalRevenue: {
+    type: Number,
+    default: 0
   },
   createdAt: {
     type: Date,

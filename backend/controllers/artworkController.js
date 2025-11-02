@@ -91,26 +91,29 @@ exports.toggleLike = async (req, res, next) => {
 
 exports.uploadImage = async (req, res, next) => {
   try {
-    if (!req.file) {
+    // Handle both single file and multiple files
+    const files = req.files || (req.file ? [req.file] : []);
+    
+    if (files.length === 0) {
       return res.status(400).json({
         success: false,
         message: 'No image file provided'
       });
     }
 
-    // Return the URL path relative to the frontend public directory
-    // The file is saved in frontend/public/assets/images/art, so the URL is /assets/images/art/filename
-    const imageUrl = `/assets/images/art/${req.file.filename}`;
+    // Return the URLs for all uploaded images
+    const uploadedImages = files.map((file, index) => ({
+      url: `/assets/images/art/${file.filename}`,
+      filename: file.filename,
+      originalname: file.originalname,
+      size: file.size,
+      isPrimary: index === 0 // First image is primary
+    }));
     
     res.status(200).json({
       success: true,
-      message: 'Image uploaded successfully',
-      data: {
-        url: imageUrl,
-        filename: req.file.filename,
-        originalname: req.file.originalname,
-        size: req.file.size
-      }
+      message: files.length === 1 ? 'Image uploaded successfully' : 'Images uploaded successfully',
+      data: files.length === 1 ? uploadedImages[0] : uploadedImages // Return single object for single file, array for multiple
     });
   } catch (error) {
     next(error);

@@ -5,7 +5,7 @@
 // ============================================
 const Order = require('../models/Order');
 const Artwork = require('../models/Artwork');
-const ArtistProfile = require('../models/ArtistProfile');
+const User = require('../models/User');
 
 class OrderService {
   async createOrder(buyerId, artworkId, orderData) {
@@ -42,8 +42,8 @@ class OrderService {
     await artwork.save();
 
     // Update artist statistics
-    await ArtistProfile.findOneAndUpdate(
-      { userId: artwork.artistId },
+    await User.findByIdAndUpdate(
+      artwork.artistId,
       {
         $inc: {
           totalSales: 1,

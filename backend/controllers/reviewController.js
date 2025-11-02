@@ -62,3 +62,45 @@ exports.deleteReview = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.checkReviewExists = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const review = await reviewService.checkReviewExists(orderId, req.user.id);
+    res.status(200).json({
+      success: true,
+      data: review,
+      exists: !!review
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getOrderReview = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const review = await reviewService.getOrderReview(orderId, req.user.id);
+    res.status(200).json({
+      success: true,
+      data: review
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getArtistReviews = async (req, res, next) => {
+  try {
+    const { artistId } = req.params;
+    const { limit } = req.query;
+    const result = await reviewService.getArtistReviews(artistId, limit ? parseInt(limit) : 5);
+    res.status(200).json({
+      success: true,
+      data: result.reviews,
+      total: result.total
+    });
+  } catch (error) {
+    next(error);
+  }
+};

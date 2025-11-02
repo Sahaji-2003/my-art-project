@@ -4,13 +4,13 @@
 // services/artworkService.js
 // ============================================
 const Artwork = require('../models/Artwork');
-const ArtistProfile = require('../models/ArtistProfile');
+const User = require('../models/User');
 
 class ArtworkService {
   async createArtwork(artistId, artworkData) {
-    // Verify artist profile exists
-    const artistProfile = await ArtistProfile.findOne({ userId: artistId });
-    if (!artistProfile) {
+    // Verify artist exists and is an artist
+    const user = await User.findById(artistId);
+    if (!user || !user.isArtist) {
       throw new Error('Artist profile not found. Please create an artist profile first.');
     }
 

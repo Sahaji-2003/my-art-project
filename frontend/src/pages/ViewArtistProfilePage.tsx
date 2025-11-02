@@ -1,17 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { artistAPI } from '../services/api.service';
+import { artistAPI, reviewAPI } from '../services/api.service';
 import { artworkAPI, type Artwork } from '../services/artwork';
 import ArtworkCard from '../components/ArtworkCard';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import '../styles/App.css';
 
+interface Review {
+  _id: string;
+  rating: number;
+  comment?: string;
+  buyerId?: {
+    _id: string;
+    name: string;
+    profilePicture?: string;
+  };
+  artworkId?: {
+    _id: string;
+    title: string;
+    images?: Array<{ url: string }>;
+  };
+  createdAt: string;
+}
+
 const ViewArtistProfilePage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<any>(null);
   const [artworks, setArtworks] = useState<Artwork[]>([]);
+  const [soldArtworks, setSoldArtworks] = useState<Artwork[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [totalReviews, setTotalReviews] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [likingArtworks, setLikingArtworks] = useState<Set<string>>(new Set());
@@ -20,6 +40,7 @@ const ViewArtistProfilePage: React.FC = () => {
     if (userId) {
       fetchArtistProfile();
       fetchArtistArtworks();
+      fetchArtistReviews();
     }
   }, [userId]);
 
@@ -37,12 +58,27 @@ const ViewArtistProfilePage: React.FC = () => {
     try {
       setLoading(true);
       const response = await artworkAPI.getArtworksByArtist(userId!);
-      setArtworks(response.data || []);
+      const allArtworks = response.data || [];
+      setArtworks(allArtworks);
+      // Filter sold artworks
+      const sold = allArtworks.filter((artwork: Artwork) => artwork.status === 'sold');
+      setSoldArtworks(sold);
     } catch (err: any) {
       console.error('Error fetching artist artworks:', err);
       setError('Failed to load artworks');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchArtistReviews = async () => {
+    try {
+      const response = await reviewAPI.getArtistReviews(userId!, 5);
+      setReviews(response.data || []);
+      setTotalReviews(response.total || 0);
+    } catch (err: any) {
+      console.error('Error fetching artist reviews:', err);
+      // Don't set error for reviews, just leave empty
     }
   };
 
@@ -134,10 +170,10 @@ const ViewArtistProfilePage: React.FC = () => {
                 className="rounded-circle bg-light d-flex align-items-center justify-content-center overflow-hidden"
                 style={{ width: '120px', height: '120px' }}
               >
-                {profile?.userId?.profilePicture || profile?.profilePicture ? (
+                {profile?.profilePicture ? (
                   <img 
-                    src={profile.userId?.profilePicture || profile.profilePicture} 
-                    alt={profile.userId?.name || 'Artist'} 
+                    src={profile.profilePicture} 
+                    alt={profile?.name || 'Artist'} 
                     className="w-100 h-100"
                     style={{ objectFit: 'cover' }}
                   />
@@ -148,7 +184,7 @@ const ViewArtistProfilePage: React.FC = () => {
             </div>
             <div className="col">
               <div className="d-flex align-items-center gap-2 mb-2">
-                <h2 className="h3 mb-0 fw-bold">{profile?.userId?.name || 'Artist'}</h2>
+                <h2 className="h3 mb-0 fw-bold">{profile?.name || 'Artist'}</h2>
                 {profile?.isVerified && (
                   <i className="bi bi-patch-check-fill text-primary fs-5"></i>
                 )}
@@ -214,10 +250,33 @@ const ViewArtistProfilePage: React.FC = () => {
           </div>
         </div>
 
-        {/* Artworks Section */}
-        <div className="bg-white rounded-4 shadow-sm p-4">
+        {/* Sold Artworks Section */}
+        {soldArtworks.length > 0 && (
+          <div className="bg-white rounded-4 shadow-sm p-4 mb-4">
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h2 className="h4 mb-0 fw-bold">Sold Artworks</h2>
+              <span className="badge bg-success">{soldArtworks.length} sold</span>
+            </div>
+
+            <div className="row g-4">
+              {soldArtworks.map((artwork) => (
+                <div key={artwork._id} className="col-6 col-md-4 col-lg-3">
+                  <ArtworkCard
+                    artwork={artwork}
+                    onCardClick={() => handleCardClick(artwork)}
+                    onLikeClick={() => handleToggleLike(artwork)}
+                    isLiking={likingArtworks.has(artwork._id || '')}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* All Artworks Section */}
+        <div className="bg-white rounded-4 shadow-sm p-4 mb-4">
           <div className="d-flex justify-content-between align-items-center mb-4">
-            <h2 className="h4 mb-0 fw-bold">Artworks by {profile?.userId?.name || 'Artist'}</h2>
+            <h2 className="h4 mb-0 fw-bold">All Artworks by {profile?.name || 'Artist'}</h2>
             <span className="badge bg-primary">{artworks.length} pieces</span>
           </div>
 
@@ -241,6 +300,70 @@ const ViewArtistProfilePage: React.FC = () => {
             </div>
           )}
         </div>
+
+        {/* Customer Reviews Section */}
+        {totalReviews > 0 && (
+          <div className="bg-white rounded-4 shadow-sm p-4">
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <div>
+                <h2 className="h4 mb-0 fw-bold">Customer Reviews</h2>
+                <p className="text-muted small mb-0">{totalReviews} total {totalReviews === 1 ? 'review' : 'reviews'}</p>
+              </div>
+              <span className="badge bg-primary">Top {reviews.length} Reviews</span>
+            </div>
+
+            {reviews.length > 0 ? (
+              <div>
+                {reviews.map((review) => {
+                  const reviewer = review.buyerId || {};
+                  const reviewerName = reviewer.name || 'Anonymous';
+                  const reviewerPicture = reviewer.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(reviewerName)}&background=4A90E2&color=fff`;
+                  const artworkTitle = review.artworkId?.title || 'Artwork';
+                  
+                  return (
+                    <div key={review._id} className="mb-4 pb-4 border-bottom">
+                      <div className="d-flex align-items-start gap-3 mb-2">
+                        <img 
+                          src={reviewerPicture}
+                          alt={reviewerName}
+                          className="rounded-circle"
+                          style={{ width: '48px', height: '48px', objectFit: 'cover' }}
+                        />
+                        <div className="flex-grow-1">
+                          <div className="d-flex align-items-center gap-2 mb-1">
+                            <span className="fw-semibold">{reviewerName}</span>
+                            <span className="text-muted small">•</span>
+                            <span className="text-muted small">{artworkTitle}</span>
+                          </div>
+                          <div className="text-warning mb-2">
+                            {Array.from({ length: 5 }, (_, i) => (
+                              <i key={i} className={`bi ${i < review.rating ? 'bi-star-fill' : 'bi-star'}`}></i>
+                            ))}
+                          </div>
+                          {review.comment && (
+                            <p className="text-muted mb-2">{review.comment}</p>
+                          )}
+                          <small className="text-muted">
+                            {new Date(review.createdAt).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric'
+                            })}
+                          </small>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-4">
+                <i className="bi bi-chat-left-text display-6 text-muted"></i>
+                <p className="text-muted mt-3">No reviews yet</p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

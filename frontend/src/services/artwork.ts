@@ -134,6 +134,16 @@ export const artworkAPI = {
   getTrendingArtworks: async (limit: number = 8): Promise<{ success: boolean; data: Artwork[] }> => {
     const response = await apiClient.get(`/artworks/trending?limit=${limit}`);
     return response.data;
+  },
+
+  // Upload multiple images
+  uploadMultipleImages: async (formData: FormData): Promise<UploadResponse | { success: boolean; data: any[]; message?: string }> => {
+    const response = await apiClient.post('/artworks/upload-image', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
   }
 };
 
@@ -204,8 +214,8 @@ export const artworkValidation = {
     if (!images || images.length === 0) {
       return { isValid: false, message: 'At least one image is required' };
     }
-    if (images.length > 10) {
-      return { isValid: false, message: 'Maximum 10 images allowed' };
+    if (images.length > 4) {
+      return { isValid: false, message: 'Maximum 4 images allowed' };
     }
     
     for (const file of images) {

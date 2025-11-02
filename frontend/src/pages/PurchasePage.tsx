@@ -15,7 +15,12 @@ interface Review {
   _id: string;
   rating: number;
   comment: string;
-  user: {
+  user?: {
+    _id: string;
+    name: string;
+    profilePicture?: string;
+  };
+  buyerId?: {
     _id: string;
     name: string;
     profilePicture?: string;
@@ -50,6 +55,14 @@ const PurchasePage: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [orderId, setOrderId] = useState<string | null>(null);
+  const [reviewData, setReviewData] = useState({
+    rating: 0,
+    comment: ''
+  });
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   useEffect(() => {
     if (artworkId) {
@@ -206,6 +219,7 @@ const PurchasePage: React.FC = () => {
       const response = await orderAPI.createOrder(artworkId!, orderPayload);
       
       if (response.success) {
+        setOrderId(response.data._id);
         setShowSuccessModal(true);
       } else {
         setError('Failed to place order. Please try again.');
@@ -548,11 +562,41 @@ const PurchasePage: React.FC = () => {
           <div className="col-lg-6">
             {/* Artwork Display */}
             <div className="bg-white rounded-4 shadow-sm p-4 mb-4">
-              <img 
-                src={artwork.images?.[0]?.url || 'https://via.placeholder.com/400x400/CCCCCC/FFFFFF?text=No+Image'} 
-                alt={artwork.title}
-                className="img-fluid rounded-3 mb-3 w-100"
-              />
+              {/* Main Image Display */}
+              <div className="mb-3">
+                <img 
+                  src={artwork.images?.[selectedImageIndex]?.url || artwork.images?.[0]?.url || 'https://via.placeholder.com/400x400/CCCCCC/FFFFFF?text=No+Image'} 
+                  alt={artwork.title}
+                  className="img-fluid rounded-3 w-100"
+                  style={{ maxHeight: '500px', objectFit: 'contain' }}
+                />
+              </div>
+              
+              {/* Thumbnail Gallery - Show only if multiple images */}
+              {artwork.images && artwork.images.length > 1 && (
+                <div className="d-flex gap-2 mb-3 flex-wrap">
+                  {artwork.images.map((image, index) => (
+                    <div
+                      key={index}
+                      className={`border rounded p-1 cursor-pointer ${selectedImageIndex === index ? 'border-primary border-2' : 'border-secondary'}`}
+                      style={{ 
+                        cursor: 'pointer',
+                        width: '80px',
+                        height: '80px',
+                        overflow: 'hidden'
+                      }}
+                      onClick={() => setSelectedImageIndex(index)}
+                    >
+                      <img
+                        src={image.url}
+                        alt={`${artwork.title} - Image ${index + 1}`}
+                        className="w-100 h-100"
+                        style={{ objectFit: 'cover' }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
               <h2 className="fw-bold mb-2">{artwork.title}</h2>
               <p className="text-muted mb-3">
                 <i className="bi bi-person-circle me-2"></i>
@@ -589,29 +633,35 @@ const PurchasePage: React.FC = () => {
               <h2 className="fw-bold mb-3 pb-2 border-bottom">Customer Reviews</h2>
               {reviews.length > 0 ? (
                 <div>
-                  {reviews.map((review) => (
-                    <div key={review._id} className="mb-4">
-                      <div className="d-flex align-items-center gap-2 mb-2">
-                        <img 
-                          src={review.user.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(review.user.name)}&background=4A90E2&color=fff`}
-                          alt={review.user.name}
-                          className="rounded-circle"
-                          style={{ width: '32px', height: '32px', objectFit: 'cover' }}
-                        />
-                        <div className="flex-grow-1">
-                          <div className="text-warning mb-1">
-                            {Array.from({ length: 5 }, (_, i) => (
-                              <i key={i} className={`bi ${i < review.rating ? 'bi-star-fill' : 'bi-star'}`}></i>
-                            ))}
+                  {reviews.map((review) => {
+                    const reviewer = review.user || review.buyerId || {};
+                    const reviewerName = reviewer.name || 'Anonymous';
+                    const reviewerPicture = reviewer.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(reviewerName)}&background=4A90E2&color=fff`;
+                    
+                    return (
+                      <div key={review._id} className="mb-4">
+                        <div className="d-flex align-items-center gap-2 mb-2">
+                          <img 
+                            src={reviewerPicture}
+                            alt={reviewerName}
+                            className="rounded-circle"
+                            style={{ width: '32px', height: '32px', objectFit: 'cover' }}
+                          />
+                          <div className="flex-grow-1">
+                            <div className="text-warning mb-1">
+                              {Array.from({ length: 5 }, (_, i) => (
+                                <i key={i} className={`bi ${i < review.rating ? 'bi-star-fill' : 'bi-star'}`}></i>
+                              ))}
+                            </div>
+                            <span className="fw-semibold">{reviewerName}</span>
                           </div>
-                          <span className="fw-semibold">{review.user.name}</span>
                         </div>
+                        {review.comment && (
+                          <p className="text-muted mb-0">{review.comment}</p>
+                        )}
                       </div>
-                      {review.comment && (
-                        <p className="text-muted mb-0">{review.comment}</p>
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="alert alert-info text-center py-4">
@@ -634,9 +684,38 @@ const PurchasePage: React.FC = () => {
               </div>
               <h3 className="fw-bold mb-3">Order Placed Successfully!</h3>
               <p className="text-muted mb-4">You will receive a confirmation email shortly.</p>
+              <div className="d-flex gap-2 justify-content-center">
               <button 
                 className="btn btn-primary"
-                onClick={() => navigate('/my-purchases')}
+                  onClick={async () => {
+                    setShowSuccessModal(false);
+                    // Check if review already exists before opening modal
+                    if (orderId) {
+                      try {
+                        const reviewCheck = await reviewAPI.checkReviewExists(orderId);
+                        if (reviewCheck.exists) {
+                          setError('You have already reviewed this purchase.');
+                          setTimeout(() => {
+                            navigate('/my-purchases');
+                          }, 2000);
+                          return;
+                        }
+                      } catch (err) {
+                        // If check fails, still allow opening the modal
+                        console.error('Error checking review:', err);
+                      }
+                    }
+                    setShowReviewModal(true);
+                  }}
+                >
+                  Give Your Review
+                </button>
+                <button 
+                  className="btn btn-outline-secondary"
+                  onClick={() => {
+                    setShowSuccessModal(false);
+                    navigate('/my-purchases');
+                  }}
               >
                 View My Orders
               </button>
@@ -644,7 +723,148 @@ const PurchasePage: React.FC = () => {
           </div>
         </div>
       </div>
-      {showSuccessModal && <div className="modal-backdrop fade show"></div>}
+      </div>
+
+      {/* Review Modal */}
+      <div className={`modal fade ${showReviewModal ? 'show' : ''}`} style={{ display: showReviewModal ? 'block' : 'none' }} tabIndex={-1}>
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title fw-bold">Review Your Purchase</h5>
+              <button 
+                type="button" 
+                className="btn-close" 
+                onClick={() => {
+                  setShowReviewModal(false);
+                  navigate('/my-purchases');
+                }}
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="modal-body">
+              {error && (
+                <div className="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                  <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                  {error}
+                  <button type="button" className="btn-close" onClick={() => setError('')} aria-label="Close"></button>
+                </div>
+              )}
+              {artwork && (
+                <div className="mb-4">
+                  <div className="d-flex gap-3 mb-3">
+                    <img 
+                      src={artwork.images?.[0]?.url || 'https://via.placeholder.com/100x100/CCCCCC/FFFFFF?text=No+Image'} 
+                      alt={artwork.title}
+                      className="rounded"
+                      style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+                    />
+                    <div>
+                      <h6 className="fw-bold mb-1">{artwork.title}</h6>
+                      <p className="text-muted small mb-0">by {artwork.artist?.name || 'Unknown Artist'}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="mb-3">
+                    <label className="form-label fw-semibold">Rating <span className="text-danger">*</span></label>
+                    <div className="d-flex gap-1">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          type="button"
+                          className="btn btn-link p-0"
+                          onClick={() => setReviewData({ ...reviewData, rating: star })}
+                          style={{ fontSize: '2rem', lineHeight: '1' }}
+                        >
+                          <i className={`bi ${star <= reviewData.rating ? 'bi-star-fill text-warning' : 'bi-star text-muted'}`}></i>
+                        </button>
+                      ))}
+                    </div>
+                    {reviewData.rating === 0 && (
+                      <small className="text-danger">Please select a rating</small>
+                    )}
+                  </div>
+
+                  <div className="mb-3">
+                    <label htmlFor="reviewComment" className="form-label fw-semibold">Your Review</label>
+                    <textarea
+                      id="reviewComment"
+                      className="form-control"
+                      rows={4}
+                      placeholder="Share your experience with this artwork..."
+                      value={reviewData.comment}
+                      onChange={(e) => setReviewData({ ...reviewData, comment: e.target.value })}
+                      maxLength={1000}
+                    />
+                    <small className="text-muted">{reviewData.comment.length}/1000 characters</small>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="modal-footer">
+              <button 
+                type="button" 
+                className="btn btn-outline-secondary"
+                onClick={() => {
+                  setShowReviewModal(false);
+                  navigate('/my-purchases');
+                }}
+                disabled={submittingReview}
+              >
+                Skip for Now
+              </button>
+              <button 
+                type="button" 
+                className="btn btn-primary"
+                onClick={async () => {
+                  if (reviewData.rating === 0) {
+                    setError('Please select a rating');
+                    return;
+                  }
+                  if (!orderId) {
+                    setError('Order ID not found');
+                    return;
+                  }
+                  setSubmittingReview(true);
+                  setError('');
+                  try {
+                    await reviewAPI.createReview({
+                      orderId,
+                      rating: reviewData.rating,
+                      comment: reviewData.comment || undefined
+                    });
+                    setShowReviewModal(false);
+                    navigate('/my-purchases');
+                  } catch (err: any) {
+                    const errorMessage = err.response?.data?.message || err.response?.data?.error || err.message || 'Failed to submit review. Please try again.';
+                    setError(errorMessage);
+                    // If review already exists, close modal and navigate after a short delay
+                    if (errorMessage.toLowerCase().includes('already exists')) {
+                      setTimeout(() => {
+                        setShowReviewModal(false);
+                        navigate('/my-purchases');
+                      }, 2000);
+                    }
+                  } finally {
+                    setSubmittingReview(false);
+                  }
+                }}
+                disabled={submittingReview || reviewData.rating === 0}
+              >
+                {submittingReview ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                    Submitting...
+                  </>
+                ) : (
+                  'Submit Review'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {(showSuccessModal || showReviewModal) && <div className="modal-backdrop fade show"></div>}
     </div>
   );
 };

@@ -80,7 +80,7 @@ const profileUpload = multer({
 const uploadSingle = upload.single('image');
 
 // Middleware for multiple artwork image uploads
-const uploadMultiple = upload.array('images', 10); // Max 10 images
+const uploadMultiple = upload.array('images', 4); // Max 4 images
 
 // Middleware for profile picture upload
 const uploadProfilePicture = profileUpload.single('profilePicture');

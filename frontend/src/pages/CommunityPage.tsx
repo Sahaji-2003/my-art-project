@@ -4,6 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { communityAPI, type Post } from '../services/community';
+import { getUser } from '../services/api.service';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import '../styles/App.css';
@@ -109,8 +110,22 @@ const CommunityPage: React.FC = () => {
 
   const handleToggleLike = async (postId: string) => {
     try {
-      await communityAPI.toggleLike(postId);
-      await fetchPosts();
+      const response = await communityAPI.toggleLike(postId);
+      
+      // Update only the specific post's likes and comments without reloading all posts
+      setPosts(prevPosts => 
+        prevPosts.map(post => 
+          post._id === postId 
+            ? { 
+                ...post, 
+                likes: response.data.likes || post.likes,
+                comments: response.data.comments !== undefined 
+                  ? response.data.comments 
+                  : post.comments
+              }
+            : post
+        )
+      );
     } catch (err: any) {
       console.error('Error toggling like:', err);
     }
@@ -125,7 +140,20 @@ const CommunityPage: React.FC = () => {
       await communityAPI.addComment(selectedPost, newComment);
       setNewComment('');
       await fetchComments(selectedPost);
-      await fetchPosts();
+      
+      // Update comment count in the posts list without reloading all posts
+      setPosts(prevPosts => 
+        prevPosts.map(post => 
+          post._id === selectedPost 
+            ? { 
+                ...post, 
+                comments: typeof post.comments === 'number' 
+                  ? post.comments + 1 
+                  : (Array.isArray(post.comments) ? post.comments.length + 1 : 1)
+              }
+            : post
+        )
+      );
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to add comment');
     } finally {
@@ -268,7 +296,9 @@ const CommunityPage: React.FC = () => {
                         </button>
                         <span className="text-muted small">
                           <i className="bi bi-chat-dots me-1"></i>
-                          {Array.isArray(post.comments) ? post.comments.length : 0}
+                          {typeof post.comments === 'number' 
+                            ? post.comments 
+                            : (Array.isArray(post.comments) ? post.comments.length : 0)}
                         </span>
                       </div>
                     </div>

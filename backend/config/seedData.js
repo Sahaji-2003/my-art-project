@@ -4,14 +4,12 @@ const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
 const User = require('../models/User');
-const ArtistProfile = require('../models/ArtistProfile');
 const Artwork = require('../models/Artwork');
 const Order = require('../models/Order');
 const Review = require('../models/Review');
 const Community = require('../models/Community');
 const Post = require('../models/Post');
 const Comment = require('../models/Comment');
-const Analytics = require('../models/Analytics');
 const Notification = require('../models/Notification');
 
 const connectDB = async () => {
@@ -32,14 +30,12 @@ const seedData = async () => {
     // Clear existing data
     await Promise.all([
       User.deleteMany(),
-      ArtistProfile.deleteMany(),
       Artwork.deleteMany(),
       Order.deleteMany(),
       Review.deleteMany(),
       Community.deleteMany(),
       Post.deleteMany(),
       Comment.deleteMany(),
-      Analytics.deleteMany(),
       Notification.deleteMany()
     ]);
     console.log('🧹 Cleared existing data');
@@ -63,76 +59,74 @@ const seedData = async () => {
 
     const specialUser = users.find(u => u.email === 'user@gmail.com');
 
-    // Artist Profiles
-    const artistProfiles = await ArtistProfile.insertMany([
-      {
-        userId: users[0]._id,
-        bio: 'Contemporary painter inspired by urban life.',
-        portfolio: 'https://behance.net/aliceart',
-        socialMediaLinks: { instagram: 'https://instagram.com/aliceart' },
-        profilePicture: users[0].profilePicture,
-        isVerified: true,
-        rating: 4.8,
-        totalSales: 5,
-        totalRevenue: 2500
-      },
-      {
-        userId: users[1]._id,
-        bio: 'Sculptor focusing on modern minimalism.',
-        portfolio: 'https://bobsculpt.com',
-        socialMediaLinks: { instagram: 'https://instagram.com/bobsculpt' },
-        profilePicture: users[1].profilePicture,
-        isVerified: true,
-        rating: 4.6,
-        totalSales: 3,
-        totalRevenue: 3600
-      },
-      {
-        userId: users[2]._id,
-        bio: 'Digital illustrator and concept artist.',
-        portfolio: 'https://dribbble.com/clarawilson',
-        socialMediaLinks: { instagram: 'https://instagram.com/clarawilson' },
-        profilePicture: users[2].profilePicture,
-        isVerified: false,
-        rating: 4.5,
-        totalSales: 2,
-        totalRevenue: 700
-      },
-      {
-        userId: users[3]._id,
-        bio: 'Photographer capturing human emotions.',
-        portfolio: 'https://photographybydavid.com',
-        socialMediaLinks: { instagram: 'https://instagram.com/davidphoto' },
-        profilePicture: users[3].profilePicture,
-        isVerified: true,
-        rating: 4.9,
-        totalSales: 8,
-        totalRevenue: 6400
-      },
-      {
-        userId: users[4]._id,
-        bio: 'Mixed-media artist exploring textures and forms.',
-        portfolio: 'https://ellamediaart.com',
-        socialMediaLinks: { instagram: 'https://instagram.com/ellamedia' },
-        profilePicture: users[4].profilePicture,
-        isVerified: false,
-        rating: 4.3,
-        totalSales: 1,
-        totalRevenue: 400
-      },
-      {
-        userId: specialUser._id,
-        bio: 'All-round creator: painting, digital art & sculpture.',
-        portfolio: 'https://specialuserart.com',
-        socialMediaLinks: { instagram: 'https://instagram.com/specialuserart' },
-        profilePicture: specialUser.profilePicture,
-        isVerified: true,
-        rating: 4.7,
-        totalSales: 6,
-        totalRevenue: 4200
-      }
-    ]);
-    console.log('🎨 Artist profiles inserted');
+    // Update users with artist profile data
+    await User.findByIdAndUpdate(users[0]._id, {
+      isArtist: true,
+      bio: 'Contemporary painter inspired by urban life.',
+      portfolio: 'https://behance.net/aliceart',
+      socialMediaLinks: { instagram: 'https://instagram.com/aliceart' },
+      isVerified: true,
+      rating: 4.8,
+      totalSales: 5,
+      totalRevenue: 2500
+    });
+
+    await User.findByIdAndUpdate(users[1]._id, {
+      isArtist: true,
+      bio: 'Sculptor focusing on modern minimalism.',
+      portfolio: 'https://bobsculpt.com',
+      socialMediaLinks: { instagram: 'https://instagram.com/bobsculpt' },
+      isVerified: true,
+      rating: 4.6,
+      totalSales: 3,
+      totalRevenue: 3600
+    });
+
+    await User.findByIdAndUpdate(users[2]._id, {
+      isArtist: true,
+      bio: 'Digital illustrator and concept artist.',
+      portfolio: 'https://dribbble.com/clarawilson',
+      socialMediaLinks: { instagram: 'https://instagram.com/clarawilson' },
+      isVerified: false,
+      rating: 4.5,
+      totalSales: 2,
+      totalRevenue: 700
+    });
+
+    await User.findByIdAndUpdate(users[3]._id, {
+      isArtist: true,
+      bio: 'Photographer capturing human emotions.',
+      portfolio: 'https://photographybydavid.com',
+      socialMediaLinks: { instagram: 'https://instagram.com/davidphoto' },
+      isVerified: true,
+      rating: 4.9,
+      totalSales: 8,
+      totalRevenue: 6400
+    });
+
+    await User.findByIdAndUpdate(users[4]._id, {
+      isArtist: true,
+      bio: 'Mixed-media artist exploring textures and forms.',
+      portfolio: 'https://ellamediaart.com',
+      socialMediaLinks: { instagram: 'https://instagram.com/ellamedia' },
+      isVerified: false,
+      rating: 4.3,
+      totalSales: 1,
+      totalRevenue: 400
+    });
+
+    await User.findByIdAndUpdate(specialUser._id, {
+      isArtist: true,
+      bio: 'All-round creator: painting, digital art & sculpture.',
+      portfolio: 'https://specialuserart.com',
+      socialMediaLinks: { instagram: 'https://instagram.com/specialuserart' },
+      isVerified: true,
+      rating: 4.7,
+      totalSales: 6,
+      totalRevenue: 4200
+    });
+
+    console.log('🎨 Artist profiles updated');
 
     // Artworks
     const artworks = await Artwork.insertMany([
@@ -683,20 +677,6 @@ const seedData = async () => {
       }
     ]);
     console.log('💬 Comments inserted');
-
-    // Analytics
-    const analytics = await Analytics.insertMany([
-      { artistId: users[0]._id, artworkId: artworks[0]._id, eventType: 'view', userId: users[3]._id, metadata: { ip: '192.168.0.1' } },
-      { artistId: users[1]._id, artworkId: artworks[1]._id, eventType: 'like', userId: users[4]._id, metadata: { device: 'mobile' } },
-      { artistId: users[2]._id, artworkId: artworks[2]._id, eventType: 'share', userId: users[5]._id, metadata: { platform: 'twitter' } },
-      { artistId: users[0]._id, artworkId: artworks[3]._id, eventType: 'inquiry', userId: users[6]._id, metadata: { message: 'Is this framed?' } },
-      { artistId: users[4]._id, artworkId: artworks[4]._id, eventType: 'purchase', userId: users[7]._id, metadata: { transactionRef: 'TX12345' } },
-      // Analytics for special user
-      { artistId: specialUser._id, artworkId: artworks[8]._id, eventType: 'view', userId: users[2]._id, metadata: { ip: '10.0.0.5' } },
-      { artistId: specialUser._id, artworkId: artworks[8]._id, eventType: 'like', userId: users[3]._id, metadata: { device: 'desktop' } },
-      { artistId: specialUser._id, artworkId: artworks[9]._id, eventType: 'share', userId: users[4]._id, metadata: { platform: 'instagram' } }
-    ]);
-    console.log('📊 Analytics inserted');
 
     // Notifications
     const notifications = await Notification.insertMany([
