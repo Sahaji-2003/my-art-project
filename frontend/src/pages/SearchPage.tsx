@@ -4,16 +4,21 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { artworkAPI, type Artwork, type SearchFilters } from '../services/artwork';
+import { getUser } from '../services/api.service';
+import ArtworkCard from '../components/ArtworkCard';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 import '../styles/App.css';
-
 
 const SearchPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  const currentUser = getUser();
   const [artworks, setArtworks] = useState<Artwork[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [likingArtworks, setLikingArtworks] = useState<Set<string>>(new Set());
   const [filters, setFilters] = useState<SearchFilters>({
     q: '',
     medium: '',
@@ -29,23 +34,19 @@ const SearchPage: React.FC = () => {
     totalItems: 0
   });
 
-  // Popular mediums for quick filter
-  const popularMediums = ['Oil', 'Watercolor', 'Photography', 'Digital', 'Acrylic', 'Sculpture'];
+  const mediums = ['Oil on Canvas', 'Acrylic', 'Watercolor', 'Digital Art', 'Photography', 'Sculpture', 'Mixed Media', 'Pencil', 'Charcoal', 'Other'];
+  const styles = ['Abstract', 'Impressionism', 'Realism', 'Surrealism', 'Contemporary', 'Modern', 'Pop Art', 'Minimalism', 'Expressionism', 'Other'];
 
   // Handle URL query parameters on component mount
   useEffect(() => {
     const query = searchParams.get('q');
     if (query) {
       setSearchQuery(query);
-      setFilters(prev => ({
-        ...prev,
-        q: query,
-        page: 1
-      }));
+      setFilters(prev => ({ ...prev, q: query, page: 1 }));
     }
   }, [searchParams]);
 
-  // Fetch artworks on component mount and when filters change
+  // Fetch artworks when filters change
   useEffect(() => {
     fetchArtworks();
   }, [filters]);
@@ -55,22 +56,19 @@ const SearchPage: React.FC = () => {
       setLoading(true);
       setError('');
       
-      // Clean up filters - remove empty values
       const cleanFilters = Object.fromEntries(
-        Object.entries(filters).filter(([_, value]) => value !== '' && value !== null)
+        Object.entries(filters).filter(([_, value]) => value !== '' && value !== null && value !== undefined)
       );
 
       const response = await artworkAPI.searchArtworks(cleanFilters);
       const artworksData = response.data || [];
       
-      // Ensure we have an array and filter out any invalid items
       const validArtworks = Array.isArray(artworksData) 
         ? artworksData.filter(artwork => artwork && typeof artwork === 'object' && artwork._id)
         : [];
         
       setArtworks(validArtworks);
       
-      // Set pagination if available
       if (response.pagination) {
         setPagination({
           currentPage: response.pagination.page || 1,
@@ -87,143 +85,140 @@ const SearchPage: React.FC = () => {
     }
   };
 
-
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    setFilters(prev => ({
-      ...prev,
-      q: searchQuery,
-      page: 1
-    }));
+    setFilters(prev => ({ ...prev, q: searchQuery, page: 1 }));
   };
 
-  const handleFilterChange = (key: keyof SearchFilters, value: string | number | undefined) => {
-    setFilters(prev => ({
-      ...prev,
-      [key]: value,
-      page: 1
-    }));
+  const handleToggleLike = async (e: React.MouseEvent, artworkId: string) => {
+    e.stopPropagation();
+    
+    if (!currentUser) {
+      navigate('/login');
+      return;
+    }
+
+    if (likingArtworks.has(artworkId)) return;
+
+    try {
+      setLikingArtworks(prev => new Set(prev).add(artworkId));
+      const response = await artworkAPI.toggleLike(artworkId);
+      
+      setArtworks(prev => prev.map(artwork => 
+        artwork._id === artworkId 
+          ? { ...artwork, likesCount: response.data.likes, isLiked: response.data.isLiked }
+          : artwork
+      ));
+    } catch (error) {
+      console.error('Error toggling like:', error);
+    } finally {
+      setLikingArtworks(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(artworkId);
+        return newSet;
+      });
+    }
   };
 
-  const handleMediumFilter = (medium: string) => {
-    setFilters(prev => ({
-      ...prev,
-      medium: prev.medium === medium ? '' : medium,
-      page: 1
-    }));
-  };
-
-  const handlePageChange = (page: number) => {
-    setFilters(prev => ({
-      ...prev,
-      page
-    }));
+  const handleCardClick = (artworkId: string) => {
+    navigate(`/purchase/${artworkId}`);
   };
 
   const clearFilters = () => {
-    setFilters({
-      q: '',
-      medium: '',
-      style: '',
-      price_min: undefined,
-      price_max: undefined,
-      page: 1,
-      limit: 12
-    });
+    setFilters({ q: '', medium: '', style: '', price_min: undefined, price_max: undefined, page: 1, limit: 12 });
     setSearchQuery('');
   };
 
   return (
-    <div className="search-page">
-      <div className="search-container">
-        {/* Header Section */}
-        <div className="search-header">
-          <h1>Explore Artwork</h1>
-          <p>Discover a curated collection of art from talented artists worldwide</p>
+    <div className="container-fluid py-3 py-md-4 bg-light min-vh-100">
+      <div className="container">
+        {/* Header */}
+        <div className="text-center mb-3">
+          <h1 className="h2 fw-bold mb-2">Explore Artwork</h1>
+          <p className="text-muted mb-3">Discover curated art from talented artists worldwide</p>
         </div>
 
-        {/* Main Search Bar */}
-        <form className="main-search-form" onSubmit={handleSearch}>
-          <div className="search-input-container">
-            <input
-              type="text"
-              placeholder="Search artworks, artists, styles..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="main-search-input"
-            />
-            <button type="submit" className="search-button">
-              Search
+        {/* Search Bar */}
+        <div className="bg-white rounded-3 shadow-sm p-3 mb-3">
+          <form onSubmit={handleSearch}>
+            <div className="input-group">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Search artworks, artists, styles..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <button className="btn btn-primary" type="submit">
+                <i className="bi bi-search me-1"></i>Search
+              </button>
+            </div>
+          </form>
+        </div>
+
+        {/* Filters */}
+        <div className="bg-white rounded-3 shadow-sm p-3 mb-3">
+          <div className="row g-2">
+            <div className="col-md-4">
+              <label className="form-label small fw-semibold mb-1">Medium</label>
+              <select
+                className="form-select form-select-sm"
+                value={filters.medium}
+                onChange={(e) => setFilters(prev => ({ ...prev, medium: e.target.value, page: 1 }))}
+              >
+                <option value="">All Mediums</option>
+                {mediums.map(medium => (
+                  <option key={medium} value={medium}>{medium}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="col-md-4">
+              <label className="form-label small fw-semibold mb-1">Style</label>
+              <select
+                className="form-select form-select-sm"
+                value={filters.style}
+                onChange={(e) => setFilters(prev => ({ ...prev, style: e.target.value, page: 1 }))}
+              >
+                <option value="">All Styles</option>
+                {styles.map(style => (
+                  <option key={style} value={style}>{style}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="col-md-4">
+              <label className="form-label small fw-semibold mb-1">Price Range</label>
+              <div className="d-flex gap-2">
+                <input
+                  type="number"
+                  className="form-control form-control-sm"
+                  placeholder="Min"
+                  value={filters.price_min || ''}
+                  onChange={(e) => setFilters(prev => ({ ...prev, price_min: e.target.value ? parseInt(e.target.value) : undefined, page: 1 }))}
+                />
+                <input
+                  type="number"
+                  className="form-control form-control-sm"
+                  placeholder="Max"
+                  value={filters.price_max || ''}
+                  onChange={(e) => setFilters(prev => ({ ...prev, price_max: e.target.value ? parseInt(e.target.value) : undefined, page: 1 }))}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-2 pt-2 border-top">
+            <button className="btn btn-outline-secondary btn-sm" onClick={clearFilters}>
+              <i className="bi bi-x-circle me-1"></i>Clear Filters
             </button>
           </div>
-        </form>
-
-        {/* Popular Mediums Filter */}
-        <div className="filters-section">
-          <h3>Popular Mediums:</h3>
-          <div className="medium-filters">
-            {popularMediums.map((medium) => (
-              <button
-                key={medium}
-                className={`medium-filter ${filters.medium === medium ? 'active' : ''}`}
-                onClick={() => handleMediumFilter(medium)}
-              >
-                {medium}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Advanced Filters */}
-        <div className="advanced-filters">
-          <div className="filter-group">
-            <label htmlFor="style-filter">Style:</label>
-            <select
-              id="style-filter"
-              value={filters.style}
-              onChange={(e) => handleFilterChange('style', e.target.value)}
-            >
-              <option value="">All Styles</option>
-              <option value="Realistic">Realistic</option>
-              <option value="Abstract">Abstract</option>
-              <option value="Impressionist">Impressionist</option>
-              <option value="Contemporary">Contemporary</option>
-              <option value="Minimalist">Minimalist</option>
-              <option value="Surreal">Surreal</option>
-            </select>
-          </div>
-
-          <div className="filter-group">
-            <label htmlFor="price-min">Min Price:</label>
-            <input
-              type="number"
-              id="price-min"
-              placeholder="Min"
-              value={filters.price_min}
-              onChange={(e) => handleFilterChange('price_min', e.target.value ? parseInt(e.target.value) : undefined)}
-            />
-          </div>
-
-          <div className="filter-group">
-            <label htmlFor="price-max">Max Price:</label>
-            <input
-              type="number"
-              id="price-max"
-              placeholder="Max"
-              value={filters.price_max}
-              onChange={(e) => handleFilterChange('price_max', e.target.value ? parseInt(e.target.value) : undefined)}
-            />
-          </div>
-
-          <button className="clear-filters" onClick={clearFilters}>
-            Clear Filters
-          </button>
         </div>
 
         {/* Results Count */}
         {!loading && artworks.length > 0 && (
-          <div className="results-info">
-            <p>
+          <div className="mb-2">
+            <p className="text-muted small mb-0">
               Showing {artworks.length} of {pagination.totalItems} artworks
             </p>
           </div>
@@ -231,60 +226,34 @@ const SearchPage: React.FC = () => {
 
         {/* Error Message */}
         {error && (
-          <div className="error-message">
-            <span>⚠️</span>
+          <div className="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+            <i className="bi bi-exclamation-triangle-fill me-2"></i>
             {error}
+            <button type="button" className="btn-close" onClick={() => setError('')}></button>
           </div>
         )}
 
         {/* Loading State */}
         {loading && (
-          <div className="loading-container">
-            <div className="spinner"></div>
-            <p>Loading artworks...</p>
+          <div className="text-center py-4">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+            <p className="mt-2 text-muted small">Loading artworks...</p>
           </div>
         )}
 
         {/* Artworks Grid */}
         {!loading && artworks.length > 0 && (
-          <div className="artworks-grid">
-            {artworks.filter(artwork => artwork && artwork._id).map((artwork) => (
-              <div 
-                key={artwork._id} 
-                className="artwork-card"
-                onClick={() => navigate(`/purchase/${artwork._id}`)}
-                style={{ cursor: 'pointer' }}
-              >
-                <div className="artwork-image-container">
-                  <img
-                    src={artwork.images?.[0]?.url || 'https://via.placeholder.com/400x300/CCCCCC/FFFFFF?text=No+Image'}
-                    alt={artwork.title || 'Artwork'}
-                    className="artwork-image"
-                  />
-                  <div className="artwork-overlay">
-                    <button 
-                      className="like-button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // Handle like functionality here
-                      }}
-                    >
-                      <span>❤️</span>
-                      {artwork.likes?.length || 0}
-                    </button>
-                  </div>
-                </div>
-                
-                <div className="artwork-info">
-                  <h3 className="artwork-title">{artwork.title || 'Untitled'}</h3>
-                  <p className="artist-name">by {artwork.artist?.name || 'Unknown Artist'}</p>
-                  <div className="artwork-meta">
-                    <span className="artwork-price">${artwork.price?.toLocaleString() || '0'}</span>
-                    <span className={`medium-tag medium-${artwork.medium?.toLowerCase() || 'other'}`}>
-                      {artwork.medium || 'Other'}
-                    </span>
-                  </div>
-                </div>
+          <div className="row g-3 mb-3">
+            {artworks.map((artwork) => (
+              <div key={artwork._id} className="col-12 col-sm-6 col-md-4 col-lg-3">
+                <ArtworkCard
+                  artwork={artwork}
+                  onCardClick={handleCardClick}
+                  onLikeClick={handleToggleLike}
+                  isLiking={likingArtworks.has(artwork._id)}
+                />
               </div>
             ))}
           </div>
@@ -292,47 +261,65 @@ const SearchPage: React.FC = () => {
 
         {/* No Results */}
         {!loading && artworks.length === 0 && !error && (
-          <div className="no-results">
-            <div className="no-results-icon">🎨</div>
-            <h3>No artworks found</h3>
-            <p>No artworks are available at the moment. Please check back later or try different search criteria.</p>
-            <button className="browse-all-button" onClick={clearFilters}>
-              Clear Filters
+          <div className="text-center py-4 bg-white rounded-3 shadow-sm">
+            <i className="bi bi-palette display-6 text-muted opacity-50 mb-2"></i>
+            <h5 className="fw-bold mb-2">No artworks found</h5>
+            <p className="text-muted mb-3 small">Try adjusting your search or filters to find more artworks.</p>
+            <button className="btn btn-primary btn-sm" onClick={clearFilters}>
+              <i className="bi bi-arrow-counterclockwise me-1"></i>Clear Filters
             </button>
           </div>
         )}
 
         {/* Pagination */}
         {!loading && pagination.totalPages > 1 && (
-          <div className="pagination">
-            <button
-              className="pagination-button"
-              onClick={() => handlePageChange(pagination.currentPage - 1)}
-              disabled={pagination.currentPage === 1}
-            >
-              Previous
-            </button>
-            
-            <div className="pagination-numbers">
-              {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((page) => (
+          <nav aria-label="Artworks pagination">
+            <ul className="pagination justify-content-center">
+              <li className={`page-item ${pagination.currentPage === 1 ? 'disabled' : ''}`}>
                 <button
-                  key={page}
-                  className={`pagination-number ${pagination.currentPage === page ? 'active' : ''}`}
-                  onClick={() => handlePageChange(page)}
+                  className="page-link"
+                  onClick={() => setFilters(prev => ({ ...prev, page: prev.page - 1 }))}
+                  disabled={pagination.currentPage === 1}
                 >
-                  {page}
+                  <i className="bi bi-chevron-left"></i>
                 </button>
-              ))}
-            </div>
-            
-            <button
-              className="pagination-button"
-              onClick={() => handlePageChange(pagination.currentPage + 1)}
-              disabled={pagination.currentPage === pagination.totalPages}
-            >
-              Next
-            </button>
-          </div>
+              </li>
+              
+              {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                let pageNum;
+                if (pagination.totalPages <= 5) {
+                  pageNum = i + 1;
+                } else if (pagination.currentPage <= 3) {
+                  pageNum = i + 1;
+                } else if (pagination.currentPage >= pagination.totalPages - 2) {
+                  pageNum = pagination.totalPages - 4 + i;
+                } else {
+                  pageNum = pagination.currentPage - 2 + i;
+                }
+
+                return (
+                  <li key={pageNum} className={`page-item ${pagination.currentPage === pageNum ? 'active' : ''}`}>
+                    <button
+                      className="page-link"
+                      onClick={() => setFilters(prev => ({ ...prev, page: pageNum }))}
+                    >
+                      {pageNum}
+                    </button>
+                  </li>
+                );
+              })}
+              
+              <li className={`page-item ${pagination.currentPage === pagination.totalPages ? 'disabled' : ''}`}>
+                <button
+                  className="page-link"
+                  onClick={() => setFilters(prev => ({ ...prev, page: prev.page + 1 }))}
+                  disabled={pagination.currentPage === pagination.totalPages}
+                >
+                  <i className="bi bi-chevron-right"></i>
+                </button>
+              </li>
+            </ul>
+          </nav>
         )}
       </div>
     </div>

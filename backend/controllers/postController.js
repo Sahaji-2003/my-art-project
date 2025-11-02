@@ -44,20 +44,21 @@ exports.getPost = async (req, res, next) => {
 
 exports.getAllPosts = async (req, res, next) => {
   try {
-    const { page = 1, limit = 10 } = req.query;
-    const result = await postService.getAllPosts(parseInt(page), parseInt(limit));
+    const { page = 1, limit = 10, q = '' } = req.query;
+    const result = await postService.getAllPosts(parseInt(page), parseInt(limit), q);
     
     // Transform authorId to author for frontend compatibility
+    // Note: Aggregation returns plain objects, not Mongoose documents
     const transformedPosts = result.posts.map(post => {
-      const postObj = post.toObject();
-      if (postObj.authorId) {
-        postObj.author = postObj.authorId;
-        delete postObj.authorId;
+      // Already a plain object from aggregation
+      if (post.authorId) {
+        post.author = post.authorId;
+        delete post.authorId;
       }
       // Keep likes array for frontend compatibility
       // Transform comments to count (comments are stored separately)
-      postObj.comments = 0; // Will be calculated if needed
-      return postObj;
+      post.comments = 0; // Will be calculated if needed
+      return post;
     });
     
     res.status(200).json({

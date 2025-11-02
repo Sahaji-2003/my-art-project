@@ -86,37 +86,100 @@ class ArtworkService {
     const { q, medium, style, price_min, price_max, page = 1, limit = 12 } = filters;
     const skip = (page - 1) * limit;
 
-    let query = { status: 'available' };
-
-    // Text search
-    if (q) {
-      query.$text = { $search: q };
-    }
-
-    // Filter by medium
-    if (medium) {
-      query.medium = medium;
-    }
-
-    // Filter by style
-    if (style) {
-      query.style = style;
-    }
-
-    // Filter by price range
+    // Build match query
+    const matchQuery = { status: 'available' };
+    if (medium) matchQuery.medium = medium;
+    if (style) matchQuery.style = style;
     if (price_min || price_max) {
-      query.price = {};
-      if (price_min) query.price.$gte = parseFloat(price_min);
-      if (price_max) query.price.$lte = parseFloat(price_max);
+      matchQuery.price = {};
+      if (price_min) matchQuery.price.$gte = parseFloat(price_min);
+      if (price_max) matchQuery.price.$lte = parseFloat(price_max);
     }
 
-    const artworks = await Artwork.find(query)
-      .populate('artistId', 'name email profilePicture')
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(parseInt(limit));
+    // Build aggregation pipeline
+    const pipeline = [
+      { $match: matchQuery },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'artistId',
+          foreignField: '_id',
+          as: 'artistInfo'
+        }
+      },
+      {
+        $unwind: {
+          path: '$artistInfo',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $addFields: {
+          artist: {
+            _id: '$artistInfo._id',
+            name: '$artistInfo.name',
+            email: '$artistInfo.email',
+            profilePicture: '$artistInfo.profilePicture'
+          },
+          // Add searchable fields for text search
+          searchableText: {
+            $concat: [
+              { $ifNull: ['$title', ''] },
+              ' ',
+              { $ifNull: ['$description', ''] },
+              ' ',
+              { $ifNull: [{ $reduce: { input: '$tags', initialValue: '', in: { $concat: ['$$value', ' ', '$$this'] } } }, ''] },
+              ' ',
+              { $ifNull: ['$artistInfo.name', ''] }
+            ]
+          }
+        }
+      }
+    ];
 
-    const total = await Artwork.countDocuments(query);
+    // Add text search filter if query exists
+    if (q && q.trim()) {
+      pipeline.push({
+        $match: {
+          searchableText: { $regex: q.trim(), $options: 'i' }
+        }
+      });
+    }
+
+    // Add sorting
+    pipeline.push({ $sort: { createdAt: -1 } });
+
+    // Get total count
+    const countPipeline = [...pipeline, { $count: 'total' }];
+    const countResult = await Artwork.aggregate(countPipeline);
+    const total = countResult[0]?.total || 0;
+
+    // Add pagination
+    pipeline.push({ $skip: skip }, { $limit: parseInt(limit) });
+
+    // Project final fields
+    pipeline.push({
+      $project: {
+        _id: 1,
+        title: 1,
+        description: 1,
+        price: 1,
+        medium: 1,
+        style: 1,
+        images: 1,
+        dimensions: 1,
+        status: 1,
+        tags: 1,
+        views: 1,
+        likes: 1,
+        createdAt: 1,
+        updatedAt: 1,
+        artistId: 1,
+        artist: 1
+      }
+    });
+
+    const artworks = await Artwork.aggregate(pipeline);
 
     return {
       artworks,
@@ -124,7 +187,7 @@ class ArtworkService {
         page: parseInt(page),
         limit: parseInt(limit),
         total,
-        pages: Math.ceil(total / limit)
+        pages: Math.ceil(total / parseInt(limit))
       }
     };
   }
@@ -157,13 +220,11 @@ class ArtworkService {
   }
 
   async getTrendingArtworks(limit = 8) {
+    // Fetch more artworks to ensure good sorting
     const artworks = await Artwork.find({ status: 'available' })
       .populate('artistId', 'name email profilePicture')
-      .sort({ 
-        // Sort by likes count (descending), then by views, then by creation date
-        createdAt: -1 
-      })
-      .limit(parseInt(limit));
+      .sort({ createdAt: -1 })
+      .limit(Math.max(parseInt(limit) * 2, 20));
 
     // Sort by likes count in JavaScript since MongoDB doesn't support array length in sort
     const sortedArtworks = artworks.sort((a, b) => {

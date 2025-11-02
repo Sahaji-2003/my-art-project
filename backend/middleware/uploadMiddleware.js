@@ -6,7 +6,7 @@ const path = require('path');
 const fs = require('fs');
 
 // Path to frontend public assets images directory
-const artworkDir = path.join(__dirname, '../../frontend/public/assets/images');
+const artworkDir = path.join(__dirname, '../../frontend/public/assets/images/art');
 const profileDir = path.join(__dirname, '../../frontend/public/userProfile');
 
 // Ensure the upload directories exist
@@ -23,11 +23,15 @@ const storage = multer.diskStorage({
     cb(null, artworkDir);
   },
   filename: (req, file, cb) => {
-    // Generate unique filename: timestamp-random-originalname
+    // Get user info from request if available
+    const user = req.user;
+    const artName = user && req.body.artName ? req.body.artName.replace(/[^a-z0-9]/gi, '_').toLowerCase() : 'artwork';
+    const username = user && user.name ? user.name.replace(/[^a-z0-9]/gi, '_').toLowerCase() : 'user';
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const ext = path.extname(file.originalname);
-    const baseName = path.basename(file.originalname, ext).replace(/[^a-z0-9]/gi, '-').toLowerCase();
-    cb(null, `${baseName}-${uniqueSuffix}${ext}`);
+    const ext = path.extname(file.originalname) || '.jpg';
+    
+    // Format: artname_username_unique.jpg
+    cb(null, `${artName}_${username}_${uniqueSuffix}${ext}`);
   }
 });
 

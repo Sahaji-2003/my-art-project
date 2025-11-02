@@ -9,7 +9,7 @@ const ArtistProfile = require('../models/ArtistProfile');
 
 class OrderService {
   async createOrder(buyerId, artworkId, orderData) {
-    const { shipping_address, payment_method } = orderData;
+    const { shippingAddress, paymentMethod } = orderData;
 
     // Get artwork details
     const artwork = await Artwork.findById(artworkId);
@@ -21,24 +21,18 @@ class OrderService {
       throw new Error('Artwork is not available for purchase');
     }
 
-    // Parse shipping address
-    const addressParts = shipping_address.split(',').map(part => part.trim());
-    const shippingAddress = {
-      street: addressParts[0] || '',
-      city: addressParts[1] || '',
-      state: addressParts[2] || '',
-      country: addressParts[3] || '',
-      zipCode: addressParts[4] || ''
-    };
+    // Generate order number
+    const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
 
     // Create order
     const order = await Order.create({
       buyerId,
       artworkId,
       artistId: artwork.artistId,
+      orderNumber,
       price: artwork.price,
       shippingAddress,
-      paymentMethod: payment_method,
+      paymentMethod: paymentMethod === 'credit_card' ? 'Credit Card' : paymentMethod,
       paymentStatus: 'completed',
       orderStatus: 'confirmed'
     });
@@ -81,7 +75,13 @@ class OrderService {
 
   async getUserOrders(userId) {
     const orders = await Order.find({ buyerId: userId })
-      .populate('artworkId')
+      .populate({
+        path: 'artworkId',
+        populate: {
+          path: 'artistId',
+          select: 'name email profilePicture'
+        }
+      })
       .populate('artistId', 'name email')
       .sort({ createdAt: -1 });
 
@@ -90,7 +90,13 @@ class OrderService {
 
   async getArtistOrders(artistId) {
     const orders = await Order.find({ artistId })
-      .populate('artworkId')
+      .populate({
+        path: 'artworkId',
+        populate: {
+          path: 'artistId',
+          select: 'name email profilePicture'
+        }
+      })
       .populate('buyerId', 'name email')
       .sort({ createdAt: -1 });
 

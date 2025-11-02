@@ -99,8 +99,8 @@ exports.uploadImage = async (req, res, next) => {
     }
 
     // Return the URL path relative to the frontend public directory
-    // The file is saved in frontend/public/assets/images, so the URL is /assets/images/filename
-    const imageUrl = `/assets/images/${req.file.filename}`;
+    // The file is saved in frontend/public/assets/images/art, so the URL is /assets/images/art/filename
+    const imageUrl = `/assets/images/art/${req.file.filename}`;
     
     res.status(200).json({
       success: true,

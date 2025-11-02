@@ -1,17 +1,15 @@
-// ============================================
-// src/pages/LoginPage.tsx
-// ============================================
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { loginAPI, formValidation } from '../services/login';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import '../styles/App.css';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    email: 'name@example.com',
-    password: '********',
+    email: '',
+    password: '',
   });
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -65,83 +63,95 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="login-page">
-      <div className="login-container">
-        <div className="login-header">
-          <h1>Login to Arthub</h1>
-          <p>Enter your credentials to access your account</p>
-        </div>
+    <div className="min-vh-100 d-flex align-items-center" style={{ backgroundColor: '#f8f9fa' }}>
+      <div className="container">
+        <div className="row justify-content-center">
+          <div className="col-12 col-md-6 col-lg-5">
+            <div className="bg-white rounded-4 shadow-sm p-4 p-md-5">
+              <div className="text-center mb-4">
+                <h1 className="h2 fw-bold mb-2">Welcome Back</h1>
+                <p className="text-muted">Sign in to your Arthub account</p>
+              </div>
 
-        {errors.general && (
-          <div className="error-message">
-            <span>⚠️</span>
-            {errors.general}
-          </div>
-        )}
+              {errors.general && (
+                <div className="alert alert-danger alert-dismissible fade show">
+                  <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                  {errors.general}
+                  <button type="button" className="btn-close" onClick={() => setErrors({})}></button>
+                </div>
+              )}
 
-        <form className="login-form" onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              disabled={loading}
-              autoComplete="email"
-            />
-            {errors.email && (
-              <div className="field-error">{errors.email}</div>
-            )}
-          </div>
+              <form onSubmit={handleSubmit}>
+                <div className="mb-3">
+                  <label htmlFor="email" className="form-label fw-semibold">Email</label>
+                  <input
+                    type="email"
+                    className="form-control"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    disabled={loading}
+                    autoComplete="email"
+                    placeholder="name@example.com"
+                  />
+                  {errors.email && <div className="invalid-feedback d-block">{errors.email}</div>}
+                </div>
 
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <div className="password-input-wrapper">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                disabled={loading}
-                autoComplete="current-password"
-              />
-              <button
-                type="button"
-                className="password-toggle-btn"
-                onClick={() => setShowPassword(!showPassword)}
-                disabled={loading}
-                tabIndex={-1}
-              >
-                <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'}`}></i>
-              </button>
+                <div className="mb-3">
+                  <label htmlFor="password" className="form-label fw-semibold">Password</label>
+                  <div className="position-relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      className="form-control"
+                      id="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      disabled={loading}
+                      autoComplete="current-password"
+                      placeholder="Enter your password"
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-link position-absolute end-0 top-50 translate-middle-y text-muted"
+                      style={{ transform: 'translateY(-50%)', marginRight: '10px' }}
+                      onClick={() => setShowPassword(!showPassword)}
+                      disabled={loading}
+                    >
+                      <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'}`}></i>
+                    </button>
+                  </div>
+                  {errors.password && <div className="invalid-feedback d-block">{errors.password}</div>}
+                </div>
+
+                <button 
+                  type="submit" 
+                  className="btn btn-primary w-100"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2"></span>
+                      Logging in...
+                    </>
+                  ) : (
+                    <>
+                      <i className="bi bi-box-arrow-in-right me-2"></i>
+                      Sign In
+                    </>
+                  )}
+                </button>
+              </form>
+
+              <div className="text-center mt-4">
+                <span className="text-muted">Don't have an account? </span>
+                <Link to="/signup" className="text-primary fw-semibold text-decoration-none">
+                  Sign Up
+                </Link>
+              </div>
             </div>
-            {errors.password && (
-              <div className="field-error">{errors.password}</div>
-            )}
           </div>
-
-          <button 
-            type="submit" 
-            className="btn-login"
-            disabled={loading}
-          >
-            {loading ? (
-              <>
-                <span className="spinner"></span>
-                Logging in...
-              </>
-            ) : (
-              'Login'
-            )}
-          </button>
-        </form>
-
-        <div className="login-footer">
-          Don't have an account?{' '}
-          <Link to="/signup" className="signup-link">Sign Up</Link>
         </div>
       </div>
     </div>

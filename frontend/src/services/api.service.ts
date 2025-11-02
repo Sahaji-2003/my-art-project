@@ -149,6 +149,16 @@ export const authAPI = {
     const response = await apiClient.put('/auth/profile', data);
     return response.data;
   },
+
+  requestPasswordReset: async (email: string): Promise<ApiResponse<any>> => {
+    const response = await apiClient.post('/auth/request-password-reset', { email });
+    return response.data;
+  },
+
+  resetPassword: async (email: string, otp: string, newPassword: string): Promise<ApiResponse<any>> => {
+    const response = await apiClient.post('/auth/reset-password', { email, otp, newPassword });
+    return response.data;
+  },
 };
 
 // Artist API

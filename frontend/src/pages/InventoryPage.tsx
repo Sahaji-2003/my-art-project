@@ -19,7 +19,8 @@ const InventoryPage: React.FC = () => {
     totalSales: 0,
     totalRevenue: 0,
     averagePrice: 0,
-    totalViews: 0
+    totalViews: 0,
+    totalLikes: 0
   });
 
   useEffect(() => {
@@ -50,13 +51,20 @@ const InventoryPage: React.FC = () => {
         ? fetchedArtworks.reduce((sum: number, artwork: any) => sum + (artwork.price || 0), 0) / totalArtworks 
         : 0;
       const totalViews = fetchedArtworks.reduce((sum: number, artwork: any) => sum + (artwork.views || 0), 0);
+      const totalLikes = fetchedArtworks.reduce((sum: number, artwork: any) => {
+        if (artwork.likes && Array.isArray(artwork.likes)) {
+          return sum + artwork.likes.length;
+        }
+        return sum;
+      }, 0);
 
       setStats({
         totalArtworks,
         totalSales,
         totalRevenue: artistStats.data?.totalRevenue || totalRevenue,
         averagePrice: Math.round(averagePrice),
-        totalViews
+        totalViews,
+        totalLikes
       });
     } catch (err: any) {
       console.error('Error fetching data:', err);
@@ -67,8 +75,8 @@ const InventoryPage: React.FC = () => {
   };
 
   const handleEditArtwork = (artworkId: string) => {
-    // Navigate to edit page or open edit modal
-    console.log('Edit artwork:', artworkId);
+    // Navigate to upload page with artwork ID as param for editing
+    navigate(`/upload?edit=${artworkId}`);
   };
 
   const handleDeleteArtwork = async (artworkId: string) => {
@@ -142,11 +150,11 @@ const InventoryPage: React.FC = () => {
               <div className="card border-0 shadow-sm h-100">
                 <div className="card-body">
                   <div className="d-flex align-items-center mb-2">
-                    <i className="bi bi-currency-dollar text-info fs-3 me-2"></i>
-                    <h6 className="text-muted mb-0 small">Average Artwork Price</h6>
+                    <i className="bi bi-heart-fill text-danger fs-3 me-2"></i>
+                    <h6 className="text-muted mb-0 small">Total Likes</h6>
                   </div>
-                  <h3 className="fw-bold mb-1">${loading ? <span className="spinner-border spinner-border-sm"></span> : stats.averagePrice.toLocaleString()}</h3>
-                  <p className="text-muted small mb-0">Stable over the last quarter</p>
+                  <h3 className="fw-bold mb-1">{loading ? <span className="spinner-border spinner-border-sm"></span> : stats.totalLikes.toLocaleString()}</h3>
+                  <p className="text-muted small mb-0">Across all your artworks</p>
                 </div>
               </div>
             </div>
@@ -220,7 +228,13 @@ const InventoryPage: React.FC = () => {
                     <div className="card-body">
                       <h5 className="card-title fw-bold mb-2">{artwork.title || 'Untitled'}</h5>
                       <p className="text-muted small mb-2">{artwork.medium || 'Unknown Medium'}</p>
-                      <p className="text-primary fw-bold fs-5 mb-3">${artwork.price?.toLocaleString() || '0'}</p>
+                      <div className="d-flex justify-content-between align-items-center mb-3">
+                        <p className="text-primary fw-bold fs-5 mb-0">${artwork.price?.toLocaleString() || '0'}</p>
+                        <span className="text-danger">
+                          <i className="bi bi-heart-fill me-1"></i>
+                          {artwork.likes && Array.isArray(artwork.likes) ? artwork.likes.length : 0}
+                        </span>
+                      </div>
                       
                       <div className="d-flex gap-2">
                         <button 

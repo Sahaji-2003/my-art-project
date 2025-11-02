@@ -105,9 +105,15 @@ export interface CommentResponse {
 // Community API functions
 export const communityAPI = {
   // Get all posts
-  getPosts: async (page: number = 1, limit: number = 10): Promise<CommunityResponse> => {
+  getPosts: async (page: number = 1, limit: number = 10, searchQuery: string = ''): Promise<CommunityResponse> => {
     try {
-      const response = await communityClient.get(`/community/posts?page=${page}&limit=${limit}`);
+      const queryParams = new URLSearchParams();
+      queryParams.append('page', page.toString());
+      queryParams.append('limit', limit.toString());
+      if (searchQuery) {
+        queryParams.append('q', searchQuery);
+      }
+      const response = await communityClient.get(`/community/posts?${queryParams.toString()}`);
       return response.data;
     } catch (error: any) {
       console.error('Error fetching posts:', error);

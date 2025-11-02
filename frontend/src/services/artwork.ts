@@ -204,10 +204,13 @@ export const artworkAPI = {
   },
 
   // Upload artwork image
-  uploadImage: async (file: File): Promise<UploadResponse> => {
+  uploadImage: async (file: File, artName?: string): Promise<UploadResponse> => {
     try {
       const formData = new FormData();
       formData.append('image', file);
+      if (artName) {
+        formData.append('artName', artName);
+      }
       
       const response = await artworkClient.post('/artworks/upload-image', formData, {
         headers: {

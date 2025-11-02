@@ -1,18 +1,59 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { artworkAPI, type Artwork } from '../services/artwork';
+import { getUser } from '../services/api.service';
+import ArtworkCard from '../components/ArtworkCard';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import '../styles/App.css';
 
 const DashboardPage: React.FC = () => {
  const navigate = useNavigate();
  const scrollContainerRef = useRef<HTMLDivElement>(null);
+ const currentUser = getUser();
  const [trendingArtworks, setTrendingArtworks] = useState<Artwork[]>([]);
  const [loading, setLoading] = useState(true);
+ const [likingArtworks, setLikingArtworks] = useState<Set<string>>(new Set());
+ const [currentImageIndex, setCurrentImageIndex] = useState(0);
+ const [typingText, setTypingText] = useState('');
+ const [typingIndex, setTypingIndex] = useState(0);
+
+ const typingWords = ['Discover', 'Create', 'Connect'];
 
  useEffect(() => {
    fetchTrendingArtworks();
  }, []);
+
+ // Typing effect for hero text
+ useEffect(() => {
+   const currentWord = typingWords[typingIndex % typingWords.length];
+   let charIndex = 0;
+   
+   const interval = setInterval(() => {
+     if (charIndex <= currentWord.length) {
+       setTypingText(currentWord.slice(0, charIndex));
+       charIndex++;
+     } else {
+       setTimeout(() => {
+         setTypingIndex(prev => (prev + 1) % typingWords.length);
+       }, 2500);
+       clearInterval(interval);
+     }
+   }, 200);
+
+   return () => clearInterval(interval);
+ }, [typingIndex]);
+
+ // Auto-rotate hero images every 3 seconds
+ useEffect(() => {
+   const topArtworks = trendingArtworks.slice(0, 3);
+   if (topArtworks.length > 0) {
+     const interval = setInterval(() => {
+       setCurrentImageIndex(prev => (prev + 1) % topArtworks.length);
+     }, 3000);
+     return () => clearInterval(interval);
+   }
+ }, [trendingArtworks]);
 
  const fetchTrendingArtworks = async () => {
    try {
@@ -39,26 +80,35 @@ const DashboardPage: React.FC = () => {
    }
  };
 
- const getPrimaryImage = (artwork: Artwork) => {
-   if (artwork.images && artwork.images.length > 0) {
-     const primaryImage = artwork.images.find(img => img.isPrimary);
-     return primaryImage?.url || artwork.images[0].url;
-   }
-   return '/assets/images/default-artwork.jpg';
- };
-
- const getLikesCount = (artwork: Artwork) => {
-   return artwork.likes ? (Array.isArray(artwork.likes) ? artwork.likes.length : 0) : 0;
- };
-
  const handleToggleLike = async (e: React.MouseEvent, artworkId: string) => {
    e.stopPropagation();
+   
+   if (!currentUser) {
+     navigate('/login');
+     return;
+   }
+
+   // Check if already liking
+   if (likingArtworks.has(artworkId)) return;
+
    try {
-     await artworkAPI.toggleLike(artworkId);
-     // Refresh trending artworks after like toggle
-     await fetchTrendingArtworks();
+     setLikingArtworks(prev => new Set(prev).add(artworkId));
+     const response = await artworkAPI.toggleLike(artworkId);
+     
+     // Update the artwork's like count locally
+     setTrendingArtworks(prev => prev.map(artwork => 
+       artwork._id === artworkId 
+         ? { ...artwork, likesCount: response.data.likes, isLiked: response.data.isLiked }
+         : artwork
+     ));
    } catch (error) {
      console.error('Error toggling like:', error);
+   } finally {
+     setLikingArtworks(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(artworkId);
+      return newSet;
+    });
    }
  };
 
@@ -66,20 +116,31 @@ const DashboardPage: React.FC = () => {
    navigate(`/purchase/${artworkId}`);
  };
 
+ const getPrimaryImage = (artwork: Artwork) => {
+   if (artwork.images && artwork.images.length > 0) {
+     const primaryImage = artwork.images.find(img => img.isPrimary);
+     return primaryImage?.url || artwork.images[0].url;
+   }
+   return 'https://via.placeholder.com/400x300/CCCCCC/FFFFFF?text=No+Image';
+ };
+
  return (
     <div className="container-fluid px-3 px-md-4 px-lg-5 py-4 py-md-5">
         {/* Hero Section */}
-      <section className="bg-light rounded-4 p-4 p-md-5 mb-4 mb-md-5 border-0 shadow-sm">
-        <div className="row align-items-center g-4">
+      <section className="rounded-3 p-3 p-md-4 mb-4" style={{ 
+        background: 'linear-gradient(135deg, #E3F2FD 0%, #F3E5F5 100%)'
+      }}>
+        <div className="row align-items-center g-3 g-md-4">
           <div className="col-lg-7">
-            <h1 className="display-4 fw-bold mb-4">Discover, Create, Connect: Your Art Journey Starts Here.</h1>
-            <p className="lead text-muted mb-4">
+            <h2 className="h2 fw-bold mb-2">
+              {typingText}<span style={{ animation: 'blink 0.7s infinite' }}>|</span>, <span className="text-primary">Your Art Journey Starts Here</span>.
+            </h2>
+            <p className="text-muted mb-3">
                Arthub connects talented artists with eager buyers. Manage your art, 
-               track sales, and engage with a vibrant community. Your dashboard provides 
-               a quick overview of everything you need.
+               track sales, and engage with a vibrant community.
              </p>
             <button 
-              className="btn btn-primary btn-lg px-4 py-3 rounded-pill shadow-sm fw-semibold" 
+              className="btn btn-primary btn-sm px-3 rounded-pill" 
               type="button" 
               onClick={() => navigate('/search')}
             >
@@ -87,16 +148,35 @@ const DashboardPage: React.FC = () => {
               Explore Artworks
             </button>
            </div>
-          <div className="col-lg-5 text-center">
-            <div className="bg-gradient rounded-4 p-5 d-flex align-items-center justify-content-center" 
-                 style={{ 
-                   background: 'linear-gradient(135deg, #ffb6c1 0%, #ffd1dc 100%)',
-                   minHeight: '300px',
-                   height: '100%'
-                 }}>
-              <i className="bi bi-palette-fill display-1 text-white opacity-75"></i>
-               </div>
-             </div>
+          <div className="col-lg-5">
+            {loading ? (
+              <div className="text-center">
+                <div className="spinner-border spinner-border-sm text-primary" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+              </div>
+            ) : trendingArtworks.length > 0 ? (
+              <div className="position-relative ratio overflow-hidden rounded-3 shadow-sm" style={{ aspectRatio: '4/3' }}>
+                {trendingArtworks.slice(0, 3).map((artwork, index) => (
+                  <img
+                    key={artwork._id}
+                    src={getPrimaryImage(artwork)}
+                    alt={artwork.title}
+                    className="w-100 h-100 position-absolute top-0 start-0"
+                    style={{
+                      objectFit: 'cover',
+                      opacity: index === currentImageIndex ? 1 : 0,
+                      transition: 'opacity 0.8s ease'
+                    }}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="ratio ratio-4x3 bg-light rounded-3 d-flex align-items-center justify-content-center">
+                <i className="bi bi-palette-fill display-4 text-muted opacity-50"></i>
+              </div>
+            )}
+          </div>
            </div>
          </section>
 
@@ -135,69 +215,15 @@ const DashboardPage: React.FC = () => {
               className="d-flex gap-3 overflow-auto hide-scrollbar"
             >
               {trendingArtworks.map((artwork) => (
-                <div 
+                <ArtworkCard
                   key={artwork._id}
-                  className="card shadow-sm"
-                  style={{ 
-                    minWidth: '300px',
-                    maxWidth: '300px',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    border: '1px solid #e9ecef'
-                  }}
-                  onClick={() => handleCardClick(artwork._id)}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-4px)';
-                    e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.15)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '';
-                  }}
-                >
-                  <div className="position-relative" style={{ height: '250px', overflow: 'hidden' }}>
-                    <img
-                      src={getPrimaryImage(artwork)}
-                      alt={artwork.title}
-                      className="w-100 h-100"
-                      style={{ objectFit: 'cover' }}
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = '/assets/images/default-artwork.jpg';
-                      }}
-                    />
-                    <div className="position-absolute top-0 end-0 p-2">
-                      <button
-                        className="btn btn-light rounded-pill shadow-sm border-0"
-                        onClick={(e) => handleToggleLike(e, artwork._id)}
-                        style={{ 
-                          background: 'rgba(255, 255, 255, 0.9)',
-                          backdropFilter: 'blur(10px)'
-                        }}
-                      >
-                        <i className="bi bi-heart-fill text-danger me-1"></i>
-                        <span className="fw-semibold">{getLikesCount(artwork)}</span>
-                      </button>
-                    </div>
-               </div>
-                  <div className="card-body p-4">
-                    <h5 className="fw-bold mb-2 text-truncate" style={{ fontSize: '1.1rem' }}>
-                      {artwork.title}
-                    </h5>
-                    <p className="text-muted small mb-3">
-                      by {artwork.artist?.name || 'Unknown Artist'}
-                    </p>
-                    <div className="d-flex justify-content-between align-items-center">
-                      <span className="fw-bold text-primary fs-5">
-                        ${artwork.price.toLocaleString()}
-                      </span>
-                      <span className="badge bg-secondary-subtle text-secondary">
-                        {artwork.medium}
-                      </span>
-            </div>
-               </div>
-            </div>
+                  artwork={artwork}
+                  onCardClick={handleCardClick}
+                  onLikeClick={handleToggleLike}
+                  isLiking={likingArtworks.has(artwork._id)}
+                />
               ))}
-               </div>
+            </div>
 
             <button
               className="btn btn-light rounded-circle position-absolute end-0 top-50 translate-middle-y shadow-lg border-0 d-none d-md-flex align-items-center justify-content-center"

@@ -48,6 +48,8 @@ const PurchasePage: React.FC = () => {
     savePayment: false
   });
   const [submitting, setSubmitting] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   useEffect(() => {
     if (artworkId) {
@@ -89,6 +91,14 @@ const PurchasePage: React.FC = () => {
       ...prev,
       [name]: value
     }));
+    // Clear validation error for this field
+    if (validationErrors[name]) {
+      setValidationErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
 
   const handlePaymentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,29 +109,86 @@ const PurchasePage: React.FC = () => {
         paymentMethod: value
       }));
     } else {
-    setPaymentData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+      let formattedValue = value;
+      
+      // Format card number with dashes
+      if (name === 'cardNumber') {
+        const cleaned = value.replace(/\D/g, ''); // Remove non-digits
+        formattedValue = cleaned.match(/.{1,4}/g)?.join('-') || cleaned;
+      }
+      
+      // Format expiration date with slash
+      if (name === 'expirationDate') {
+        const cleaned = value.replace(/\D/g, ''); // Remove non-digits
+        if (cleaned.length >= 2) {
+          formattedValue = `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}`;
+        } else {
+          formattedValue = cleaned;
+        }
+      }
+      
+      setPaymentData(prev => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : formattedValue
+      }));
+    }
+    // Clear validation error for this field
+    if (validationErrors[name]) {
+      setValidationErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
     }
   };
 
   const handlePlaceOrder = async () => {
     if (!artwork || !artworkId) return;
 
+    // Clear previous errors
+    setValidationErrors({});
+    setError('');
+
     // Validate required fields
-    if (!orderData.fullName || !orderData.address || !orderData.city || !orderData.state || !orderData.zipCode) {
-      setError('Please fill in all required shipping information.');
-      return;
+    const errors: {[key: string]: string} = {};
+
+    if (!orderData.fullName.trim()) {
+      errors.fullName = 'Full name is required';
+    }
+    if (!orderData.address.trim()) {
+      errors.address = 'Address is required';
+    }
+    if (!orderData.city.trim()) {
+      errors.city = 'City is required';
+    }
+    if (!orderData.state.trim()) {
+      errors.state = 'State is required';
+    }
+    if (!orderData.zipCode.trim()) {
+      errors.zipCode = 'Zip code is required';
     }
 
-    if (!paymentData.paymentMethod) {
-      setError('Please select a payment method.');
+    // Validate card details if credit card is selected
+    if (paymentData.paymentMethod === 'credit_card') {
+      const cardNumberDigits = paymentData.cardNumber.replace(/[^0-9]/g, '');
+      if (!cardNumberDigits || cardNumberDigits.length < 13) {
+        errors.cardNumber = 'Please enter a valid card number';
+      }
+      if (!paymentData.expirationDate || paymentData.expirationDate.length < 5) {
+        errors.expirationDate = 'Expiration date is required';
+      }
+      if (!paymentData.cvc || paymentData.cvc.length < 3) {
+        errors.cvc = 'Please enter a valid CVC';
+      }
+    }
+
+    // If there are validation errors, set them and return
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
       return;
     }
 
     setSubmitting(true);
-    setError('');
     
     try {
       const orderPayload = {
@@ -140,14 +207,13 @@ const PurchasePage: React.FC = () => {
       const response = await orderAPI.createOrder(orderPayload);
       
       if (response.success) {
-      alert('Order placed successfully! You will receive a confirmation email shortly.');
-      navigate('/dashboard');
+        setShowSuccessModal(true);
       } else {
         setError('Failed to place order. Please try again.');
       }
     } catch (err: any) {
       console.error('Error placing order:', err);
-      setError(err.message || 'Failed to place order. Please try again.');
+      setError(err.response?.data?.message || err.message || 'Failed to place order. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -155,27 +221,31 @@ const PurchasePage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="purchase-page">
-        <div className="purchase-container">
-          <div className="loading-container">
-            <div className="spinner"></div>
-            <p>Loading artwork details...</p>
+      <div className="bg-light min-vh-100 py-4">
+        <div className="container">
+          <div className="text-center py-5">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+            <p className="mt-3 text-muted">Loading artwork details...</p>
           </div>
         </div>
       </div>
     );
   }
 
-  if (error || !artwork) {
+  if (!artwork && !loading) {
     return (
-      <div className="purchase-page">
-        <div className="purchase-container">
-          <div className="error-container">
-            <div className="error-icon">⚠️</div>
-            <h3>Artwork Not Found</h3>
-            <p>{error || 'The artwork you are looking for does not exist.'}</p>
+      <div className="bg-light min-vh-100 py-4">
+        <div className="container">
+          <div className="text-center py-5">
+            <div className="mb-4">
+              <i className="bi bi-exclamation-triangle display-1 text-warning"></i>
+            </div>
+            <h3 className="fw-bold mb-3">Artwork Not Found</h3>
+            <p className="text-muted mb-4">The artwork you are looking for does not exist.</p>
             <button 
-              className="btn-primary" 
+              className="btn btn-primary" 
               onClick={() => navigate('/search')}
             >
               Browse Artworks
@@ -186,15 +256,17 @@ const PurchasePage: React.FC = () => {
     );
   }
 
+  if (!artwork) {
+    return null;
+  }
+
   const subtotal = artwork.price;
   const shipping = 0; // Free shipping
   const total = subtotal + shipping;
 
   return (
-    <div className="purchase-page bg-light min-vh-100 py-4">
-      <div className="purchase-container container">
-        <h1 className="page-title display-4 fw-bold mb-4 text-center">Purchase Artwork</h1>
-        
+    <div className="bg-light min-vh-100 py-4">
+      <div className="container">
         {error && (
           <div className="alert alert-danger alert-dismissible fade show mb-4" role="alert">
             <i className="bi bi-exclamation-triangle-fill me-2"></i>
@@ -203,27 +275,27 @@ const PurchasePage: React.FC = () => {
           </div>
         )}
         
-        <div className="purchase-content row g-4">
-          {/* Left Column - Order Summary & Shipping */}
-          <div className="left-column col-lg-6">
+        <div className="row g-4">
+          {/* Left Column - Order Summary, Shipping, Payment, Review */}
+          <div className="col-lg-6">
             {/* Order Summary */}
-            <div className="order-summary bg-white rounded-4 shadow-sm p-4 mb-4">
+            <div className="bg-white rounded-4 shadow-sm p-4 mb-4">
               <h2 className="fw-bold mb-3 pb-2 border-bottom">Order Summary</h2>
-              <div className="artwork-item d-flex gap-3 p-3 bg-light rounded mb-3">
+              <div className="d-flex gap-3 p-3 bg-light rounded mb-3">
                 <img 
                   src={artwork.images?.[0]?.url || 'https://via.placeholder.com/100x100/CCCCCC/FFFFFF?text=No+Image'} 
                   alt={artwork.title}
-                  className="artwork-thumbnail rounded"
+                  className="rounded"
                   style={{ width: '100px', height: '100px', objectFit: 'cover' }}
                 />
-                <div className="artwork-details flex-grow-1">
+                <div className="flex-grow-1">
                   <h3 className="fw-semibold mb-1">{artwork.title}</h3>
-                  <p className="artist-name text-muted small mb-2">{artwork.artist?.name || 'Unknown Artist'}</p>
-                  <p className="artwork-price text-primary fw-bold fs-5 mb-0">${artwork.price?.toLocaleString()}</p>
+                  <p className="text-muted small mb-2">{artwork.artist?.name || 'Unknown Artist'}</p>
+                  <p className="text-primary fw-bold fs-5 mb-0">${artwork.price?.toLocaleString()}</p>
                 </div>
               </div>
               
-              <div className="pricing-breakdown">
+              <div>
                 <div className="d-flex justify-content-between mb-2">
                   <span className="text-muted">Subtotal</span>
                   <span className="fw-semibold">${subtotal.toLocaleString()}</span>
@@ -238,10 +310,15 @@ const PurchasePage: React.FC = () => {
                   <span className="fw-bold text-primary fs-5">${total.toLocaleString()}</span>
                 </div>
               </div>
+              <div className="mt-3">
+                <a href="#" className="text-primary text-decoration-none" onClick={(e) => e.preventDefault()}>
+                  Edit Order
+                </a>
+              </div>
             </div>
 
             {/* Shipping Information */}
-            <div className="shipping-info bg-white rounded-4 shadow-sm p-4">
+            <div className="bg-white rounded-4 shadow-sm p-4 mb-4">
               <h2 className="fw-bold mb-3 pb-2 border-bottom">Shipping Information</h2>
               <div className="mb-3">
                 <label htmlFor="fullName" className="form-label fw-semibold">Full Name <span className="text-danger">*</span></label>
@@ -249,11 +326,12 @@ const PurchasePage: React.FC = () => {
                   type="text"
                   id="fullName"
                   name="fullName"
-                  className="form-control"
+                  className={`form-control ${validationErrors.fullName ? 'is-invalid' : ''}`}
                   value={orderData.fullName}
                   onChange={handleInputChange}
                   required
                 />
+                {validationErrors.fullName && <div className="invalid-feedback">{validationErrors.fullName}</div>}
               </div>
               <div className="mb-3">
                 <label htmlFor="email" className="form-label fw-semibold">Email</label>
@@ -267,16 +345,17 @@ const PurchasePage: React.FC = () => {
                 />
               </div>
               <div className="mb-3">
-                <label htmlFor="address" className="form-label fw-semibold">Street Address <span className="text-danger">*</span></label>
+                <label htmlFor="address" className="form-label fw-semibold">Address <span className="text-danger">*</span></label>
                 <input
                   type="text"
                   id="address"
                   name="address"
-                  className="form-control"
+                  className={`form-control ${validationErrors.address ? 'is-invalid' : ''}`}
                   value={orderData.address}
                   onChange={handleInputChange}
                   required
                 />
+                {validationErrors.address && <div className="invalid-feedback">{validationErrors.address}</div>}
               </div>
               <div className="row g-3">
                 <div className="col-md-6">
@@ -285,11 +364,12 @@ const PurchasePage: React.FC = () => {
                     type="text"
                     id="city"
                     name="city"
-                    className="form-control"
+                    className={`form-control ${validationErrors.city ? 'is-invalid' : ''}`}
                     value={orderData.city}
                     onChange={handleInputChange}
                     required
                   />
+                  {validationErrors.city && <div className="invalid-feedback">{validationErrors.city}</div>}
                 </div>
                 <div className="col-md-3">
                   <label htmlFor="state" className="form-label fw-semibold">State <span className="text-danger">*</span></label>
@@ -297,11 +377,12 @@ const PurchasePage: React.FC = () => {
                     type="text"
                     id="state"
                     name="state"
-                    className="form-control"
+                    className={`form-control ${validationErrors.state ? 'is-invalid' : ''}`}
                     value={orderData.state}
                     onChange={handleInputChange}
                     required
                   />
+                  {validationErrors.state && <div className="invalid-feedback">{validationErrors.state}</div>}
                 </div>
                 <div className="col-md-3">
                   <label htmlFor="zipCode" className="form-label fw-semibold">Zip Code <span className="text-danger">*</span></label>
@@ -309,11 +390,12 @@ const PurchasePage: React.FC = () => {
                     type="text"
                     id="zipCode"
                     name="zipCode"
-                    className="form-control"
+                    className={`form-control ${validationErrors.zipCode ? 'is-invalid' : ''}`}
                     value={orderData.zipCode}
                     onChange={handleInputChange}
                     required
                   />
+                  {validationErrors.zipCode && <div className="invalid-feedback">{validationErrors.zipCode}</div>}
                 </div>
               </div>
               <div className="mb-3 mt-3">
@@ -329,26 +411,142 @@ const PurchasePage: React.FC = () => {
                 />
               </div>
             </div>
+
+            {/* Payment Method */}
+            <div className="bg-white rounded-4 shadow-sm p-4 mb-4">
+              <h2 className="fw-bold mb-3 pb-2 border-bottom">Payment Method</h2>
+              <div className="mb-3">
+                <div className="form-check">
+                  <input 
+                    className="form-check-input" 
+                    type="radio" 
+                    name="paymentMethod" 
+                    id="creditCard"
+                    value="credit_card" 
+                    checked={paymentData.paymentMethod === 'credit_card'}
+                    onChange={handlePaymentChange}
+                  />
+                  <label className="form-check-label" htmlFor="creditCard">
+                    <i className="bi bi-credit-card-2-front me-2"></i>
+                    Credit Card
+                  </label>
+                </div>
+              </div>
+              
+              {paymentData.paymentMethod === 'credit_card' && (
+                <div>
+                  <div className="mb-3">
+                    <label htmlFor="cardNumber" className="form-label fw-semibold">Card Number</label>
+                    <input
+                      type="text"
+                      id="cardNumber"
+                      name="cardNumber"
+                      className={`form-control ${validationErrors.cardNumber ? 'is-invalid' : ''}`}
+                      value={paymentData.cardNumber}
+                      onChange={handlePaymentChange}
+                      placeholder="**** **** **** 1234"
+                    />
+                    {validationErrors.cardNumber && <div className="invalid-feedback">{validationErrors.cardNumber}</div>}
+                  </div>
+                  <div className="row g-3">
+                    <div className="col-6">
+                      <label htmlFor="expirationDate" className="form-label fw-semibold">Expiration Date</label>
+                      <input
+                        type="text"
+                        id="expirationDate"
+                        name="expirationDate"
+                        className={`form-control ${validationErrors.expirationDate ? 'is-invalid' : ''}`}
+                        value={paymentData.expirationDate}
+                        onChange={handlePaymentChange}
+                        placeholder="MM/YY"
+                        maxLength={5}
+                      />
+                      {validationErrors.expirationDate && <div className="invalid-feedback">{validationErrors.expirationDate}</div>}
+                    </div>
+                    <div className="col-6">
+                      <label htmlFor="cvc" className="form-label fw-semibold">CVC</label>
+                      <input
+                        type="text"
+                        id="cvc"
+                        name="cvc"
+                        className={`form-control ${validationErrors.cvc ? 'is-invalid' : ''}`}
+                        value={paymentData.cvc}
+                        onChange={handlePaymentChange}
+                        placeholder="***"
+                        maxLength={4}
+                      />
+                      {validationErrors.cvc && <div className="invalid-feedback">{validationErrors.cvc}</div>}
+                    </div>
+                  </div>
+                  <div className="form-check mt-3">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id="savePayment"
+                      name="savePayment"
+                      checked={paymentData.savePayment}
+                      onChange={handlePaymentChange}
+                    />
+                    <label className="form-check-label" htmlFor="savePayment">
+                      Save payment information for future purchases
+                    </label>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Review Your Order */}
+            <div className="bg-white rounded-4 shadow-sm p-4">
+              <h2 className="fw-bold mb-3 pb-2 border-bottom">Review Your Order</h2>
+              <div className="mb-3">
+                <div className="d-flex justify-content-between mb-2">
+                  <span>Subtotal</span>
+                  <span className="fw-semibold">${subtotal.toLocaleString()}</span>
+                </div>
+                <div className="d-flex justify-content-between mb-2">
+                  <span>Shipping</span>
+                  <span className="fw-semibold">${shipping.toFixed(2)}</span>
+                </div>
+                <hr />
+                <div className="d-flex justify-content-between">
+                  <span className="fw-bold">Order Total</span>
+                  <span className="fw-bold text-primary fs-5">${total.toLocaleString()}</span>
+                </div>
+              </div>
+              <button 
+                className="btn btn-primary w-100 fw-semibold"
+                onClick={handlePlaceOrder}
+                disabled={submitting}
+              >
+                {submitting ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    Processing...
+                  </>
+                ) : (
+                  'Place Order'
+                )}
+              </button>
+            </div>
           </div>
 
           {/* Right Column - Artwork Display & Reviews */}
-          <div className="right-column col-lg-6">
+          <div className="col-lg-6">
             {/* Artwork Display */}
-            <div className="artwork-display bg-white rounded-4 shadow-sm p-4 mb-4">
+            <div className="bg-white rounded-4 shadow-sm p-4 mb-4">
               <img 
                 src={artwork.images?.[0]?.url || 'https://via.placeholder.com/400x400/CCCCCC/FFFFFF?text=No+Image'} 
                 alt={artwork.title}
-                className="artwork-image img-fluid rounded-3 mb-3 shadow-sm"
-                style={{ maxHeight: '400px', width: '100%', objectFit: 'contain' }}
+                className="img-fluid rounded-3 mb-3 w-100"
               />
-              <h2 className="artwork-title fw-bold mb-2">{artwork.title}</h2>
-              <p className="artist-name text-muted mb-3">
+              <h2 className="fw-bold mb-2">{artwork.title}</h2>
+              <p className="text-muted mb-3">
                 <i className="bi bi-person-circle me-2"></i>
                 by {artwork.artist?.name || 'Unknown Artist'}
               </p>
-              <div className="artwork-description mb-3">
+              <div className="mb-3">
                 <p className="text-muted">{artwork.description}</p>
-                <div className="artwork-meta d-flex gap-2 flex-wrap mt-3">
+                <div className="d-flex gap-2 flex-wrap mt-3">
                   <span className="badge bg-primary">{artwork.medium}</span>
                   <span className="badge bg-secondary">{artwork.style}</span>
                   {artwork.tags && artwork.tags.slice(0, 3).map((tag, idx) => (
@@ -359,32 +557,31 @@ const PurchasePage: React.FC = () => {
             </div>
 
             {/* Customer Reviews */}
-            <div className="customer-reviews bg-white rounded-4 shadow-sm p-4">
+            <div className="bg-white rounded-4 shadow-sm p-4">
               <h2 className="fw-bold mb-3 pb-2 border-bottom">Customer Reviews</h2>
               {reviews.length > 0 ? (
-              <div className="reviews-list">
+                <div>
                   {reviews.map((review) => (
-                    <div key={review._id} className="review-item mb-3 p-3 bg-light rounded shadow-sm">
-                      <div className="review-rating mb-2">
-                        {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
+                    <div key={review._id} className="mb-4">
+                      <div className="d-flex align-items-center gap-2 mb-2">
+                        <img 
+                          src={review.user.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(review.user.name)}&background=4A90E2&color=fff`}
+                          alt={review.user.name}
+                          className="rounded-circle"
+                          style={{ width: '32px', height: '32px', objectFit: 'cover' }}
+                        />
+                        <div className="flex-grow-1">
+                          <div className="text-warning mb-1">
+                            {Array.from({ length: 5 }, (_, i) => (
+                              <i key={i} className={`bi ${i < review.rating ? 'bi-star-fill' : 'bi-star'}`}></i>
+                            ))}
+                          </div>
+                          <span className="fw-semibold">{review.user.name}</span>
+                        </div>
                       </div>
-                  <div className="review-content">
-                        <div className="reviewer-info d-flex align-items-center gap-2 mb-2">
-                          <img 
-                            src={review.user.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(review.user.name)}&background=4A90E2&color=fff`}
-                            alt={review.user.name}
-                            className="reviewer-avatar rounded-circle"
-                            style={{ width: '32px', height: '32px', objectFit: 'cover' }}
-                          />
-                          <span className="reviewer-name fw-semibold">{review.user.name}</span>
-                          <span className="text-muted small ms-auto">
-                            {new Date(review.createdAt).toLocaleDateString()}
-                          </span>
-                    </div>
-                        {review.comment && (
-                          <p className="review-text mb-0 text-muted">{review.comment}</p>
-                        )}
-                </div>
+                      {review.comment && (
+                        <p className="text-muted mb-0">{review.comment}</p>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -397,156 +594,29 @@ const PurchasePage: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Payment Method & Place Order */}
-        <div className="payment-section row g-4 mt-2">
-          <div className="payment-method col-lg-8 bg-white rounded-4 shadow-sm p-4">
-            <h2 className="fw-bold mb-3 pb-2 border-bottom">Payment Method</h2>
-            <div className="payment-options mb-3">
-              <div className="form-check mb-2">
-                <input 
-                  className="form-check-input" 
-                  type="radio" 
-                  name="paymentMethod" 
-                  id="creditCard"
-                  value="credit_card" 
-                  checked={paymentData.paymentMethod === 'credit_card'}
-                  onChange={handlePaymentChange}
-                />
-                <label className="form-check-label d-flex align-items-center gap-2" htmlFor="creditCard">
-                  <i className="bi bi-credit-card-2-front"></i>
-                <span>Credit Card</span>
-              </label>
+      {/* Success Modal */}
+      <div className={`modal fade ${showSuccessModal ? 'show' : ''}`} style={{ display: showSuccessModal ? 'block' : 'none' }} tabIndex={-1}>
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-body text-center py-5">
+              <div className="mb-3">
+                <i className="bi bi-check-circle-fill text-success display-2"></i>
               </div>
-              <div className="form-check mb-2">
-                <input 
-                  className="form-check-input" 
-                  type="radio" 
-                  name="paymentMethod" 
-                  id="paypal"
-                  value="paypal"
-                  checked={paymentData.paymentMethod === 'paypal'}
-                  onChange={handlePaymentChange}
-                />
-                <label className="form-check-label d-flex align-items-center gap-2" htmlFor="paypal">
-                  <i className="bi bi-paypal"></i>
-                  <span>PayPal</span>
-                </label>
-              </div>
-              <div className="form-check mb-2">
-                <input 
-                  className="form-check-input" 
-                  type="radio" 
-                  name="paymentMethod" 
-                  id="bankTransfer"
-                  value="bank_transfer"
-                  checked={paymentData.paymentMethod === 'bank_transfer'}
-                  onChange={handlePaymentChange}
-                />
-                <label className="form-check-label d-flex align-items-center gap-2" htmlFor="bankTransfer">
-                  <i className="bi bi-bank"></i>
-                  <span>Bank Transfer</span>
-                </label>
-              </div>
+              <h3 className="fw-bold mb-3">Order Placed Successfully!</h3>
+              <p className="text-muted mb-4">You will receive a confirmation email shortly.</p>
+              <button 
+                className="btn btn-primary"
+                onClick={() => navigate('/my-purchases')}
+              >
+                View My Orders
+              </button>
             </div>
-            
-            {paymentData.paymentMethod === 'credit_card' && (
-            <div className="card-details">
-                <div className="mb-3">
-                  <label htmlFor="cardNumber" className="form-label fw-semibold">Card Number</label>
-                <input
-                  type="text"
-                  id="cardNumber"
-                  name="cardNumber"
-                    className="form-control"
-                  value={paymentData.cardNumber}
-                  onChange={handlePaymentChange}
-                    placeholder="1234 5678 9012 3456"
-                    maxLength={19}
-                />
-              </div>
-                <div className="row g-3">
-                  <div className="col-md-6">
-                    <label htmlFor="expirationDate" className="form-label fw-semibold">Expiration Date</label>
-                  <input
-                    type="text"
-                    id="expirationDate"
-                    name="expirationDate"
-                      className="form-control"
-                    value={paymentData.expirationDate}
-                    onChange={handlePaymentChange}
-                    placeholder="MM/YY"
-                      maxLength={5}
-                  />
-                </div>
-                  <div className="col-md-6">
-                    <label htmlFor="cvc" className="form-label fw-semibold">CVC</label>
-                  <input
-                    type="text"
-                    id="cvc"
-                    name="cvc"
-                      className="form-control"
-                    value={paymentData.cvc}
-                    onChange={handlePaymentChange}
-                      placeholder="123"
-                      maxLength={4}
-                  />
-                </div>
-              </div>
-                <div className="form-check mt-3">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id="savePayment"
-                    name="savePayment"
-                    checked={paymentData.savePayment}
-                    onChange={handlePaymentChange}
-                  />
-                  <label className="form-check-label" htmlFor="savePayment">
-                  Save payment information for future purchases
-                </label>
-              </div>
-            </div>
-            )}
-          </div>
-
-          <div className="order-total col-lg-4 bg-white rounded-4 shadow-sm p-4">
-            <h3 className="fw-bold mb-3 pb-2 border-bottom">Order Total</h3>
-            <div className="total-breakdown mb-3">
-              <div className="d-flex justify-content-between mb-2">
-                <span className="text-muted">Subtotal</span>
-                <span className="fw-semibold">${subtotal.toLocaleString()}</span>
-              </div>
-              <div className="d-flex justify-content-between mb-2">
-                <span className="text-muted">Shipping</span>
-                <span className="fw-semibold">${shipping.toFixed(2)}</span>
-              </div>
-              <hr />
-              <div className="d-flex justify-content-between">
-                <span className="fw-bold fs-5">Total</span>
-                <span className="fw-bold fs-5 text-primary">${total.toLocaleString()}</span>
-              </div>
-            </div>
-            <button 
-              className="btn btn-primary btn-lg w-100 rounded-pill shadow-sm fw-semibold"
-              onClick={handlePlaceOrder}
-              disabled={submitting}
-            >
-              {submitting ? (
-                <>
-                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <i className="bi bi-cart-check me-2"></i>
-                  Place Order
-                </>
-              )}
-            </button>
           </div>
         </div>
       </div>
+      {showSuccessModal && <div className="modal-backdrop fade show"></div>}
     </div>
   );
 };

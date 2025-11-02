@@ -20,7 +20,6 @@ const ArtistProfilePage: React.FC = () => {
   });
 
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
-  const [portfolioFiles, setPortfolioFiles] = useState<File[]>([]);
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -100,22 +99,6 @@ const ArtistProfilePage: React.FC = () => {
     }
   };
 
-  const handlePortfolioUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files) {
-      const fileArray = Array.from(files);
-      if (portfolioFiles.length + fileArray.length > 10) {
-        setError('Maximum 10 portfolio images allowed');
-        return;
-      }
-      setPortfolioFiles([...portfolioFiles, ...fileArray]);
-      setError('');
-    }
-  };
-
-  const removePortfolioFile = (index: number) => {
-    setPortfolioFiles(portfolioFiles.filter((_, i) => i !== index));
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -305,51 +288,6 @@ const ArtistProfilePage: React.FC = () => {
                           <i className="bi bi-lightbulb me-1"></i>
                           A detailed bio helps buyers connect with your art and understand your unique perspective.
                         </div>
-                      </div>
-                    </div>
-                  </section>
-
-                  {/* Portfolio Upload */}
-                  <section className="card border-0 shadow-sm mb-4">
-                    <div className="card-body p-4">
-                      <h2 className="h5 fw-bold mb-2">Portfolio Upload</h2>
-                      <p className="text-muted small mb-4">Showcase your best artworks (up to 10 images).</p>
-                      
-                      {portfolioFiles.length > 0 && (
-                        <div className="mb-4">
-                          <h4 className="h6 fw-semibold mb-3">Current Uploads</h4>
-                          <div className="list-group gap-2">
-                            {portfolioFiles.map((file, index) => (
-                              <div key={index} className="list-group-item d-flex align-items-center gap-3">
-                                <i className="bi bi-file-image text-primary fs-5"></i>
-                                <span className="flex-grow-1">{file.name}</span>
-                                <button
-                                  type="button"
-                                  onClick={() => removePortfolioFile(index)}
-                                  className="btn btn-sm btn-outline-danger"
-                                >
-                                  <i className="bi bi-trash"></i>
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      <div>
-                        <h4 className="h6 fw-semibold mb-3">Upload New Artwork</h4>
-                        <label htmlFor="portfolioUpload" className="btn btn-outline-secondary">
-                          <i className="bi bi-plus-circle me-2"></i>
-                          Add File
-                        </label>
-                        <input
-                          type="file"
-                          id="portfolioUpload"
-                          accept="image/*"
-                          multiple
-                          onChange={handlePortfolioUpload}
-                          style={{ display: 'none' }}
-                        />
                       </div>
                     </div>
                   </section>

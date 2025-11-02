@@ -51,8 +51,10 @@ const MyPurchasesPage: React.FC = () => {
   };
 
   const getArtworkImage = (artwork: any) => {
-    if (artwork?.images && artwork.images.length > 0) {
-      return artwork.images[0].url;
+    if (artwork && artwork.images && artwork.images.length > 0) {
+      // Handle both object structure with url field or array of images
+      const firstImage = artwork.images[0];
+      return typeof firstImage === 'string' ? firstImage : firstImage.url;
     }
     return 'https://via.placeholder.com/150x150?text=No+Image';
   };
@@ -136,19 +138,19 @@ const MyPurchasesPage: React.FC = () => {
                           <td>
                             <div className="d-flex align-items-center gap-2">
                               <img
-                                src={getArtworkImage(order.artwork)}
-                                alt={order.artwork?.title}
+                                src={getArtworkImage(order.artworkId || order.artwork)}
+                                alt={(order.artworkId || order.artwork)?.title}
                                 className="rounded"
                                 style={{ width: '50px', height: '50px', objectFit: 'cover' }}
                               />
                               <div>
-                                <div className="fw-semibold">{order.artwork?.title}</div>
-                                <div className="text-muted small">{order.artwork?.medium}</div>
+                                <div className="fw-semibold">{(order.artworkId || order.artwork)?.title}</div>
+                                <div className="text-muted small">{(order.artworkId || order.artwork)?.medium}</div>
                               </div>
                             </div>
                           </td>
                           <td>
-                            <div>{order.artwork?.artist?.name}</div>
+                            <div>{(order.artworkId || order.artwork)?.artistId?.name || order.artistId?.name}</div>
                           </td>
                           <td>
                             <div className="fw-bold text-primary">${order.totalAmount?.toFixed(2) || order.price?.toFixed(2)}</div>

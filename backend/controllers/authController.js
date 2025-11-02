@@ -74,3 +74,30 @@ exports.updateProfile = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.requestPasswordReset = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const result = await authService.verifyEmailForPasswordReset(email);
+    res.status(200).json({
+      success: true,
+      message: 'OTP generated successfully',
+      data: result
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.resetPassword = async (req, res, next) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+    await authService.verifyOTPAndResetPassword(email, otp, newPassword);
+    res.status(200).json({
+      success: true,
+      message: 'Password reset successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+};

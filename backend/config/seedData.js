@@ -143,7 +143,7 @@ const seedData = async () => {
         title: 'City Reflections',
         description: 'Acrylic painting depicting the glow of city lights on a rainy night.',
         price: 500,
-        images: [{ url: '/assets/images/pexels-zaksheuskaya-709412-1561020.jpg', isPrimary: true }],
+        images: [{ url: '/assets/images/art/pexels-zaksheuskaya-709412-1561020.jpg', isPrimary: true }],
         medium: 'Acrylic',
         style: 'Contemporary',
         tags: ['city','rain','urban']
@@ -153,7 +153,7 @@ const seedData = async () => {
         title: 'Silent Stone',
         description: 'Abstract sculpture carved from granite, symbolizing stillness.',
         price: 1200,
-        images: [{ url: '/assets/images/pexels-expect-best-79873-707265.jpg', isPrimary: true }],
+        images: [{ url: '/assets/images/art/pexels-expect-best-79873-707265.jpg', isPrimary: true }],
         medium: 'Sculpture',
         style: 'Minimalism',
         tags: ['sculpture','stone','abstract']
@@ -163,7 +163,7 @@ const seedData = async () => {
         title: 'Dreamscape',
         description: 'Digital surreal art exploring imagination and dreams.',
         price: 350,
-        images: [{ url: '/assets/images/pexels-rakicevic-nenad-233369-1262302.jpg', isPrimary: true }],
+        images: [{ url: '/assets/images/art/pexels-rakicevic-nenad-233369-1262302.jpg', isPrimary: true }],
         medium: 'Digital Art',
         style: 'Surrealism',
         tags: ['digital','dream','fantasy']
@@ -173,7 +173,7 @@ const seedData = async () => {
         title: 'Sunset Melody',
         description: 'Oil on canvas capturing the symphony of colors during sunset.',
         price: 750,
-        images: [{ url: '/assets/images/images.jpeg', isPrimary: true }],
+        images: [{ url: '/assets/images/art/images.jpeg', isPrimary: true }],
         medium: 'Oil on Canvas',
         style: 'Impressionism',
         tags: ['sunset','landscape','color']
@@ -183,7 +183,7 @@ const seedData = async () => {
         title: 'Portrait of Silence',
         description: 'Photography print capturing a moment of deep thought.',
         price: 300,
-        images: [{ url: '/assets/images/images (1).jpeg', isPrimary: true }],
+        images: [{ url: '/assets/images/art/images (1).jpeg', isPrimary: true }],
         medium: 'Photography',
         style: 'Realism',
         tags: ['portrait','thought','human']
@@ -193,7 +193,7 @@ const seedData = async () => {
         title: 'Textures of Time',
         description: 'Mixed media piece reflecting layers of memory and material.',
         price: 600,
-        images: [{ url: '/assets/images/images (3).jpeg', isPrimary: true }],
+        images: [{ url: '/assets/images/art/images (3).jpeg', isPrimary: true }],
         medium: 'Mixed Media',
         style: 'Expressionism',
         tags: ['texture','memory','mixed media']
@@ -203,7 +203,7 @@ const seedData = async () => {
         title: 'Monochrome Silence',
         description: 'Charcoal on paper drawing emphasizing shape and void.',
         price: 400,
-        images: [{ url: '/assets/images/pexels-shvetsa-3683209.jpg', isPrimary: true }],
+        images: [{ url: '/assets/images/art/pexels-shvetsa-3683209.jpg', isPrimary: true }],
         medium: 'Charcoal',
         style: 'Minimalism',
         tags: ['charcoal','paper','monochrome']
@@ -213,7 +213,7 @@ const seedData = async () => {
         title: 'Urban Pop',
         description: 'Pop-art digital illustration based on city icons.',
         price: 450,
-        images: [{ url: '/assets/images/close-up-portrait-curly-handsome-european-male.jpg', isPrimary: true }],
+        images: [{ url: '/assets/images/art/close-up-portrait-curly-handsome-european-male.jpg', isPrimary: true }],
         medium: 'Digital Art',
         style: 'Pop Art',
         tags: ['pop art','city','illustration']
@@ -224,7 +224,7 @@ const seedData = async () => {
         title: 'Special Artwork 1',
         description: 'Oil painting by Special User exploring light and shadow.',
         price: 800,
-        images: [{ url: '/assets/images/smiling-caucasian-young-guy-wearing-pink-shirt-isolated-white-background.jpg', isPrimary: true }],
+        images: [{ url: '/assets/images/art/smiling-caucasian-young-guy-wearing-pink-shirt-isolated-white-background.jpg', isPrimary: true }],
         medium: 'Oil on Canvas',
         style: 'Contemporary',
         tags: ['special','light','shadow']
@@ -234,7 +234,7 @@ const seedData = async () => {
         title: 'Special Artwork 2',
         description: 'Digital art piece from Special User featuring abstract geometry.',
         price: 650,
-        images: [{ url: '/assets/images/young-bearded-man-black-shirt-looking-aside-confused.jpg', isPrimary: true }],
+        images: [{ url: '/assets/images/art/young-bearded-man-black-shirt-looking-aside-confused.jpg', isPrimary: true }],
         medium: 'Digital Art',
         style: 'Pop Art',
         tags: ['digital','abstract','geometry']
@@ -244,7 +244,7 @@ const seedData = async () => {
         title: 'Special Artwork 3',
         description: 'Sculpture combining recycled materials – by Special User.',
         price: 900,
-        images: [{ url: '/assets/images/pexels-zaksheuskaya-709412-1561020.jpg', isPrimary: true }],
+        images: [{ url: '/assets/images/art/pexels-zaksheuskaya-709412-1561020.jpg', isPrimary: true }],
         medium: 'Sculpture',
         style: 'Modern',
         tags: ['sculpture','recycled','modern']
@@ -254,7 +254,7 @@ const seedData = async () => {
         title: 'Special Artwork 4',
         description: 'Mixed media collage by Special User about time and memory.',
         price: 700,
-        images: [{ url: '/assets/images/pexels-expect-best-79873-707265.jpg', isPrimary: true }],
+        images: [{ url: '/assets/images/art/pexels-expect-best-79873-707265.jpg', isPrimary: true }],
         medium: 'Mixed Media',
         style: 'Expressionism',
         tags: ['collage','memory','mixed']
@@ -264,7 +264,7 @@ const seedData = async () => {
         title: 'Special Artwork 5',
         description: 'Photography print by Special User of urban textures.',
         price: 550,
-        images: [{ url: '/assets/images/pexels-rakicevic-nenad-233369-1262302.jpg', isPrimary: true }],
+        images: [{ url: '/assets/images/art/pexels-rakicevic-nenad-233369-1262302.jpg', isPrimary: true }],
         medium: 'Photography',
         style: 'Contemporary',
         tags: ['photography','urban','texture']

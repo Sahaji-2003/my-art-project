@@ -16,8 +16,13 @@
   padding: 0;
  
   box-sizing: border-box;
- 
- }
+
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
  
  
   
@@ -2682,29 +2687,54 @@
 
  }
 
- .artwork-card {
+.artwork-card {
 
-   background: white;
+  background: white;
 
-   border-radius: 12px;
+  border-radius: 12px;
 
-   overflow: hidden;
+  border: 1px solid #e9ecef;
 
-   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 
-   transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 
-   cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
 
- }
+  cursor: pointer;
 
- .artwork-card:hover {
+}
 
-   transform: translateY(-4px);
+.artwork-card:hover {
 
-   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  transform: translateY(-4px);
 
- }
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+
+  border-color: #4A90E2;
+
+}
+
+.artwork-card-hover {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.artwork-card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+}
+
+.artwork-image-wrapper {
+  overflow: hidden;
+}
+
+.artwork-image-zoom {
+  transition: transform 0.3s ease;
+}
+
+.artwork-card-hover:hover .artwork-image-zoom {
+  transform: scale(1.05);
+}
 
  .artwork-image-container {
 
@@ -2712,7 +2742,7 @@
 
    width: 100%;
 
-   height: 250px;
+   height: 180px;
 
    overflow: hidden;
 
@@ -2778,11 +2808,29 @@
 
    gap: 0.25rem;
 
+   transition: all 0.2s ease;
+
+ }
+
+ .like-button:hover:not(:disabled) {
+
+   background: rgba(0, 0, 0, 0.9);
+
+   transform: scale(1.05);
+
+ }
+
+ .like-button:disabled {
+
+   opacity: 0.6;
+
+   cursor: not-allowed;
+
  }
 
  .artwork-info {
 
-   padding: 1.5rem;
+   padding: 1rem;
 
  }
 
@@ -2892,6 +2940,31 @@
 
    color: #475569;
 
+ }
+
+ .medium-oiloncanvas {
+   background: #E6F3FF;
+   color: #1E40AF;
+ }
+
+ .medium-mixedmedia {
+   background: #FFF4E6;
+   color: #B45309;
+ }
+
+ .medium-pencil {
+   background: #F5F5F5;
+   color: #374151;
+ }
+
+ .medium-charcoal {
+   background: #2C2C2C;
+   color: #FFFFFF;
+ }
+
+ .medium-other {
+   background: #E5E7EB;
+   color: #6B7280;
  }
 
  .loading-container {
@@ -7322,64 +7395,6 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 1rem;
-}
-
-.artwork-card {
-  background: white;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  overflow: hidden;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.artwork-card:hover {
-  border-color: #4A90E2;
-  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.15);
-  transform: translateY(-2px);
-}
-
-.artwork-image-container {
-  position: relative;
-  width: 100%;
-  height: 150px;
-  overflow: hidden;
-}
-
-.artwork-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.2s ease;
-}
-
-.artwork-card:hover .artwork-image {
-  transform: scale(1.05);
-}
-
-.artwork-info {
-  padding: 0.75rem;
-}
-
-.artwork-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #2c3e50;
-  margin-bottom: 0.25rem;
-  line-height: 1.3;
-}
-
-.artist-name {
-  color: #6c757d;
-  font-size: 0.8rem;
-  margin-bottom: 0.5rem;
-}
-
-.artwork-price {
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: #4A90E2;
-  margin-bottom: 0.5rem;
 }
 
 .artwork-actions {

@@ -6,88 +6,95 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import '../styles/App.css';
 
 const PasswordPage: React.FC = () => {
-  const [formData, setFormData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
+  const [step, setStep] = useState<'email' | 'otp' | 'password'>('email');
+  const [email, setEmail] = useState('');
+  const [otp, setOtp] = useState('');
+  const [generatedOTP, setGeneratedOTP] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-  const [showPassword, setShowPassword] = useState({
-    current: false,
-    new: false,
-    confirm: false
-  });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-    setError('');
-    setSuccess(false);
-  };
-
-  const togglePasswordVisibility = (field: 'current' | 'new' | 'confirm') => {
-    setShowPassword({
-      ...showPassword,
-      [field]: !showPassword[field]
-    });
-  };
-
-  const validateForm = () => {
-    if (!formData.currentPassword) {
-      setError('Current password is required');
-      return false;
-    }
-    if (!formData.newPassword) {
-      setError('New password is required');
-      return false;
-    }
-    if (formData.newPassword.length < 6) {
-      setError('New password must be at least 6 characters long');
-      return false;
-    }
-    if (formData.newPassword !== formData.confirmPassword) {
-      setError('New passwords do not match');
-      return false;
-    }
-    if (formData.currentPassword === formData.newPassword) {
-      setError('New password must be different from current password');
-      return false;
-    }
-    return true;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setSuccess(false);
 
-    if (!validateForm()) {
+    if (!email.trim()) {
+      setError('Email is required');
       return;
     }
 
     setLoading(true);
-
     try {
-      // Note: You may need to add a changePassword endpoint to your authAPI
-      // For now, this is a placeholder
-      setSuccess(true);
-      setFormData({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      });
-      
-      setTimeout(() => setSuccess(false), 3000);
+      const response = await authAPI.requestPasswordReset(email);
+      if (response.success) {
+        setGeneratedOTP(response.data.otp);
+        setStep('otp');
+      }
     } catch (err: any) {
-      console.error('Error changing password:', err);
-      setError(err.response?.data?.message || 'Failed to change password. Please try again.');
+      setError(err.response?.data?.message || 'Failed to generate OTP. Please try again.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleOTPSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    if (!otp.trim()) {
+      setError('OTP is required');
+      return;
+    }
+
+    setStep('password');
+  };
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    if (!newPassword.trim()) {
+      setError('New password is required');
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setError('Password must be at least 8 characters long');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await authAPI.resetPassword(email, otp, newPassword);
+      if (response.success) {
+        setSuccess(true);
+        setTimeout(() => {
+          setSuccess(false);
+          setStep('email');
+          setEmail('');
+          setOtp('');
+          setNewPassword('');
+          setConfirmPassword('');
+          setGeneratedOTP('');
+        }, 2000);
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to reset password. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const copyOTP = () => {
+    navigator.clipboard.writeText(generatedOTP);
+    alert('OTP copied to clipboard!');
   };
 
   return (
@@ -104,104 +111,47 @@ const PasswordPage: React.FC = () => {
             <div className="bg-white rounded-4 shadow-sm p-4">
               <div className="mb-4">
                 <h2 className="mb-1">Change Password</h2>
-                <p className="text-muted mb-0">Update your account password</p>
+                <p className="text-muted mb-0">Reset your account password</p>
               </div>
 
               {error && (
-                <div className="alert alert-danger d-flex align-items-center gap-2 mb-4">
-                  <i className="bi bi-exclamation-triangle"></i>
+                <div className="alert alert-danger alert-dismissible fade show mb-3">
+                  <i className="bi bi-exclamation-triangle-fill me-2"></i>
                   {error}
+                  <button type="button" className="btn-close" onClick={() => setError('')}></button>
                 </div>
               )}
 
               {success && (
-                <div className="alert alert-success d-flex align-items-center gap-2 mb-4">
-                  <i className="bi bi-check-circle"></i>
-                  Password changed successfully!
+                <div className="alert alert-success alert-dismissible fade show mb-3">
+                  <i className="bi bi-check-circle-fill me-2"></i>
+                  Password reset successfully!
+                  <button type="button" className="btn-close" onClick={() => setSuccess(false)}></button>
                 </div>
               )}
 
-              <form onSubmit={handleSubmit}>
-                {/* Current Password */}
-                <div className="mb-3">
-                  <label htmlFor="currentPassword" className="form-label fw-semibold">
-                    Current Password
-                  </label>
-                  <div className="position-relative">
+              {/* Step 1: Email */}
+              {step === 'email' && (
+                <form onSubmit={handleEmailSubmit}>
+                  <div className="mb-3">
+                    <label htmlFor="email" className="form-label fw-semibold">
+                      Enter Your Email
+                    </label>
                     <input
-                      type={showPassword.current ? 'text' : 'password'}
+                      type="email"
                       className="form-control"
-                      id="currentPassword"
-                      name="currentPassword"
-                      value={formData.currentPassword}
-                      onChange={handleChange}
+                      id="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="email@example.com"
                       required
+                      disabled={loading}
                     />
-                    <button
-                      type="button"
-                      className="btn btn-link position-absolute end-0 top-0"
-                      style={{ transform: 'translateY(50%)', marginTop: '-20px' }}
-                      onClick={() => togglePasswordVisibility('current')}
-                    >
-                      <i className={`bi ${showPassword.current ? 'bi-eye-slash' : 'bi-eye'}`}></i>
-                    </button>
+                    <div className="form-text">
+                      We'll send you an OTP to verify your identity
+                    </div>
                   </div>
-                </div>
 
-                {/* New Password */}
-                <div className="mb-3">
-                  <label htmlFor="newPassword" className="form-label fw-semibold">
-                    New Password
-                  </label>
-                  <div className="position-relative">
-                    <input
-                      type={showPassword.new ? 'text' : 'password'}
-                      className="form-control"
-                      id="newPassword"
-                      name="newPassword"
-                      value={formData.newPassword}
-                      onChange={handleChange}
-                      required
-                    />
-                    <button
-                      type="button"
-                      className="btn btn-link position-absolute end-0 top-0"
-                      style={{ transform: 'translateY(50%)', marginTop: '-20px' }}
-                      onClick={() => togglePasswordVisibility('new')}
-                    >
-                      <i className={`bi ${showPassword.new ? 'bi-eye-slash' : 'bi-eye'}`}></i>
-                    </button>
-                  </div>
-                  <div className="form-text">Must be at least 6 characters long</div>
-                </div>
-
-                {/* Confirm New Password */}
-                <div className="mb-4">
-                  <label htmlFor="confirmPassword" className="form-label fw-semibold">
-                    Confirm New Password
-                  </label>
-                  <div className="position-relative">
-                    <input
-                      type={showPassword.confirm ? 'text' : 'password'}
-                      className="form-control"
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      required
-                    />
-                    <button
-                      type="button"
-                      className="btn btn-link position-absolute end-0 top-0"
-                      style={{ transform: 'translateY(50%)', marginTop: '-20px' }}
-                      onClick={() => togglePasswordVisibility('confirm')}
-                    >
-                      <i className={`bi ${showPassword.confirm ? 'bi-eye-slash' : 'bi-eye'}`}></i>
-                    </button>
-                  </div>
-                </div>
-
-                <div className="d-flex gap-2">
                   <button
                     type="submit"
                     className="btn btn-primary"
@@ -209,25 +159,140 @@ const PasswordPage: React.FC = () => {
                   >
                     {loading ? (
                       <>
-                        <span className="spinner-border spinner-border-sm me-2" role="status"></span>
-                        Updating...
+                        <span className="spinner-border spinner-border-sm me-2"></span>
+                        Sending...
                       </>
                     ) : (
                       <>
-                        <i className="bi bi-shield-check me-2"></i>
-                        Update Password
+                        <i className="bi bi-envelope-fill me-2"></i>
+                        Send OTP
                       </>
                     )}
                   </button>
-                  <button
-                    type="button"
-                    className="btn btn-outline-secondary"
-                    onClick={() => setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' })}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
+                </form>
+              )}
+
+              {/* Step 2: OTP */}
+              {step === 'otp' && (
+                <form onSubmit={handleOTPSubmit}>
+                  <div className="alert alert-info">
+                    <div className="d-flex align-items-center justify-content-between">
+                      <div>
+                        <i className="bi bi-info-circle-fill me-2"></i>
+                        <strong>Your OTP:</strong> <span className="font-monospace fs-5 fw-bold">{generatedOTP}</span>
+                      </div>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline-primary"
+                        onClick={copyOTP}
+                      >
+                        <i className="bi bi-clipboard me-1"></i>
+                        Copy
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="mb-3">
+                    <label htmlFor="otp" className="form-label fw-semibold">
+                      Enter OTP
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control text-center font-monospace"
+                      id="otp"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                      placeholder="000000"
+                      maxLength={6}
+                      required
+                      disabled={loading}
+                    />
+                  </div>
+
+                  <div className="d-flex gap-2">
+                    <button
+                      type="submit"
+                      className="btn btn-primary"
+                      disabled={loading}
+                    >
+                      <i className="bi bi-check-circle me-2"></i>
+                      Verify OTP
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-outline-secondary"
+                      onClick={() => setStep('email')}
+                    >
+                      <i className="bi bi-arrow-left me-1"></i>
+                      Back
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {/* Step 3: New Password */}
+              {step === 'password' && (
+                <form onSubmit={handlePasswordSubmit}>
+                  <div className="mb-3">
+                    <label htmlFor="newPassword" className="form-label fw-semibold">
+                      New Password
+                    </label>
+                    <input
+                      type="password"
+                      className="form-control"
+                      id="newPassword"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      required
+                      disabled={loading}
+                    />
+                    <div className="form-text">Must be at least 8 characters long</div>
+                  </div>
+
+                  <div className="mb-3">
+                    <label htmlFor="confirmPassword" className="form-label fw-semibold">
+                      Confirm New Password
+                    </label>
+                    <input
+                      type="password"
+                      className="form-control"
+                      id="confirmPassword"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      disabled={loading}
+                    />
+                  </div>
+
+                  <div className="d-flex gap-2">
+                    <button
+                      type="submit"
+                      className="btn btn-primary"
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <>
+                          <span className="spinner-border spinner-border-sm me-2"></span>
+                          Resetting...
+                        </>
+                      ) : (
+                        <>
+                          <i className="bi bi-shield-check me-2"></i>
+                          Reset Password
+                        </>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-outline-secondary"
+                      onClick={() => setStep('otp')}
+                    >
+                      <i className="bi bi-arrow-left me-1"></i>
+                      Back
+                    </button>
+                  </div>
+                </form>
+              )}
             </div>
           </div>
         </div>
@@ -237,4 +302,3 @@ const PasswordPage: React.FC = () => {
 };
 
 export default PasswordPage;
-

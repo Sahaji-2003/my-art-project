@@ -27,17 +27,85 @@ class PostService {
     return post;
   }
 
-  async getAllPosts(page = 1, limit = 10) {
+  async getAllPosts(page = 1, limit = 10, searchQuery = '') {
     const skip = (page - 1) * limit;
 
-    const [posts, total] = await Promise.all([
-      Post.find()
-        .populate('authorId', 'name email profilePicture')
-        .sort({ isPinned: -1, createdAt: -1 })
-        .skip(skip)
-        .limit(limit),
-      Post.countDocuments()
-    ]);
+    // Build aggregation pipeline
+    const pipeline = [
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'authorId',
+          foreignField: '_id',
+          as: 'authorInfo'
+        }
+      },
+      {
+        $unwind: {
+          path: '$authorInfo',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $addFields: {
+          // Add searchable fields for text search
+          searchableText: {
+            $concat: [
+              { $ifNull: ['$title', ''] },
+              ' ',
+              { $ifNull: ['$content', ''] },
+              ' ',
+              { $ifNull: ['$category', ''] },
+              ' ',
+              { $ifNull: ['$authorInfo.name', ''] }
+            ]
+          }
+        }
+      }
+    ];
+
+    // Add text search filter if query exists
+    if (searchQuery && searchQuery.trim()) {
+      pipeline.push({
+        $match: {
+          searchableText: { $regex: searchQuery.trim(), $options: 'i' }
+        }
+      });
+    }
+
+    // Add sorting
+    pipeline.push({ $sort: { isPinned: -1, createdAt: -1 } });
+
+    // Get total count
+    const countPipeline = [...pipeline, { $count: 'total' }];
+    const countResult = await Post.aggregate(countPipeline);
+    const total = countResult[0]?.total || 0;
+
+    // Add pagination
+    pipeline.push({ $skip: skip }, { $limit: limit });
+
+    // Project final fields with populated author info
+    pipeline.push({
+      $project: {
+        _id: 1,
+        title: 1,
+        content: 1,
+        category: 1,
+        likes: 1,
+        views: 1,
+        isPinned: 1,
+        createdAt: 1,
+        updatedAt: 1,
+        authorId: {
+          _id: '$authorInfo._id',
+          name: '$authorInfo.name',
+          email: '$authorInfo.email',
+          profilePicture: '$authorInfo.profilePicture'
+        }
+      }
+    });
+
+    const posts = await Post.aggregate(pipeline);
 
     return {
       posts,
