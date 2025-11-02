@@ -144,6 +144,34 @@ const LoginPage: React.FC = () => {
                 </button>
               </form>
 
+              <div className="text-center my-4 position-relative">
+                <hr />
+                <span className="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">or</span>
+              </div>
+
+              <div className="row g-2">
+                <div className="col-6">
+                  <button 
+                    type="button" 
+                    className="btn btn-outline-dark w-100"
+                    onClick={() => alert('Google login - Coming soon!')}
+                  >
+                    <i className="bi bi-google me-2"></i>
+                    Google
+                  </button>
+                </div>
+                <div className="col-6">
+                  <button 
+                    type="button" 
+                    className="btn btn-outline-primary w-100"
+                    onClick={() => alert('Facebook login - Coming soon!')}
+                  >
+                    <i className="bi bi-facebook me-2"></i>
+                    Facebook
+                  </button>
+                </div>
+              </div>
+
               <div className="text-center mt-4">
                 <span className="text-muted">Don't have an account? </span>
                 <Link to="/signup" className="text-primary fw-semibold text-decoration-none">

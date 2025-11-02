@@ -149,85 +149,115 @@ const SignupPage: React.FC = () => {
 
               {/* Step 1: Signup Form */}
               {step === 'signup' && (
-                <form onSubmit={handleSignupSubmit}>
-                  <div className="mb-3">
-                    <label htmlFor="name" className="form-label fw-semibold">Full Name</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="name"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      disabled={loading}
-                      autoComplete="name"
-                      placeholder="John Doe"
-                    />
-                    {errors.name && <div className="invalid-feedback d-block">{errors.name}</div>}
-                  </div>
-
-                  <div className="mb-3">
-                    <label htmlFor="email" className="form-label fw-semibold">Email</label>
-                    <input
-                      type="email"
-                      className="form-control"
-                      id="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      disabled={loading}
-                      autoComplete="email"
-                      placeholder="name@example.com"
-                    />
-                    {errors.email && <div className="invalid-feedback d-block">{errors.email}</div>}
-                  </div>
-
-                  <div className="mb-3">
-                    <label htmlFor="password" className="form-label fw-semibold">Password</label>
-                    <div className="position-relative">
+                <>
+                  <form onSubmit={handleSignupSubmit}>
+                    <div className="mb-3">
+                      <label htmlFor="name" className="form-label fw-semibold">Full Name</label>
                       <input
-                        type={showPassword ? 'text' : 'password'}
+                        type="text"
                         className="form-control"
-                        id="password"
-                        name="password"
-                        value={formData.password}
+                        id="name"
+                        name="name"
+                        value={formData.name}
                         onChange={handleChange}
                         disabled={loading}
-                        autoComplete="new-password"
-                        placeholder="Enter your password"
+                        autoComplete="name"
+                        placeholder="John Doe"
                       />
-                      <button
-                        type="button"
-                        className="btn btn-link position-absolute end-0 top-50 translate-middle-y text-muted"
-                        style={{ transform: 'translateY(-50%)', marginRight: '10px' }}
-                        onClick={() => setShowPassword(!showPassword)}
-                        disabled={loading}
-                      >
-                        <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'}`}></i>
-                      </button>
+                      {errors.name && <div className="invalid-feedback d-block">{errors.name}</div>}
                     </div>
-                    {errors.password && <div className="invalid-feedback d-block">{errors.password}</div>}
-                    <div className="form-text">Must be at least 8 characters long</div>
+
+                    <div className="mb-3">
+                      <label htmlFor="email" className="form-label fw-semibold">Email</label>
+                      <input
+                        type="email"
+                        className="form-control"
+                        id="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        disabled={loading}
+                        autoComplete="email"
+                        placeholder="name@example.com"
+                      />
+                      {errors.email && <div className="invalid-feedback d-block">{errors.email}</div>}
+                    </div>
+
+                    <div className="mb-3">
+                      <label htmlFor="password" className="form-label fw-semibold">Password</label>
+                      <div className="position-relative">
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          className="form-control"
+                          id="password"
+                          name="password"
+                          value={formData.password}
+                          onChange={handleChange}
+                          disabled={loading}
+                          autoComplete="new-password"
+                          placeholder="Enter your password"
+                        />
+                        <button
+                          type="button"
+                          className="btn btn-link position-absolute end-0 top-50 translate-middle-y text-muted"
+                          style={{ transform: 'translateY(-50%)', marginRight: '10px' }}
+                          onClick={() => setShowPassword(!showPassword)}
+                          disabled={loading}
+                        >
+                          <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'}`}></i>
+                        </button>
+                      </div>
+                      {errors.password && <div className="invalid-feedback d-block">{errors.password}</div>}
+                      <div className="form-text">Must be at least 8 characters long</div>
+                    </div>
+
+                    <button 
+                      type="submit" 
+                      className="btn btn-primary w-100"
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <>
+                          <span className="spinner-border spinner-border-sm me-2"></span>
+                          Processing...
+                        </>
+                      ) : (
+                        <>
+                          <i className="bi bi-person-plus-fill me-2"></i>
+                          Continue
+                        </>
+                      )}
+                    </button>
+                  </form>
+
+                  <div className="text-center my-4 position-relative">
+                    <hr />
+                    <span className="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">or</span>
                   </div>
 
-                  <button 
-                    type="submit" 
-                    className="btn btn-primary w-100"
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      <>
-                        <span className="spinner-border spinner-border-sm me-2"></span>
-                        Processing...
-                      </>
-                    ) : (
-                      <>
-                        <i className="bi bi-person-plus-fill me-2"></i>
-                        Continue
-                      </>
-                    )}
-                  </button>
-                </form>
+                  <div className="row g-2">
+                    <div className="col-6">
+                      <button 
+                        type="button" 
+                        className="btn btn-outline-dark w-100"
+                        onClick={() => alert('Google login - Coming soon!')}
+                      >
+                        <i className="bi bi-google me-2"></i>
+                        Google
+                      </button>
+                    </div>
+                    <div className="col-6">
+                      <button 
+                        type="button" 
+                        className="btn btn-outline-primary w-100"
+                        onClick={() => alert('Facebook login - Coming soon!')}
+                      >
+                        <i className="bi bi-facebook me-2"></i>
+                        Facebook
+                      </button>
+                    </div>
+                  </div>
+                </>
               )}
 
               {/* Step 2: OTP Verification */}

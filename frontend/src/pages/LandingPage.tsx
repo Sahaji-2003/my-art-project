@@ -1,15 +1,13 @@
-// src/pages/LandingPage.tsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import '../styles/App.css';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="landing-page bg-light">
+    <div>
       {/* Navigation */}
       <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
         <div className="container">
@@ -39,12 +37,12 @@ const LandingPage: React.FC = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="hero-section bg-primary text-white py-5 py-md-6">
+      <section className="py-3 py-md-4" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
         <div className="container">
           <div className="row align-items-center">
-            <div className="col-lg-6 text-center text-lg-start mb-4 mb-lg-0">
-              <h1 className="display-3 fw-bold mb-4">Discover & Collect Extraordinary Art</h1>
-              <p className="lead mb-4 opacity-90">
+            <div className="col-lg-6 text-center text-lg-start mb-4 mb-lg-0 text-white">
+              <h1 className="display-5 fw-bold mb-3">Discover & Collect Extraordinary Art</h1>
+              <p className="lead mb-3" style={{ opacity: 0.9 }}>
                 Connect with talented artists worldwide. Buy and sell unique artwork in a 
                 secure, artist-friendly marketplace.
               </p>
@@ -60,16 +58,19 @@ const LandingPage: React.FC = () => {
               </div>
             </div>
             <div className="col-lg-6 text-center">
-              <div className="hero-illustration">
-                <i className="bi bi-palette-fill display-1 opacity-25"></i>
-              </div>
+              <img 
+                src="/assets/images/wallpaper/wallpaper.jpg" 
+                alt="Art Gallery" 
+                className="img-fluid rounded-4 shadow-lg"
+                style={{ maxHeight: '400px', objectFit: 'cover' }}
+              />
             </div>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="features-section py-5 py-md-6" id="features">
+      <section className="py-5" id="features">
         <div className="container">
           <div className="text-center mb-5">
             <h2 className="display-4 fw-bold mb-3">Why Choose Arthub?</h2>
@@ -79,9 +80,9 @@ const LandingPage: React.FC = () => {
           </div>
           <div className="row g-4">
             <div className="col-12 col-md-6 col-lg-4">
-              <div className="feature-card bg-white rounded-4 shadow-sm p-4 h-100 text-center">
-                <div className="feature-icon text-primary mb-3">
-                  <i className="bi bi-palette-fill fs-1"></i>
+              <div className="bg-white rounded-4 shadow-sm p-4 h-100 text-center">
+                <div className="mb-3">
+                  <i className="bi bi-palette-fill text-primary fs-1"></i>
                 </div>
                 <h3 className="fw-bold mb-3">Showcase Your Art</h3>
                 <p className="text-muted mb-0">
@@ -91,9 +92,9 @@ const LandingPage: React.FC = () => {
               </div>
             </div>
             <div className="col-12 col-md-6 col-lg-4">
-              <div className="feature-card bg-white rounded-4 shadow-sm p-4 h-100 text-center">
-                <div className="feature-icon text-success mb-3">
-                  <i className="bi bi-shield-check-fill fs-1"></i>
+              <div className="bg-white rounded-4 shadow-sm p-4 h-100 text-center">
+                <div className="mb-3">
+                  <i className="bi bi-shield-check-fill text-success fs-1"></i>
                 </div>
                 <h3 className="fw-bold mb-3">Secure Transactions</h3>
                 <p className="text-muted mb-0">
@@ -103,9 +104,9 @@ const LandingPage: React.FC = () => {
               </div>
             </div>
             <div className="col-12 col-md-6 col-lg-4">
-              <div className="feature-card bg-white rounded-4 shadow-sm p-4 h-100 text-center">
-                <div className="feature-icon text-info mb-3">
-                  <i className="bi bi-search fs-1"></i>
+              <div className="bg-white rounded-4 shadow-sm p-4 h-100 text-center">
+                <div className="mb-3">
+                  <i className="bi bi-search text-info fs-1"></i>
                 </div>
                 <h3 className="fw-bold mb-3">Advanced Search</h3>
                 <p className="text-muted mb-0">
@@ -115,9 +116,9 @@ const LandingPage: React.FC = () => {
               </div>
             </div>
             <div className="col-12 col-md-6 col-lg-4">
-              <div className="feature-card bg-white rounded-4 shadow-sm p-4 h-100 text-center">
-                <div className="feature-icon text-warning mb-3">
-                  <i className="bi bi-graph-up-arrow fs-1"></i>
+              <div className="bg-white rounded-4 shadow-sm p-4 h-100 text-center">
+                <div className="mb-3">
+                  <i className="bi bi-graph-up-arrow text-warning fs-1"></i>
                 </div>
                 <h3 className="fw-bold mb-3">Sales Analytics</h3>
                 <p className="text-muted mb-0">
@@ -127,9 +128,9 @@ const LandingPage: React.FC = () => {
               </div>
             </div>
             <div className="col-12 col-md-6 col-lg-4">
-              <div className="feature-card bg-white rounded-4 shadow-sm p-4 h-100 text-center">
-                <div className="feature-icon text-primary mb-3">
-                  <i className="bi bi-people-fill fs-1"></i>
+              <div className="bg-white rounded-4 shadow-sm p-4 h-100 text-center">
+                <div className="mb-3">
+                  <i className="bi bi-people-fill text-primary fs-1"></i>
                 </div>
                 <h3 className="fw-bold mb-3">Artist Community</h3>
                 <p className="text-muted mb-0">
@@ -139,9 +140,9 @@ const LandingPage: React.FC = () => {
               </div>
             </div>
             <div className="col-12 col-md-6 col-lg-4">
-              <div className="feature-card bg-white rounded-4 shadow-sm p-4 h-100 text-center">
-                <div className="feature-icon text-success mb-3">
-                  <i className="bi bi-cash-stack fs-1"></i>
+              <div className="bg-white rounded-4 shadow-sm p-4 h-100 text-center">
+                <div className="mb-3">
+                  <i className="bi bi-cash-stack text-success fs-1"></i>
                 </div>
                 <h3 className="fw-bold mb-3">Fair Pricing</h3>
                 <p className="text-muted mb-0">
@@ -155,11 +156,11 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Call to Action */}
-      <section className="cta-section bg-primary text-white py-5 py-md-6">
+      <section className="py-5" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
         <div className="container">
-          <div className="text-center">
+          <div className="text-center text-white">
             <h2 className="display-5 fw-bold mb-3">Ready to Join Our Creative Community?</h2>
-            <p className="lead mb-4 opacity-90 max-width-600 mx-auto">
+            <p className="lead mb-4" style={{ opacity: 0.9 }}>
               Whether you're an artist looking to sell or an art enthusiast ready to discover, 
               Arthub is your gateway to the world of extraordinary art.
             </p>
@@ -175,4 +176,3 @@ const LandingPage: React.FC = () => {
 };
 
 export default LandingPage;
-
