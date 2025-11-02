@@ -15,6 +15,9 @@ router.get('/search', artworkController.searchArtwork);
 // Get trending artworks (public)
 router.get('/trending', artworkController.getTrendingArtworks);
 
+// Get artworks by artist (public)
+router.get('/artists/:artistId/artworks', artworkController.getArtworksByArtist);
+
 // Get single artwork (public)
 router.get('/:artworkId', artworkController.getArtwork);
 

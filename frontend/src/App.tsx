@@ -21,6 +21,7 @@ import InventoryPage from './pages/InventoryPage';
 import MyPurchasesPage from './pages/MyPurchasesPage';
 import PasswordPage from './pages/PasswordPage';
 import SettingsPage from './pages/SettingsPage';
+import ViewArtistProfilePage from './pages/ViewArtistProfilePage';
 
 import Header from './components/Header';
 
@@ -309,32 +310,52 @@ function App() {
 
        />
 
-       <Route 
+      <Route 
 
-         path="/settings" 
+        path="/settings" 
 
-         element={
+        element={
 
-           <ProtectedRoute>
+          <ProtectedRoute>
 
-             <AuthenticatedLayout>
+            <AuthenticatedLayout>
 
-               <SettingsPage />
+              <SettingsPage />
 
-             </AuthenticatedLayout>
+            </AuthenticatedLayout>
 
-           </ProtectedRoute>
+          </ProtectedRoute>
 
-         } 
+        } 
 
-       />
+      />
+
+      <Route 
+
+        path="/artist/:userId" 
+
+        element={
+
+          <ProtectedRoute>
+
+            <AuthenticatedLayout>
+
+              <ViewArtistProfilePage />
+
+            </AuthenticatedLayout>
+
+          </ProtectedRoute>
+
+        } 
+
+      />
 
 
  
 
-       {/* 404 Route */}
+      {/* 404 Route */}
 
-       <Route path="*" element={<Navigate to="/" />} />
+      <Route path="*" element={<Navigate to="/" />} />
 
      </Routes>
 

@@ -290,7 +290,22 @@ const PurchasePage: React.FC = () => {
                 />
                 <div className="flex-grow-1">
                   <h3 className="fw-semibold mb-1">{artwork.title}</h3>
-                  <p className="text-muted small mb-2">{artwork.artist?.name || 'Unknown Artist'}</p>
+                  <p className="text-muted small mb-2">
+                    {artwork.artist?._id ? (
+                      <a 
+                        href="#" 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          navigate(`/artist/${artwork.artist._id}`);
+                        }}
+                        className="text-decoration-none"
+                      >
+                        {artwork.artist.name}
+                      </a>
+                    ) : (
+                      <span>{artwork.artist?.name || 'Unknown Artist'}</span>
+                    )}
+                  </p>
                   <p className="text-primary fw-bold fs-5 mb-0">${artwork.price?.toLocaleString()}</p>
                 </div>
               </div>
@@ -542,7 +557,21 @@ const PurchasePage: React.FC = () => {
               <h2 className="fw-bold mb-2">{artwork.title}</h2>
               <p className="text-muted mb-3">
                 <i className="bi bi-person-circle me-2"></i>
-                by {artwork.artist?.name || 'Unknown Artist'}
+                by{' '}
+                {artwork.artist?._id ? (
+                  <a 
+                    href="#" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      navigate(`/artist/${artwork.artist._id}`);
+                    }}
+                    className="text-decoration-none fw-semibold"
+                  >
+                    {artwork.artist.name}
+                  </a>
+                ) : (
+                  <span className="fw-semibold">{artwork.artist?.name || 'Unknown Artist'}</span>
+                )}
               </p>
               <div className="mb-3">
                 <p className="text-muted">{artwork.description}</p>

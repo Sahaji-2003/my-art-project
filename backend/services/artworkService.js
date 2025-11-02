@@ -194,6 +194,7 @@ class ArtworkService {
 
   async getArtistInventory(artistId) {
     const artworks = await Artwork.find({ artistId })
+      .populate('artistId', 'name email profilePicture')
       .sort({ createdAt: -1 });
     
     return artworks;

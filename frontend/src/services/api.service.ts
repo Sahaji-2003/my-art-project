@@ -174,6 +174,11 @@ export const artistAPI = {
     return response.data;
   },
 
+  getProfileById: async (userId: string): Promise<ApiResponse<any>> => {
+    const response = await apiClient.get(`/artists/profile/${userId}`);
+    return response.data;
+  },
+
   updateProfile: async (data: ArtistProfileData): Promise<ApiResponse<any>> => {
     const response = await apiClient.put('/artists/profile', data);
     return response.data;
