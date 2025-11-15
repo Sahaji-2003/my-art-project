@@ -229,6 +229,18 @@ export const artworkAPI = {
     const response = await apiClient.post(`/artworks/${artworkId}/like`);
     return response.data;
   },
+
+  uploadImage: async (file: File): Promise<ApiResponse<{ url: string }>> => {
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    const response = await apiClient.post('/artworks/upload-image', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
 };
 
 // Order API
